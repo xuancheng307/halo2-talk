@@ -304,7 +304,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <!-- II-3 custom gate -->
 <section class="slide" data-part="II" data-label="自訂閘">
   <div class="slide-meta"><span class="part-label">PART II</span> · 第 2 層</div>
-  <h2>自訂閘:每條規則 = 一個 <span class="accent">恆等於 0 的多項式</span></h2>
+  <h2>自訂閘：每條規則 = 一個 <span class="accent">恆等於 0 的多項式</span></h2>
   <div class="grid-2">
     <div>
       <div class="defn"><span class="dt">原文 · Polynomial constraints</span>
@@ -321,7 +321,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <rect x="270" y="34" width="120" height="40" rx="6" fill="#fef3c7" stroke="#fcd34d"/><text x="330" y="59" font-size="13" text-anchor="middle" fill="#92400e">coeff（fixed）</text>
         <text x="210" y="104" font-size="20" text-anchor="middle" fill="#4f46e5" font-weight="700">acc · x + coeff</text>
         <line x1="210" y1="114" x2="210" y2="146" stroke="#4f46e5" stroke-width="2" marker-end="url(#ar)"/>
-        <rect x="120" y="150" width="180" height="40" rx="6" fill="#dcfce7" stroke="#86efac"/><text x="210" y="175" font-size="13" text-anchor="middle" fill="#15803d">acc（下一列 · Rotation::next）</text>
+        <rect x="105" y="150" width="210" height="40" rx="6" fill="#dcfce7" stroke="#86efac"/><text x="210" y="175" font-size="12.5" text-anchor="middle" fill="#15803d">acc 下一列（Rotation::next）</text>
         <text x="210" y="222" font-size="14" text-anchor="middle" fill="#1a1a1f">sel · ( acc·x + coeff − acc下一列 ) = 0</text>
         <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4f46e5"/></marker></defs>
       </svg>
@@ -408,8 +408,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="grid-2">
     <div>
       <div class="defn"><span class="dt">原文 · SHPLONK</span>
-        <span class="quote">“… the commitment scheme (that for historical reasons has become known as shplonK). Its crucial advantage is that the verifier group operations do not grow with the number of evaluation points.”</span>
-        <span class="gloss">把「多點、多條多項式開啟」批次成近乎常數大小的單一開啟；驗證配對數不隨點數增長。</span>
+        <span class="quote">“We present an enhanced version of the Kate, Zaverucha and Goldberg polynomial commitment scheme where a single group element can be an opening proof for multiple polynomials each evaluated at a different arbitrary subset of points.”</span>
+        <span class="gloss">把「多條多項式、各在不同點開啟」批次成單一開啟證明（其方案 2：2 個 G₁ 元素），驗證僅 2 次配對 → 證明小、驗證快。</span>
         <a class="src" href="https://eprint.iacr.org/2020/081" target="_blank" rel="noopener">Boneh, Drake, Fisch, Gabizon — ePrint 2020/081 ↗</a></div>
       <p style="font-size:.95rem"><b>Fiat–Shamir</b>：把互動挑戰換成對 transcript 的雜湊；PSE v0.3.0 預設 <b>Blake2b</b> → 非互動。</p>
     </div>
