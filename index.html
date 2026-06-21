@@ -3,492 +3,582 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Halo2 技術專題 — 我們的論文用到的證明系統</title>
+<title>Halo2 技術專題 — 我們的論文站在什麼證明系統上</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --ink:#0f172a; --sub:#475569; --dim:#94a3b8; --line:#e2e8f0;
-    --bg:#ffffff; --paper:#f8fafc; --indigo:#4f46e5; --indigo-d:#3730a3;
-    --amber:#d97706; --green:#10b981; --red:#dc2626; --blue:#2563eb;
-    --code-bg:#0d1117; --code-fg:#c9d1d9;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    font-family:"Segoe UI","Noto Sans TC","PingFang TC",system-ui,sans-serif;
-    color:var(--ink); background:#1e1b2e; overflow:hidden;
-    -webkit-font-smoothing:antialiased;
-  }
-  #deck{height:100vh; width:100vw; position:relative}
-  .track{display:flex; height:100%; transition:transform .45s cubic-bezier(.4,0,.2,1)}
-  .slide{
-    min-width:100vw; height:100vh; padding:4.2vh 6vw 7vh;
-    background:var(--bg); display:flex; flex-direction:column;
-    overflow-y:auto; position:relative;
-  }
-  .slide.center{justify-content:center; align-items:center; text-align:center}
-  .kicker{
-    font-size:.82rem; letter-spacing:.18em; text-transform:uppercase;
-    color:var(--indigo); font-weight:700; margin-bottom:.5rem;
-  }
-  h1{font-size:3.1rem; line-height:1.12; font-weight:800; letter-spacing:-.01em}
-  h2{font-size:2.05rem; line-height:1.18; font-weight:780; margin-bottom:1.1rem; letter-spacing:-.01em}
-  h2 .accent{color:var(--indigo)}
-  h3{font-size:1.15rem; font-weight:720; margin:.2rem 0 .5rem}
-  p,li{font-size:1.05rem; line-height:1.6; color:var(--sub)}
-  .lead{font-size:1.28rem; color:var(--ink); font-weight:600; margin-bottom:1rem}
-  strong{color:var(--ink); font-weight:700}
-  em{font-style:normal; color:var(--indigo); font-weight:700}
-  .muted{color:var(--dim)}
-  ul{margin:.3rem 0 .3rem 1.2rem} li{margin:.36rem 0}
-  .cols{display:grid; gap:1.4rem; margin-top:.4rem}
-  .c2{grid-template-columns:1fr 1fr}
-  .c3{grid-template-columns:1fr 1fr 1fr}
-  .card{
-    background:var(--paper); border:1px solid var(--line);
-    border-radius:14px; padding:1.05rem 1.15rem;
-  }
-  .card.indigo{background:#eef2ff; border-color:#c7d2fe}
-  .card.green{background:#ecfdf5; border-color:#a7f3d0}
-  .card.amber{background:#fffbeb; border-color:#fde68a}
-  .card.red{background:#fef2f2; border-color:#fecaca}
-  .card h3{margin-top:0}
-  .defn{
-    background:#f5f3ff; border-left:4px solid #7c3aed; border-radius:0 10px 10px 0;
-    padding:.7rem .95rem; margin:.5rem 0; font-size:1rem; color:#3b0764;
-  }
-  .defn b{color:#5b21b6}
-  .pill{
-    display:inline-block; font-size:.78rem; font-weight:700; padding:.16rem .6rem;
-    border-radius:999px; background:#eef2ff; color:var(--indigo-d); margin:.1rem .25rem .1rem 0;
-  }
-  .tag-y{background:#fffbeb;color:#92400e}.tag-g{background:#ecfdf5;color:#065f46}
-  .tag-r{background:#fef2f2;color:#991b1b}.tag-b{background:#eff6ff;color:#1e40af}
-  pre{
-    background:var(--code-bg); color:var(--code-fg); border-radius:12px;
-    padding:1rem 1.15rem; font-family:"JetBrains Mono","Cascadia Code","Consolas",monospace;
-    font-size:.82rem; line-height:1.5; overflow:auto; border:1px solid #21262d;
-  }
-  code.inl{
-    font-family:"JetBrains Mono","Consolas",monospace; font-size:.92em;
-    background:#eef2ff; color:var(--indigo-d); padding:.08em .42em; border-radius:6px;
-  }
-  pre .k{color:#ff7b72}.pre .t{color:#79c0ff} pre .c{color:#8b949e;font-style:italic}
-  pre .s{color:#a5d6ff} pre .f{color:#d2a8ff} pre .n{color:#79c0ff}
-  pre .ok{color:#3fb950;font-weight:700} pre .bad{color:#f85149;font-weight:700}
-  pre .hl{color:#ffa657}
-  table{border-collapse:collapse; width:100%; font-size:.95rem; margin-top:.3rem}
-  th,td{border:1px solid var(--line); padding:.5rem .7rem; text-align:left; color:var(--sub)}
-  th{background:var(--paper); color:var(--ink); font-weight:700}
-  td b{color:var(--ink)}
-  .flow{display:flex; align-items:stretch; gap:.5rem; flex-wrap:wrap; margin:.5rem 0}
-  .step{
-    flex:1; min-width:120px; background:var(--paper); border:1px solid var(--line);
-    border-radius:10px; padding:.6rem .7rem; position:relative;
-  }
-  .step .n{font-size:.72rem; font-weight:800; color:var(--indigo)}
-  .step .ttl{font-weight:700; color:var(--ink); font-size:.98rem; margin:.15rem 0}
-  .step small{font-size:.82rem; color:var(--dim)}
-  .arrow{align-self:center; color:var(--dim); font-size:1.3rem}
-  .big{font-size:2.4rem; font-weight:800; color:var(--indigo); line-height:1}
-  .kpi{display:flex; gap:1.8rem; flex-wrap:wrap; margin-top:.6rem}
-  .kpi div{text-align:center} .kpi .v{font-size:1.9rem;font-weight:800;color:var(--indigo)}
-  .kpi .l{font-size:.8rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
-  .foot{position:absolute; left:6vw; right:6vw; bottom:2.4vh; display:flex;
-    justify-content:space-between; align-items:center; font-size:.78rem; color:var(--dim)}
-  .foot .tnt{color:var(--indigo); font-weight:700}
-  /* nav */
-  #dots{position:fixed; bottom:1.1vh; left:50%; transform:translateX(-50%);
-    display:flex; gap:6px; z-index:30}
-  #dots i{width:7px;height:7px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:.2s}
-  #dots i.on{background:var(--indigo); width:20px; border-radius:4px}
-  .navbtn{position:fixed; top:50%; transform:translateY(-50%); z-index:30;
-    width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;
-    background:rgba(79,70,229,.12); color:var(--indigo); font-size:1.3rem; transition:.2s}
-  .navbtn:hover{background:rgba(79,70,229,.25)}
-  #prev{left:14px} #next{right:14px}
-  #cnt{position:fixed; top:14px; right:18px; z-index:30; font-size:.8rem;
-    color:var(--dim); background:rgba(255,255,255,.8); padding:.2rem .6rem; border-radius:999px}
-  .title-bg{
-    position:absolute; inset:0; background:
-      radial-gradient(900px 500px at 80% -10%, #e0e7ff 0, transparent 60%),
-      radial-gradient(700px 500px at -10% 110%, #ede9fe 0, transparent 55%);
-  }
-  .hl-row{display:flex;gap:.5rem;align-items:baseline}
-  .hl-row .num{font-size:1.5rem;font-weight:800;color:var(--indigo);min-width:1.6em}
+:root{
+  --bg:#ffffff; --surface:#f7f8fa; --surface-2:#eef0f4; --border:#d9dce3;
+  --text:#1a1a1f; --text-dim:#55596b; --text-faint:#8b94a3;
+  --accent:#4f46e5; --accent-light:#4338ca; --accent-glow:rgba(79,70,229,.12);
+  --green:#16a34a; --blue:#2563eb; --amber:#d97706; --red:#dc2626; --violet:#7c3aed;
+  --code-bg:#0d1117; --code-fg:#c9d1d9;
+  --font-sans:'Noto Sans TC','Inter',-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono','Fira Code',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;overflow:hidden}
+
+/* topbar */
+.topbar{position:fixed;top:0;left:0;right:0;height:56px;z-index:50;display:flex;align-items:center;gap:1rem;
+  padding:0 1.5rem;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.brand{font-weight:900;letter-spacing:-.02em;font-size:.95rem;white-space:nowrap}
+.brand .tag{color:var(--accent-light);font-weight:600;margin-left:.5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em}
+.pills{display:flex;gap:.25rem;flex:1;justify-content:center;overflow-x:auto;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill{font-size:.75rem;font-weight:600;padding:.35rem .7rem;border-radius:999px;color:var(--text-dim);
+  background:transparent;border:1px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s}
+.pill:hover{color:var(--text);background:var(--surface)}
+.pill.active{color:var(--accent-light);background:var(--accent-glow);border-color:rgba(99,102,241,.3)}
+.home-link{font-size:.72rem;font-weight:600;padding:.4rem .7rem;border-radius:8px;color:var(--text-dim);
+  background:var(--surface);border:1px solid var(--border);cursor:pointer;text-decoration:none;white-space:nowrap}
+.home-link:hover{color:var(--text);border-color:var(--accent)}
+
+/* right dots */
+.dots{position:fixed;top:56px;bottom:0;right:8px;z-index:40;display:flex;flex-direction:column;gap:4px;
+  padding:1rem 0;overflow-y:auto;scrollbar-width:none}
+.dots::-webkit-scrollbar{display:none}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .15s;flex-shrink:0}
+.dot:hover{background:var(--text-dim);transform:scale(1.3)}
+.dot.active{background:var(--accent);transform:scale(1.4);box-shadow:0 0 8px var(--accent-glow)}
+
+/* deck + slides */
+.deck{position:fixed;inset:56px 26px 0 0;overflow-y:scroll;scroll-snap-type:y proximity;scroll-behavior:smooth}
+.slide{min-height:calc(100vh - 56px);scroll-snap-align:start;padding:3.4rem 5rem 4rem;display:flex;
+  flex-direction:column;justify-content:center;position:relative}
+.slide-meta{position:absolute;top:1.2rem;left:5rem;display:flex;gap:.7rem;align-items:center;
+  font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--text-faint)}
+.slide-meta .part-label{color:var(--accent-light)}
+.slide h1{font-size:clamp(2rem,4.5vw,3.2rem);font-weight:900;letter-spacing:-.03em;line-height:1.15;margin-bottom:1.2rem}
+.slide h2{font-size:clamp(1.4rem,3vw,2.1rem);font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:1rem}
+.slide h2 .accent{color:var(--accent)}
+.slide h3{font-size:1.12rem;font-weight:700;margin-bottom:.5rem;color:var(--accent-light)}
+.slide p,.slide li{font-size:1.04rem;color:var(--text);max-width:1000px}
+.slide p+p,.slide p+ul,.slide ul+p{margin-top:.8rem}
+.slide ul{list-style:none;padding-left:0}
+.slide li{padding-left:1.4rem;position:relative;margin-top:.4rem;color:var(--text-dim)}
+.slide li::before{content:'▸';position:absolute;left:0;color:var(--accent)}
+.slide li b,.slide p b{color:var(--text)}
+em{font-style:normal;color:var(--accent);font-weight:700}
+.subtitle{color:var(--text-dim);font-size:1.1rem;margin-bottom:1.4rem;max-width:900px}
+.lead{font-size:1.2rem;color:var(--text);max-width:1000px;line-height:1.55;margin-bottom:.8rem}
+.muted{color:var(--text-faint)}
+
+.slide.title{justify-content:center;text-align:center;align-items:center;
+  background:radial-gradient(900px 480px at 78% -8%,#e0e7ff 0,transparent 60%),radial-gradient(700px 480px at -8% 108%,#ede9fe 0,transparent 55%)}
+.slide.title h1{font-size:clamp(2.6rem,6vw,4.6rem)}
+.slide.part-opener{background:linear-gradient(180deg,rgba(99,102,241,.07) 0%,transparent 55%);justify-content:center}
+.slide.part-opener .pnum{font-family:var(--font-mono);font-size:1rem;color:var(--accent);font-weight:700;letter-spacing:.2em}
+.slide.part-opener h1{color:var(--accent-light)}
+
+/* cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1rem 1.2rem;margin-top:.8rem}
+.card h3{margin-bottom:.4rem}
+.card.accent{border-color:rgba(99,102,241,.35);background:rgba(99,102,241,.06)}
+.card.green{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)}
+.card.amber{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.06)}
+.card.red{border-color:rgba(220,38,38,.3);background:rgba(220,38,38,.05)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.5rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:.5rem}
+
+/* verbatim source definition box */
+.defn{background:#f5f3ff;border-left:4px solid var(--violet);border-radius:0 8px 8px 0;padding:.7rem .95rem;margin:.6rem 0}
+.defn .dt{font-weight:800;color:#5b21b6;font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;margin-right:.4rem}
+.defn .quote{font-family:'Inter',var(--font-sans);font-style:italic;color:#2b1769;font-size:.98rem;line-height:1.5}
+.defn .gloss{font-size:.9rem;color:var(--text-dim);margin-top:.35rem;font-style:normal}
+.defn .src{display:block;margin-top:.4rem;font-size:.72rem;color:#7c3aed;font-weight:600;text-decoration:none}
+.defn .src:hover{text-decoration:underline}
+.defn code{background:rgba(124,58,237,.1);padding:0 .25rem;border-radius:3px;font-family:var(--font-mono);font-size:.86em}
+
+.pill-tag{display:inline-block;font-size:.74rem;font-weight:700;padding:.14rem .55rem;border-radius:999px;
+  background:var(--accent-glow);color:var(--accent-light);margin:.12rem .25rem .12rem 0}
+.t-y{background:rgba(245,158,11,.14);color:#92400e}.t-g{background:rgba(34,197,94,.14);color:#15803d}
+.t-r{background:rgba(220,38,38,.12);color:#b91c1c}.t-b{background:rgba(37,99,235,.12);color:#1d4ed8}
+
+code.inl{font-family:var(--font-mono);font-size:.9em;background:var(--surface-2);color:var(--accent-light);padding:.06em .4em;border-radius:5px}
+pre{background:var(--code-bg);color:var(--code-fg);border-radius:12px;padding:.95rem 1.1rem;font-family:var(--font-mono);
+  font-size:.8rem;line-height:1.5;overflow:auto;border:1px solid #21262d;margin-top:.5rem}
+pre .k{color:#ff7b72}pre .c{color:#8b949e;font-style:italic}pre .s{color:#a5d6ff}pre .f{color:#d2a8ff}
+pre .n{color:#79c0ff}pre .ok{color:#3fb950;font-weight:700}pre .bad{color:#f85149;font-weight:700}pre .hl{color:#ffa657}
+
+table{border-collapse:collapse;width:100%;font-size:.92rem;margin-top:.4rem}
+th,td{border:1px solid var(--border);padding:.45rem .65rem;text-align:left;color:var(--text-dim)}
+th{background:var(--surface);color:var(--text);font-weight:700}td b{color:var(--text)}
+tr.hl td{background:rgba(99,102,241,.07)}
+
+figure{margin-top:.7rem}
+figcaption{font-size:.8rem;color:var(--text-faint);margin-top:.4rem;text-align:center}
+svg{max-width:100%;height:auto;display:block;margin:0 auto}
+.kpi{display:flex;gap:2rem;flex-wrap:wrap;margin-top:.6rem}
+.kpi div{text-align:center}.kpi .v{font-size:1.9rem;font-weight:800;color:var(--accent)}
+.kpi .l{font-size:.78rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em}
+.foot{position:absolute;left:5rem;right:5rem;bottom:1.6rem;display:flex;justify-content:space-between;font-size:.74rem;color:var(--text-faint)}
+.hl-row{display:flex;gap:.6rem;align-items:baseline;margin-top:.5rem}
+.hl-row .num{font-size:1.4rem;font-weight:800;color:var(--accent);min-width:1.5em}
+
+@media(max-width:820px){.slide{padding:2.6rem 1.6rem 3rem}.slide-meta{left:1.6rem}.foot{left:1.6rem;right:1.6rem}
+  .grid-2,.grid-3{grid-template-columns:1fr}.deck{inset:56px 14px 0 0}}
 </style>
 </head>
 <body>
-<div id="deck"><div class="track" id="track">
 
-<!-- 1 TITLE -->
-<section class="slide center">
-  <div class="title-bg"></div>
-  <div style="position:relative;z-index:1">
-    <div class="kicker">論文技術專題 · Zero-Knowledge Proof System</div>
-    <h1>Halo2<br><span style="font-size:1.6rem;color:var(--sub);font-weight:600">我們的論文，到底站在什麼證明系統上？</span></h1>
-    <p style="margin-top:1.4rem;font-size:1.1rem">它在做什麼 · 怎麼做 · 為什麼能用 · 用在哪 · 我們怎麼用它<br>
-    <span class="muted">— 附：一支真的會跑完整 prove / verify 的 Rust demo</span></p>
-    <div style="margin-top:1.6rem">
-      <span class="pill">PLONKish 算術化</span>
-      <span class="pill">KZG · BN254</span>
-      <span class="pill">PSE halo2_proofs v0.3.0</span>
+<div class="topbar">
+  <div class="brand">Halo2 技術專題<span class="tag">ZK Proof System</span></div>
+  <div class="pills" id="pills"></div>
+  <a class="home-link" href="https://github.com/xuancheng307/halo2-talk" target="_blank" rel="noopener">原始碼 ↗</a>
+</div>
+<div class="dots" id="dots"></div>
+
+<div class="deck" id="deck">
+
+<!-- ===== TITLE ===== -->
+<section class="slide title" data-part="" data-label="封面">
+  <div>
+    <div style="font-size:.82rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:.6rem">論文技術專題 · Zero-Knowledge Proof System</div>
+    <h1>Halo2</h1>
+    <p style="font-size:1.4rem;color:var(--text-dim);font-weight:600;margin-top:.4rem">我們的論文，到底站在什麼證明系統上？</p>
+    <p style="margin-top:1.2rem;font-size:1.05rem;color:var(--text-dim)">它在做什麼 · 怎麼做 · 為什麼能用 · 用在哪 · 我們怎麼用它<br>
+      <span class="muted">關鍵定義一律引原文 · 多圖解 · 附一支真的會跑完整 prove / verify 的 Rust demo</span></p>
+    <div style="margin-top:1.4rem">
+      <span class="pill-tag">PLONKish 算術化</span><span class="pill-tag">KZG · BN254</span><span class="pill-tag">SHPLONK</span><span class="pill-tag">PSE halo2_proofs v0.3.0</span>
     </div>
+    <p style="margin-top:1.6rem;font-size:.8rem" class="muted">↓ 向下捲動 · 右側圓點可跳節</p>
   </div>
 </section>
 
-<!-- 2 AGENDA -->
-<section class="slide">
-  <div class="kicker">路線圖</div>
+<!-- ===== AGENDA ===== -->
+<section class="slide" data-part="" data-label="路線圖">
+  <div class="slide-meta"><span class="part-label">路線圖</span></div>
   <h2>這份報告回答 <span class="accent">六個問題</span></h2>
-  <div class="cols c3">
-    <div class="card"><h3>① 在做什麼？</h3><p>Halo2 是什麼、解決什麼問題、它的家譜。</p></div>
-    <div class="card"><h3>② 怎麼做？</h3><p>算術化 → 自訂閘 → 承諾 → 開啟 → 證明的五層機制。</p></div>
-    <div class="card"><h3>③ 為什麼能用？</h3><p>完備性 / 可靠性 / 零知識 / 簡潔性，背後的數學。</p></div>
-    <div class="card"><h3>④ 用在哪裡？</h3><p>業界部署，以及我們論文的兩個電路。</p></div>
-    <div class="card"><h3>⑤ 我們怎麼用它？</h3><p>定點 Horner kernel — 把多項式逼近塞進 Halo2 的閘。</p></div>
-    <div class="card indigo"><h3>⑥ 舉例 + 跑一次</h3><p>真實 Rust 電路，現場 setup→prove→verify，864 bytes。</p></div>
+  <div class="grid-3">
+    <div class="card"><h3>① 在做什麼</h3><p>Halo2 是什麼、解決什麼問題、它的家譜。</p></div>
+    <div class="card"><h3>② 怎麼做</h3><p>算術化 → 自訂閘 → 承諾 → 開啟 → 證明。</p></div>
+    <div class="card"><h3>③ 為什麼能用</h3><p>完備 / 可靠 / 零知識 / 簡潔，背後的數學。</p></div>
+    <div class="card"><h3>④ 用在哪裡</h3><p>業界部署，與我們論文的兩個電路。</p></div>
+    <div class="card"><h3>⑤ 我們怎麼用它</h3><p>定點 Horner kernel，把超越函數塞進閘。</p></div>
+    <div class="card accent"><h3>⑥ 舉例 + 跑一次</h3><p>真實 Rust 電路，setup→prove→verify，864 bytes。</p></div>
   </div>
-  <div class="foot"><span class="tnt">Halo2 技術專題</span><span>2026 · 畢業論文 v4</span></div>
+  <p class="muted" style="margin-top:1rem;font-size:.9rem">所有密碼學「定義」皆引用原文（The halo2 Book / IACR ePrint），附出處連結可自行查證。</p>
 </section>
 
-<!-- 3 WHAT IS HALO2 -->
-<section class="slide">
-  <div class="kicker">① 在做什麼</div>
-  <h2>Halo2 = 一台「可驗證計算」的引擎</h2>
-  <p class="lead">證明者向驗證者證明「我正確執行了某段計算」，而<em>不洩漏私密輸入</em>，且證明又<em>小又快驗</em>。</p>
-  <div class="cols c2">
+<!-- ===== PART I OPENER ===== -->
+<section class="slide part-opener" data-part="I" data-label="在做什麼">
+  <div><div class="pnum">PART I</div><h1>在做什麼</h1>
+  <p class="lead">Halo2 是一台「可驗證計算」引擎：證明你正確執行了某段計算，卻不洩漏私密輸入，且證明又小又快驗。</p></div>
+</section>
+
+<!-- I-1 What is Halo2 -->
+<section class="slide" data-part="I" data-label="家譜">
+  <div class="slide-meta"><span class="part-label">PART I</span> · 在做什麼</div>
+  <h2>Halo2 的<span class="accent">家譜</span></h2>
+  <div class="grid-2">
     <div>
-      <div class="defn"><b>zk-SNARK.</b> Zero-Knowledge Succinct Non-interactive ARgument of Knowledge — 簡潔（證明遠小於計算）、非互動、零知識的知識論證。</div>
-      <h3>家譜</h3>
       <ul>
-        <li><strong>Halo</strong>（Bowe·Grigg·Hopwood, 2019，<span class="muted">ePrint 2019/1021</span>）：首個<strong>免信任設定</strong>的遞迴證明組合。</li>
-        <li><strong>Halo2</strong>（Electric Coin Company / Zcash）：把 Halo 的想法重建在 <strong>PLONKish 算術化</strong>之上，成為通用電路框架。</li>
+        <li><b>Halo</b>（Bowe·Grigg·Hopwood, 2019）：首個免信任設定的遞迴證明組合。</li>
+        <li><b>Halo2</b>（Electric Coin Company / Zcash）：把想法重建在 <b>PLONKish 算術化</b> 上，成為通用電路框架。</li>
+        <li>我們用的是 <b>PSE fork</b>：換成 <b>KZG / BN254</b>，為了以太坊上鏈驗證效率。</li>
       </ul>
+      <div class="defn">
+        <span class="dt">原文 · Halo</span>
+        <span class="quote">“We obtain and implement Halo, the first practical example of recursive proof composition without a trusted setup, using the discrete log assumption over normal cycles of elliptic curves.”</span>
+        <span class="gloss">— 首個「免信任設定」的實用遞迴證明組合，建立在橢圓曲線離散對數假設上。</span>
+        <a class="src" href="https://eprint.iacr.org/2019/1021" target="_blank" rel="noopener">Bowe, Grigg, Hopwood — IACR ePrint 2019/1021 ↗</a>
+      </div>
     </div>
     <div class="card amber">
       <h3>一句話定位</h3>
-      <p>Halo2 不是「一個」協議，而是<strong>「算術化層 + 多項式承諾層」</strong>的組合框架 —<br>
-      你描述電路，它負責產生 / 驗證證明。</p>
-      <p style="margin-top:.6rem" class="muted">下一頁就是這兩層，以及我們選了哪個版本。</p>
+      <p>Halo2 不是「一個」協議，而是 <b>「算術化層 + 多項式承諾層」</b> 的組合框架 — 你描述電路，它負責產生／驗證證明。</p>
+      <p class="muted" style="margin-top:.5rem;font-size:.9rem">下一節用原文定義 zk-SNARK 的每個性質。</p>
     </div>
   </div>
-  <div class="foot"><span class="tnt">在做什麼</span><span>03</span></div>
 </section>
 
-<!-- 4 TWO LAYERS / IPA vs KZG -->
-<section class="slide">
-  <div class="kicker">① 在做什麼 · 關鍵分支</div>
+<!-- I-2 zk-SNARK definitions (verbatim) -->
+<section class="slide" data-part="I" data-label="zk-SNARK 定義">
+  <div class="slide-meta"><span class="part-label">PART I</span> · 關鍵定義（原文）</div>
+  <h2>zk-SNARK 四性質 — <span class="accent">引 The halo2 Book 原文</span></h2>
+  <div class="grid-2">
+    <div>
+      <div class="defn"><span class="dt">Soundness</span>
+        <span class="quote">“The security property that such proofs cannot falsely convince a verifier is called soundness.”</span></div>
+      <div class="defn"><span class="dt">Knowledge soundness</span>
+        <span class="quote">“Knowledge soundness is formalized by saying that an extractor, which can observe precisely how the proof is generated, must be able to compute the witness.”</span></div>
+      <div class="defn"><span class="dt">Zero knowledge</span>
+        <span class="quote">“If a proof yields no information about the witness (other than that a witness exists and was known to the prover), then we say that the proof system is zero knowledge.”</span></div>
+    </div>
+    <div>
+      <div class="defn"><span class="dt">Succinct / SNARK</span>
+        <span class="quote">“If a proof system produces short proofs —i.e. of length polylogarithmic in the circuit size— then we say that it is succinct. A succinct NARK is called a SNARK.”</span></div>
+      <div class="defn"><span class="dt">zk-SNARK</span>
+        <span class="quote">“A zk-SNARK is a zero-knowledge SNARK.”</span>
+        <a class="src" href="https://zcash.github.io/halo2/concepts/proofs.html" target="_blank" rel="noopener">The halo2 Book — Proof systems ↗</a></div>
+      <div class="card"><p style="font-size:.92rem"><b>witness</b>（原文）：<i>“The private inputs and advice values are collectively called a witness.”</i> — 私密輸入 + 中間 advice 值合稱見證。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- I-3 two layers + IPA vs KZG -->
+<section class="slide" data-part="I" data-label="兩層架構">
+  <div class="slide-meta"><span class="part-label">PART I</span> · 在做什麼</div>
   <h2>兩層架構，與一個<span class="accent">必須講清楚的分叉</span></h2>
-  <div class="cols c2">
-    <div class="card indigo">
-      <h3>上層：PLONKish 算術化</h3>
-      <p>把計算排成一張<strong>表格（trace table）</strong>＋一組<strong>多項式恆等式</strong>。<br>
-      <span class="muted">這一層與下層的承諾方案無關 — 兩個版本共用。</span></p>
-    </div>
-    <div class="card">
-      <h3>下層：多項式承諾方案 (PCS)</h3>
-      <p>把表格編碼成多項式並「承諾」，用代數方式檢查恆等式是否成立。</p>
-    </div>
-  </div>
-  <table style="margin-top:1.1rem">
-    <tr><th>版本</th><th>承諾</th><th>曲線</th><th>信任設定</th><th>典型用途</th></tr>
-    <tr><td>原版 ECC / Zcash</td><td>IPA（內積論證）</td><td>Pasta（Pallas/Vesta）</td><td><b>免</b>（遞迴友善）</td><td>Zcash Orchard</td></tr>
-    <tr style="background:#eef2ff"><td><b>PSE fork ← 我們用這個</b></td><td><b>KZG</b></td><td><b>BN254</b></td><td>需通用 SRS</td><td>EVM 上鏈驗證</td></tr>
+  <figure>
+    <svg viewBox="0 0 900 200" role="img" aria-label="Halo2 兩層架構">
+      <rect x="20" y="20" width="860" height="70" rx="10" fill="#eef2ff" stroke="#c7d2fe"/>
+      <text x="40" y="48" font-size="15" font-weight="700" fill="#3730a3">上層 · PLONKish 算術化（與承諾無關，兩版本共用）</text>
+      <text x="40" y="72" font-size="13" fill="#55596b">把計算排成一張 2ᵏ 列的表 + 一組「恆等於 0」的多項式恆等式</text>
+      <rect x="20" y="110" width="860" height="70" rx="10" fill="#f7f8fa" stroke="#d9dce3"/>
+      <text x="40" y="138" font-size="15" font-weight="700" fill="#1a1a1f">下層 · 多項式承諾方案 (PCS)</text>
+      <text x="40" y="162" font-size="13" fill="#55596b">把表編碼成多項式並「承諾」，用代數方式檢查恆等式 — 這層有兩種選擇 ↓</text>
+    </svg>
+  </figure>
+  <table>
+    <tr><th>版本</th><th>承諾</th><th>曲線</th><th>信任設定</th><th>用途</th></tr>
+    <tr><td>原版 ECC / Zcash</td><td>IPA（內積論證）</td><td>Pasta (Pallas/Vesta)</td><td><b>免</b>（遞迴友善）</td><td>Zcash Orchard</td></tr>
+    <tr class="hl"><td><b>PSE fork ← 我們用</b></td><td><b>KZG</b></td><td><b>BN254</b></td><td>需通用 SRS</td><td>EVM 上鏈驗證</td></tr>
   </table>
-  <div class="card green" style="margin-top:1rem"><h3>為什麼選 PSE / KZG / BN254？</h3>
-  <p>BN254 的配對是<strong>以太坊內建 precompile</strong> → 鏈上驗證便宜；KZG 證明<strong>大小固定</strong>、驗證只需常數次配對。代價是需要一次性的通用可信設定（universal SRS）。</p></div>
-  <div class="foot"><span class="tnt">在做什麼</span><span>04</span></div>
+  <p style="margin-top:.6rem;font-size:.95rem"><b>為什麼選它：</b>BN254 配對是以太坊內建 precompile → 鏈上驗證便宜；KZG 證明大小固定。代價是一次性的通用可信設定。</p>
 </section>
 
-<!-- 5 HOW 1: arithmetization -->
-<section class="slide">
-  <div class="kicker">② 怎麼做 · 第 1 層</div>
+<!-- ===== PART II OPENER ===== -->
+<section class="slide part-opener" data-part="II" data-label="怎麼做">
+  <div><div class="pnum">PART II</div><h1>怎麼做</h1>
+  <p class="lead">算術化 → 自訂閘 → 複製約束 / 查表 → KZG 承諾 → SHPLONK + Fiat–Shamir → prove / verify。每一步都有原文定義與圖解。</p></div>
+</section>
+
+<!-- II-1 arithmetization + trace table -->
+<section class="slide" data-part="II" data-label="算術化">
+  <div class="slide-meta"><span class="part-label">PART II</span> · 第 1 層</div>
   <h2>算術化：把程式攤成一張 <span class="accent">2ᵏ 列的表</span></h2>
-  <div class="cols c2">
+  <div class="grid-2">
     <div>
-      <div class="defn"><b>Trace table.</b> 一個 <code class="inl">2ᵏ × w</code> 的矩陣 over 𝔽ᵣ（BN254 純量體，r ≈ 2²⁵⁴）。每一<strong>欄</strong>是一條多項式，每一<strong>列</strong>是計算的一步。</div>
-      <h3>四種欄</h3>
-      <ul>
-        <li><span class="pill tag-b">Advice</span> 私密見證（prover 的秘密）</li>
-        <li><span class="pill tag-y">Fixed</span> 電路常數（如多項式係數）</li>
-        <li><span class="pill tag-g">Instance</span> 公開輸入 / 輸出</li>
-        <li><span class="pill">Selector</span> 0/1 開關，決定某列哪個閘生效</li>
-      </ul>
+      <div class="defn"><span class="dt">原文 · Arithmetization</span>
+        <span class="quote">“The language that we use to express circuits for a particular proof system is called an arithmetization. Usually, an arithmetization will define circuits in terms of polynomial constraints on variables over a field.”</span></div>
+      <div class="defn"><span class="dt">原文 · PLONKish</span>
+        <span class="quote">“PLONKish circuits are defined in terms of a rectangular matrix of values.”</span>
+        <a class="src" href="https://zcash.github.io/halo2/concepts/arithmetization.html" target="_blank" rel="noopener">The halo2 Book — PLONKish Arithmetization ↗</a></div>
     </div>
-    <div class="card">
-      <h3 class="muted" style="font-weight:700">範例：一張 4 列的表</h3>
-      <pre style="font-size:.8rem"> row │ acc(adv) │ x(adv) │ coeff(fix) │ sel
-─────┼──────────┼────────┼────────────┼────
-  0  │    2     │   3    │     3      │  1
-  1  │    9     │   3    │     4      │  1
-  2  │   31     │   3    │     5      │  1
-  3  │   <span class="ok">98</span>     │   ·    │     ·      │  0
-                              ↑ instance = 98</pre>
-      <p class="muted" style="font-size:.86rem;margin-top:.5rem">這正是稍後 demo 的表 — 用 Horner 算 P(x)。</p>
-    </div>
+    <figure>
+      <svg viewBox="0 0 440 250" role="img" aria-label="trace table 範例">
+        <text x="10" y="18" font-size="12" fill="#8b94a3">範例：算 P(x)=2x³+3x²+4x+5 的 4 列表</text>
+        <g font-size="12" font-weight="700" text-anchor="middle">
+          <rect x="30" y="28" width="90" height="26" fill="#dbeafe"/><text x="75" y="45" fill="#1d4ed8">acc · advice</text>
+          <rect x="120" y="28" width="70" height="26" fill="#dbeafe"/><text x="155" y="45" fill="#1d4ed8">x · advice</text>
+          <rect x="190" y="28" width="90" height="26" fill="#fef3c7"/><text x="235" y="45" fill="#92400e">coeff · fixed</text>
+          <rect x="280" y="28" width="60" height="26" fill="#ede9fe"/><text x="310" y="45" fill="#5b21b6">sel</text>
+          <rect x="340" y="28" width="90" height="26" fill="#dcfce7"/><text x="385" y="45" fill="#15803d">out · instance</text>
+        </g>
+        <g font-size="13" text-anchor="middle" fill="#1a1a1f">
+          <line x1="30" y1="54" x2="430" y2="54" stroke="#d9dce3"/>
+          <text x="75" y="78">2</text><text x="155" y="78">3</text><text x="235" y="78">3</text><text x="310" y="78">1</text>
+          <text x="75" y="104">9</text><text x="155" y="104">3</text><text x="235" y="104">4</text><text x="310" y="104">1</text>
+          <text x="75" y="130">31</text><text x="155" y="130">3</text><text x="235" y="130">5</text><text x="310" y="130">1</text>
+          <text x="75" y="156" font-weight="700" fill="#16a34a">98</text><text x="155" y="156" fill="#8b94a3">·</text><text x="235" y="156" fill="#8b94a3">·</text><text x="310" y="156" fill="#8b94a3">0</text><text x="385" y="156" font-weight="700" fill="#15803d">98</text>
+        </g>
+        <g font-size="11" fill="#55596b">
+          <text x="30" y="180">行 = 計算的一步 · 欄 = 一條多項式</text>
+          <text x="30" y="198">每列強制：sel·(acc·x + coeff − acc下一列) = 0</text>
+          <text x="30" y="216" fill="#16a34a">最後 acc = 98 用複製約束綁到公開 instance</text>
+        </g>
+      </svg>
+      <figcaption>原始圖解（本報告自製）· 對應稍後 demo</figcaption>
+    </figure>
   </div>
-  <div class="foot"><span class="tnt">怎麼做</span><span>05</span></div>
 </section>
 
-<!-- 6 HOW 2: custom gate -->
-<section class="slide">
-  <div class="kicker">② 怎麼做 · 第 2 層</div>
-  <h2>自訂閘：每條規則 = 一個 <span class="accent">恆等於 0 的多項式</span></h2>
-  <div class="defn"><b>Custom gate.</b> 一個多元多項式 <code class="inl">g(...)</code>，在所有 selector=1 的列上必須 <code class="inl">g = 0</code>。它能引用<strong>同列</strong>與<strong>相鄰列（rotation）</strong>的 cell。</div>
-  <div class="cols c2" style="margin-top:.6rem">
-    <div>
-      <h3>我們論文的核心閘：一步 Horner</h3>
-      <pre><span class="c">// 在 sel=1 的列上強制成立：</span>
-sel * ( acc·x + coeff − acc<span class="hl">_next</span> ) = 0
-       <span class="c">└ acc_next 用 Rotation::next() 讀下一列</span></pre>
-      <p>係數 <code class="inl">d</code> 個的多項式 <code class="inl">P(x)=Σcᵢxⁱ</code>，用 <code class="inl">d</code> 列就能逐步算完：<br>
-      <code class="inl">acc₀=c_d</code>，<code class="inl">accᵢ₊₁ = accᵢ·x + c</code>。</p>
-    </div>
-    <div class="card amber">
-      <h3>為什麼是「鄰列」很重要</h3>
-      <p>Halo2 的閘只能看<strong>固定偏移</strong>的列（cur / next / prev / ±k）。所以演算法必須排成<strong>規則的縱向流水線</strong> — 這直接決定了我們把 Horner 寫成「逐列遞推」而不是一次展開。</p>
-      <p class="muted" style="margin-top:.5rem">閘的<strong>次數上限</strong>（本電路 ≤ 6）決定 quotient 多項式要擴張多大 → 影響 prover 成本。</p>
-    </div>
+<!-- II-2 columns -->
+<section class="slide" data-part="II" data-label="四種欄">
+  <div class="slide-meta"><span class="part-label">PART II</span> · 第 1 層</div>
+  <h2>四種欄 — <span class="accent">引原文，各司其職</span></h2>
+  <div class="defn"><span class="dt">原文 · Columns</span>
+    <span class="quote">“Fixed columns are fixed by the circuit; advice columns correspond to witness values; and instance columns are normally used for public inputs.”</span>
+    <a class="src" href="https://zcash.github.io/halo2/concepts/arithmetization.html" target="_blank" rel="noopener">The halo2 Book — PLONKish Arithmetization ↗</a></div>
+  <div class="grid-2" style="margin-top:.4rem">
+    <div class="card"><h3 style="color:#1d4ed8">Advice <span class="pill-tag t-b">私密</span></h3><p>見證值 — prover 的秘密（如我們的 acc 累加器、x 求值點）。</p></div>
+    <div class="card"><h3 style="color:#92400e">Fixed <span class="pill-tag t-y">常數</span></h3><p>電路固定值（如多項式係數、ByteTable），屬於 verification key。</p></div>
+    <div class="card"><h3 style="color:#15803d">Instance <span class="pill-tag t-g">公開</span></h3><p>公開輸入 / 輸出 — prover 與 verifier 共享（如公開的 P(x)）。</p></div>
+    <div class="card"><h3 style="color:#5b21b6">Selector</h3><p>固定欄裡的 0/1 開關，決定某列哪個閘生效（見下節原文）。</p></div>
   </div>
-  <div class="foot"><span class="tnt">怎麼做</span><span>06</span></div>
 </section>
 
-<!-- 7 HOW 3: copy + lookup -->
-<section class="slide">
-  <div class="kicker">② 怎麼做 · 第 2 層（續）</div>
+<!-- II-3 custom gate -->
+<section class="slide" data-part="II" data-label="自訂閘">
+  <div class="slide-meta"><span class="part-label">PART II</span> · 第 2 層</div>
+  <h2>自訂閘:每條規則 = 一個 <span class="accent">恆等於 0 的多項式</span></h2>
+  <div class="grid-2">
+    <div>
+      <div class="defn"><span class="dt">原文 · Polynomial constraints</span>
+        <span class="quote">“These are multivariate polynomials over F that must evaluate to zero for each row. The variables … may refer to a cell in a given column of the current row, or a given column of another row relative to this one (with wrap-around …).”</span></div>
+      <div class="defn"><span class="dt">原文 · Gate</span>
+        <span class="quote">“… a set of constraints controlled by a set of selector columns that are designed to be used together, [we refer to] as a gate.”</span>
+        <a class="src" href="https://zcash.github.io/halo2/concepts/arithmetization.html" target="_blank" rel="noopener">The halo2 Book ↗</a></div>
+    </div>
+    <figure>
+      <svg viewBox="0 0 440 250" role="img" aria-label="Horner 自訂閘">
+        <text x="10" y="16" font-size="12" fill="#8b94a3">我們論文核心閘：一步 Horner（用 rotation 讀下一列）</text>
+        <rect x="30" y="34" width="120" height="40" rx="6" fill="#dbeafe" stroke="#93c5fd"/><text x="90" y="59" font-size="13" text-anchor="middle" fill="#1d4ed8">acc（本列）</text>
+        <rect x="170" y="34" width="80" height="40" rx="6" fill="#dbeafe" stroke="#93c5fd"/><text x="210" y="59" font-size="13" text-anchor="middle" fill="#1d4ed8">x</text>
+        <rect x="270" y="34" width="120" height="40" rx="6" fill="#fef3c7" stroke="#fcd34d"/><text x="330" y="59" font-size="13" text-anchor="middle" fill="#92400e">coeff（fixed）</text>
+        <text x="210" y="104" font-size="20" text-anchor="middle" fill="#4f46e5" font-weight="700">acc · x + coeff</text>
+        <line x1="210" y1="114" x2="210" y2="146" stroke="#4f46e5" stroke-width="2" marker-end="url(#ar)"/>
+        <rect x="120" y="150" width="180" height="40" rx="6" fill="#dcfce7" stroke="#86efac"/><text x="210" y="175" font-size="13" text-anchor="middle" fill="#15803d">acc（下一列 · Rotation::next）</text>
+        <text x="210" y="222" font-size="14" text-anchor="middle" fill="#1a1a1f">sel · ( acc·x + coeff − acc下一列 ) = 0</text>
+        <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4f46e5"/></marker></defs>
+      </svg>
+      <figcaption>原始圖解（本報告自製）</figcaption>
+    </figure>
+  </div>
+  <p style="margin-top:.4rem;font-size:.95rem"><b>關鍵：</b>閘只能看固定偏移的列（cur / next / prev），所以演算法要排成規則的縱向流水線 — 這就是我們把 Horner 寫成「逐列遞推」的原因。</p>
+</section>
+
+<!-- II-4 copy + lookup -->
+<section class="slide" data-part="II" data-label="複製約束 / 查表">
+  <div class="slide-meta"><span class="part-label">PART II</span> · 第 2 層（續）</div>
   <h2>把 cell 接起來：<span class="accent">複製約束</span> 與 <span class="accent">查表</span></h2>
-  <div class="cols c2">
-    <div class="card green">
-      <h3>複製約束 (copy constraint)</h3>
-      <div class="defn" style="background:#fff"><b>Permutation argument.</b> 用 PLONK 的排列「大乘積」恆等式，斷言<strong>任意兩個 cell 相等</strong>。</div>
-      <p>例：demo 裡私密的 <code class="inl">x</code> 在每一 Horner 列都要是<strong>同一個值</strong> → 用複製約束把它們綁在一起，惡意 prover 不能每列換一個 x。</p>
+  <div class="grid-2">
+    <div>
+      <div class="defn"><span class="dt">原文 · Equality (copy) constraints</span>
+        <span class="quote">“A sequence of equality constraints, which specify that two given cells must have equal values.”</span>
+        <a class="src" href="https://zcash.github.io/halo2/concepts/arithmetization.html" target="_blank" rel="noopener">The halo2 Book ↗</a></div>
+      <p style="font-size:.95rem">例：demo 裡私密 <code class="inl">x</code> 在每一 Horner 列都要是同一個值 → 複製約束把它們綁住，惡意 prover 不能每列換 x。</p>
     </div>
-    <div class="card blue" style="background:#eff6ff;border-color:#bfdbfe">
-      <h3>查表論證 (lookup)</h3>
-      <div class="defn" style="background:#fff"><b>plookup.</b> Gabizon·Williamson 2020，<span class="muted">ePrint 2020/315</span>。斷言一組 cell 的值<strong>落在一張預先定義的表裡</strong>。</div>
-      <p>用途：範圍檢查、S-box、位元運算。<br>
-      我們用它做 <strong>ByteTable[0..255]</strong> 範圍檢查 — 保證定點截斷的餘數每個 byte 都合法。</p>
+    <div>
+      <div class="defn"><span class="dt">原文 · plookup</span>
+        <span class="quote">“We present a protocol for checking the values of a committed polynomial … over a multiplicative subgroup … are contained in the values of a table.”</span>
+        <a class="src" href="https://eprint.iacr.org/2020/315" target="_blank" rel="noopener">Gabizon & Williamson — ePrint 2020/315 ↗</a></div>
+      <p style="font-size:.95rem">用途：範圍檢查、S-box、位元運算。我們用它做 <b>ByteTable[0..255]</b> 範圍檢查，保證定點截斷餘數每個 byte 合法。</p>
     </div>
   </div>
-  <p class="muted" style="margin-top:1rem">→ 算術化層到此完整：<strong>欄 + 自訂閘 + 複製約束 + 查表</strong>。接下來把它變成密碼學證明。</p>
-  <div class="foot"><span class="tnt">怎麼做</span><span>07</span></div>
+  <figure>
+    <svg viewBox="0 0 900 120" role="img" aria-label="複製約束與查表示意">
+      <g font-size="12" text-anchor="middle">
+        <rect x="30" y="40" width="70" height="34" rx="6" fill="#dbeafe"/><text x="65" y="62">x (row0)</text>
+        <rect x="150" y="40" width="70" height="34" rx="6" fill="#dbeafe"/><text x="185" y="62">x (row1)</text>
+        <rect x="270" y="40" width="70" height="34" rx="6" fill="#dbeafe"/><text x="305" y="62">x (row2)</text>
+        <path d="M65,40 C65,12 185,12 185,40" fill="none" stroke="#16a34a" stroke-width="2"/>
+        <path d="M185,40 C185,12 305,12 305,40" fill="none" stroke="#16a34a" stroke-width="2"/>
+        <text x="185" y="98" fill="#15803d" font-weight="700">複製約束：三個 x 必相等</text>
+      </g>
+      <g font-size="12" text-anchor="middle">
+        <rect x="560" y="40" width="90" height="34" rx="6" fill="#fde68a"/><text x="605" y="62" fill="#92400e">rem byte</text>
+        <text x="690" y="62" font-size="16" fill="#4f46e5">→</text>
+        <rect x="720" y="30" width="150" height="54" rx="6" fill="#f5f3ff" stroke="#c4b5fd"/><text x="795" y="52" fill="#5b21b6">ByteTable[0..255]</text><text x="795" y="70" font-size="11" fill="#7c3aed">lookup ∈ 表內</text>
+      </g>
+    </svg>
+    <figcaption>原始圖解（本報告自製）</figcaption>
+  </figure>
 </section>
 
-<!-- 8 HOW 4: KZG -->
-<section class="slide">
-  <div class="kicker">② 怎麼做 · 第 3 層</div>
+<!-- II-5 KZG -->
+<section class="slide" data-part="II" data-label="KZG 承諾">
+  <div class="slide-meta"><span class="part-label">PART II</span> · 第 3 層</div>
   <h2>多項式承諾 KZG：把一條多項式壓成<span class="accent">一個群元素</span></h2>
-  <div class="cols c2">
+  <div class="grid-2">
     <div>
-      <div class="defn"><b>KZG (Kate–Zaverucha–Goldberg, 2010).</b> 對多項式 <code class="inl">f</code> 的承諾就是單一群元素 <code class="inl">[f(τ)]₁</code>；要「開啟」某點的值，用一次<strong>配對檢查</strong>驗證。</div>
-      <h3>SRS — 結構化參考字串</h3>
+      <div class="defn"><span class="dt">KZG (2010)</span>
+        <span class="quote">“Constant-Size Commitments to Polynomials and Their Applications.”</span>
+        <span class="gloss">對多項式 <code>f</code> 的承諾就是單一群元素 <code>[f(τ)]₁</code>；開啟某點值用一次配對檢查。</span>
+        <a class="src" href="https://www.iacr.org/archive/asiacrypt2010/6477178/6477178.pdf" target="_blank" rel="noopener">Kate, Zaverucha, Goldberg — ASIACRYPT 2010 ↗</a></div>
+      <h3 style="margin-top:.6rem">SRS — 結構化參考字串</h3>
       <ul>
-        <li><strong>通用 (universal)</strong>：一次設定，所有 ≤ 2ᵏ 的電路共用。</li>
-        <li><strong>可更新 (updatable)</strong>：只要設定儀式中<strong>有一人誠實</strong>就安全。</li>
-        <li>內容是秘密 τ 的冪次 <code class="inl">{[τⁱ]₁}, [τ]₂</code>，τ 用完即丟（toxic waste / trapdoor）。</li>
+        <li><b>通用</b>：一次設定，所有 ≤ 2ᵏ 電路共用。</li>
+        <li><b>可更新</b>：設定儀式中只要一人誠實就安全。</li>
+        <li>內容 = 秘密 τ 的冪次 <code class="inl">{[τⁱ]₁}, [τ]₂</code>，τ 用完即丟。</li>
       </ul>
     </div>
-    <div class="card amber">
-      <h3>這就是「可信設定」的代價</h3>
-      <p>原版 Halo（IPA）<strong>不需要</strong>它；PSE/KZG 為了 BN254 上鏈效率<strong>接受</strong>它，並靠 Perpetual Powers of Tau 公開儀式把信任降到最低。</p>
-      <p class="muted" style="margin-top:.5rem">我們論文如實揭露這是一條信任假設（trust assumption），不宣稱 trustless。</p>
-    </div>
+    <figure>
+      <svg viewBox="0 0 440 230" role="img" aria-label="KZG 承諾流程">
+        <rect x="20" y="30" width="160" height="44" rx="8" fill="#f7f8fa" stroke="#d9dce3"/><text x="100" y="57" font-size="13" text-anchor="middle">多項式 f(X)</text>
+        <text x="200" y="57" font-size="16" fill="#4f46e5">→</text>
+        <rect x="230" y="30" width="190" height="44" rx="8" fill="#eef2ff" stroke="#c7d2fe"/><text x="325" y="50" font-size="13" text-anchor="middle" fill="#3730a3">承諾 [f(τ)]₁</text><text x="325" y="66" font-size="11" text-anchor="middle" fill="#6366f1">單一群元素</text>
+        <rect x="20" y="110" width="190" height="44" rx="8" fill="#f7f8fa" stroke="#d9dce3"/><text x="115" y="130" font-size="13" text-anchor="middle">開啟：f(z)=v 的證明</text><text x="115" y="146" font-size="11" text-anchor="middle" fill="#8b94a3">quotient 多項式</text>
+        <text x="230" y="137" font-size="16" fill="#16a34a">→</text>
+        <rect x="250" y="110" width="170" height="44" rx="8" fill="#dcfce7" stroke="#86efac"/><text x="335" y="130" font-size="13" text-anchor="middle" fill="#15803d">配對檢查 ✓</text><text x="335" y="146" font-size="11" text-anchor="middle" fill="#16a34a">常數時間</text>
+        <text x="20" y="195" font-size="12" fill="#55596b">SRS：{[τⁱ]₁} ⋯ 公開可信設定（toxic waste τ 銷毀）</text>
+      </svg>
+      <figcaption>原始圖解（本報告自製）</figcaption>
+    </figure>
   </div>
-  <div class="foot"><span class="tnt">怎麼做</span><span>08</span></div>
 </section>
 
-<!-- 9 HOW 5: SHPLONK + FS -->
-<section class="slide">
-  <div class="kicker">② 怎麼做 · 第 4 層</div>
-  <h2>批次開啟 SHPLONK + <span class="accent">Fiat–Shamir</span></h2>
-  <div class="cols c2">
+<!-- II-6 SHPLONK + proof size -->
+<section class="slide" data-part="II" data-label="SHPLONK">
+  <div class="slide-meta"><span class="part-label">PART II</span> · 第 4 層</div>
+  <h2>批次開啟 SHPLONK：為什麼證明<span class="accent">又小又不隨深度長</span></h2>
+  <div class="grid-2">
     <div>
-      <div class="defn"><b>SHPLONK.</b> Boneh·Drake·Fisch·Gabizon, 2020，<span class="muted">ePrint 2020/081</span>。把「在多個點開啟多條多項式」批次成<strong>近乎常數大小</strong>的單一開啟證明。</div>
-      <p>結果：<strong>證明大小 ≈ O(欄數)</strong>，<u>不隨列數（計算深度）成長</u>。驗證只需常數次配對 + 一個 MSM。</p>
-      <div class="defn" style="background:#f0fdf4;border-color:#22c55e;color:#14532d"><b>Fiat–Shamir.</b> 把互動式挑戰換成對 transcript 的雜湊。PSE v0.3.0 預設用 <strong>Blake2b</strong>（<code class="inl">Blake2bWrite/Read</code>）→ 非互動。</p>
+      <div class="defn"><span class="dt">原文 · SHPLONK</span>
+        <span class="quote">“… the commitment scheme (that for historical reasons has become known as shplonK). Its crucial advantage is that the verifier group operations do not grow with the number of evaluation points.”</span>
+        <span class="gloss">把「多點、多條多項式開啟」批次成近乎常數大小的單一開啟；驗證配對數不隨點數增長。</span>
+        <a class="src" href="https://eprint.iacr.org/2020/081" target="_blank" rel="noopener">Boneh, Drake, Fisch, Gabizon — ePrint 2020/081 ↗</a></div>
+      <p style="font-size:.95rem"><b>Fiat–Shamir</b>：把互動挑戰換成對 transcript 的雜湊；PSE v0.3.0 預設 <b>Blake2b</b> → 非互動。</p>
     </div>
-    <div class="card">
-      <h3>為什麼證明這麼小？</h3>
-      <div class="kpi">
-        <div><div class="v">~0.5–32&nbsp;KB</div><div class="l">proof size</div></div>
-        <div><div class="v">O(1)</div><div class="l">配對數</div></div>
-      </div>
-      <p style="margin-top:.7rem" class="muted">關鍵：承諾把「整條多項式」壓成一個點，SHPLONK 再把「許多開啟」併成一個。所以列數翻倍、proof 幾乎不變。</p>
-      <p style="margin-top:.5rem">我們論文電路 <strong>N 不變恆為 31,872 bytes</strong> 正是這個性質的體現。</p>
-    </div>
+    <figure>
+      <svg viewBox="0 0 440 230" role="img" aria-label="證明大小不隨列數成長">
+        <text x="10" y="16" font-size="12" fill="#8b94a3">列數 2ᵏ 翻倍，proof 幾乎不變</text>
+        <line x1="50" y1="190" x2="420" y2="190" stroke="#d9dce3"/><line x1="50" y1="40" x2="50" y2="190" stroke="#d9dce3"/>
+        <g fill="#c7d2fe"><rect x="80" y="150" width="34" height="40"/><rect x="150" y="120" width="34" height="70"/><rect x="220" y="80" width="34" height="110"/><rect x="290" y="55" width="34" height="135"/></g>
+        <text x="97" y="205" font-size="10" text-anchor="middle" fill="#8b94a3">k=12</text><text x="167" y="205" font-size="10" text-anchor="middle" fill="#8b94a3">k=14</text><text x="237" y="205" font-size="10" text-anchor="middle" fill="#8b94a3">k=16</text><text x="307" y="205" font-size="10" text-anchor="middle" fill="#8b94a3">k=18</text>
+        <text x="200" y="178" font-size="11" fill="#6366f1">電路規模（列數）↑</text>
+        <line x1="60" y1="70" x2="340" y2="70" stroke="#16a34a" stroke-width="3"/>
+        <circle cx="97" cy="70" r="4" fill="#16a34a"/><circle cx="167" cy="70" r="4" fill="#16a34a"/><circle cx="237" cy="70" r="4" fill="#16a34a"/><circle cx="307" cy="70" r="4" fill="#16a34a"/>
+        <text x="350" y="73" font-size="12" fill="#15803d" font-weight="700">proof ≈ 定值</text>
+      </svg>
+      <figcaption>原始圖解 · 我們論文電路即 N 不變恆 31,872 bytes</figcaption>
+    </figure>
   </div>
-  <div class="foot"><span class="tnt">怎麼做</span><span>09</span></div>
 </section>
 
-<!-- 10 PIPELINE -->
-<section class="slide">
-  <div class="kicker">② 怎麼做 · 整條流水線</div>
+<!-- II-7 pipeline -->
+<section class="slide" data-part="II" data-label="五階段流水線">
+  <div class="slide-meta"><span class="part-label">PART II</span> · 整條流水線</div>
   <h2>從電路到「接受 / 拒絕」的 <span class="accent">五個階段</span></h2>
-  <div class="flow">
-    <div class="step"><div class="n">SETUP</div><div class="ttl">SRS</div><small>ParamsKZG::setup(k)</small></div>
-    <div class="arrow">→</div>
-    <div class="step"><div class="n">KEYGEN</div><div class="ttl">vk / pk</div><small>keygen_vk · keygen_pk</small></div>
-    <div class="arrow">→</div>
-    <div class="step"><div class="n">PROVE</div><div class="ttl">π</div><small>create_proof<br>ProverSHPLONK</small></div>
-    <div class="arrow">→</div>
-    <div class="step"><div class="n">VERIFY</div><div class="ttl">accept?</div><small>verify_proof<br>VerifierSHPLONK</small></div>
-  </div>
-  <div class="cols c2" style="margin-top:1rem">
-    <div class="card green"><h3>MockProver — 開發者的好朋友</h3>
-    <p>純軟體跑一遍約束系統，<strong>不做密碼學</strong>，但會精準指出<strong>哪一個 cell、哪一條閘</strong>沒滿足。除錯先用它，再上真 KZG。</p></div>
-    <div class="card"><h3>四大安全性質（下一節展開）</h3>
-    <p><span class="pill tag-g">完備性</span><span class="pill tag-b">可靠性</span><span class="pill">零知識</span><span class="pill tag-y">簡潔性</span></p>
-    <p class="muted" style="margin-top:.4rem">每一個都對應 demo 裡可觀察的行為。</p></div>
-  </div>
-  <div class="foot"><span class="tnt">怎麼做</span><span>10</span></div>
+  <figure>
+    <svg viewBox="0 0 900 150" role="img" aria-label="五階段流水線">
+      <g font-size="13" text-anchor="middle">
+        <rect x="20" y="40" width="140" height="56" rx="10" fill="#f7f8fa" stroke="#d9dce3"/><text x="90" y="64" font-weight="700" fill="#4f46e5">SETUP</text><text x="90" y="83" font-size="11" fill="#55596b">SRS · setup(k)</text>
+        <text x="172" y="72" font-size="18" fill="#8b94a3">→</text>
+        <rect x="190" y="40" width="140" height="56" rx="10" fill="#f7f8fa" stroke="#d9dce3"/><text x="260" y="64" font-weight="700" fill="#4f46e5">KEYGEN</text><text x="260" y="83" font-size="11" fill="#55596b">vk / pk</text>
+        <text x="342" y="72" font-size="18" fill="#8b94a3">→</text>
+        <rect x="360" y="40" width="140" height="56" rx="10" fill="#eef2ff" stroke="#c7d2fe"/><text x="430" y="64" font-weight="700" fill="#3730a3">PROVE</text><text x="430" y="83" font-size="11" fill="#6366f1">ProverSHPLONK</text>
+        <text x="512" y="72" font-size="18" fill="#8b94a3">→</text>
+        <rect x="530" y="40" width="140" height="56" rx="10" fill="#dcfce7" stroke="#86efac"/><text x="600" y="64" font-weight="700" fill="#15803d">VERIFY</text><text x="600" y="83" font-size="11" fill="#16a34a">accept?</text>
+        <rect x="710" y="40" width="170" height="56" rx="10" fill="#fffbeb" stroke="#fde68a"/><text x="795" y="62" font-weight="700" fill="#92400e">MockProver</text><text x="795" y="81" font-size="10.5" fill="#b45309">除錯：純軟體查約束</text>
+      </g>
+    </svg>
+    <figcaption>原始圖解（本報告自製）</figcaption>
+  </figure>
+  <div class="card green"><p style="font-size:.95rem"><b>MockProver</b> 不做密碼學，但會精準指出哪一個 cell、哪一條閘沒滿足。除錯先用它，再上真 KZG。</p></div>
 </section>
 
-<!-- 11 WHY IT WORKS -->
-<section class="slide">
-  <div class="kicker">③ 為什麼能用</div>
-  <h2>為什麼「檢一個隨機點」就足以信任<span class="accent">整條多項式</span>？</h2>
-  <div class="defn"><b>Schwartz–Zippel 引理.</b> 兩個次數 ≤ d 的相異多項式，在 |𝔽| ≈ 2²⁵⁴ 的體上隨機取一點相等的機率 ≤ d / |𝔽| → <strong>可忽略</strong>。所以「在 Fiat–Shamir 抽的隨機點上恆等式成立」⇒ 幾乎必然處處成立。</div>
-  <div class="cols c2" style="margin-top:.4rem">
-    <div>
-      <table>
-        <tr><th>性質</th><th>意義</th><th>機制</th></tr>
-        <tr><td><b>完備性</b></td><td>誠實 prover 必過</td><td>合法 witness 滿足所有閘</td></tr>
-        <tr><td><b>可靠性</b></td><td>作弊者過不了</td><td>承諾綁定 + Schwartz–Zippel + 抽取器</td></tr>
-        <tr><td><b>零知識</b></td><td>不洩漏 advice</td><td>advice 多項式加隨機 blinding</td></tr>
-        <tr><td><b>簡潔性</b></td><td>又小又快驗</td><td>KZG + SHPLONK 常數配對</td></tr>
-      </table>
-    </div>
-    <div class="card">
-      <h3>安全立基</h3>
-      <p>KZG 的知識可靠性建立在<strong>配對友善曲線的代數假設</strong>（AGM + q-type / ROM）。BN254 提供約 <strong>128-bit</strong> 安全等級。</p>
-      <p class="muted" style="margin-top:.5rem">→ 我們論文 ch3 對這三項（completeness / soundness / zero-knowledge）給了形式化論證。</p>
-    </div>
-  </div>
-  <div class="foot"><span class="tnt">為什麼能用</span><span>11</span></div>
+<!-- ===== PART III OPENER ===== -->
+<section class="slide part-opener" data-part="III" data-label="為什麼能用">
+  <div><div class="pnum">PART III</div><h1>為什麼能用</h1>
+  <p class="lead">為什麼「只檢一個隨機點」就足以信任整條多項式？四個安全性質又從何而來？</p></div>
 </section>
 
-<!-- 12 capabilities / limits -->
-<section class="slide">
-  <div class="kicker">③ 為什麼能用 · 邊界</div>
+<!-- III-1 schwartz-zippel + properties -->
+<section class="slide" data-part="III" data-label="為什麼成立">
+  <div class="slide-meta"><span class="part-label">PART III</span> · 為什麼能用</div>
+  <h2>核心：<span class="accent">Schwartz–Zippel</span> + 承諾綁定</h2>
+  <div class="defn"><span class="dt">Schwartz–Zippel 引理</span>
+    <span class="quote">兩個次數 ≤ d 的相異多項式，在 |𝔽| ≈ 2²⁵⁴ 的體上隨機取一點相等的機率 ≤ d / |𝔽| → 可忽略。</span>
+    <span class="gloss">所以「在 Fiat–Shamir 抽的隨機點上恆等式成立」⇒ 幾乎必然處處成立。這是 PLONK 系列可靠性的根。</span></div>
+  <div class="grid-2" style="margin-top:.3rem">
+    <table>
+      <tr><th>性質</th><th>機制</th></tr>
+      <tr><td><b>完備性</b></td><td>合法 witness 滿足所有閘</td></tr>
+      <tr><td><b>可靠性</b></td><td>承諾綁定 + Schwartz–Zippel + 抽取器</td></tr>
+      <tr><td><b>零知識</b></td><td>advice 多項式加隨機 blinding</td></tr>
+      <tr><td><b>簡潔性</b></td><td>KZG + SHPLONK 常數配對</td></tr>
+    </table>
+    <div class="card"><h3>安全立基</h3><p style="font-size:.95rem">KZG 知識可靠性建立在配對友善曲線的代數假設（AGM + q-type / ROM）。BN254 提供約 <b>128-bit</b> 安全等級。</p><p class="muted" style="font-size:.88rem;margin-top:.4rem">→ 論文 ch3 對完備 / 可靠 / 零知識三項給了形式化論證。</p></div>
+  </div>
+</section>
+
+<!-- III-2 capabilities / limits -->
+<section class="slide" data-part="III" data-label="能 / 不能">
+  <div class="slide-meta"><span class="part-label">PART III</span> · 邊界</div>
   <h2>Halo2 <span class="accent">能表達什麼</span> · 不能表達什麼</h2>
-  <div class="cols c2">
-    <div class="card green">
-      <h3>✅ 直接能做</h3>
-      <ul>
-        <li>𝔽ᵣ 上的加 / 乘（任意算術）</li>
-        <li>自訂閘 degree ≤ ~6，含 rotation</li>
-        <li>查表（固定 / 共享 preprocessed 表）</li>
-        <li>複製約束 / 任意 wiring</li>
-        <li>selector 做 2-路 MUX</li>
-      </ul>
-    </div>
-    <div class="card red">
-      <h3>⚠️ 需 gadget 或有硬限制</h3>
-      <ul>
-        <li><strong>k ≤ ~28</strong>（k=28 約 30 GB RAM）</li>
-        <li>位元運算需 boolean 拆解（SHA/Keccak 貴 2 個數量級）</li>
-        <li>除法 / 模逆：prover 提供 quotient 當 witness</li>
-        <li><strong>浮點無原生支援</strong> → 我們用 pp=48 定點</li>
-        <li>資料相依的控制流不允許（trace 預先固定）</li>
-      </ul>
-    </div>
+  <div class="grid-2">
+    <div class="card green"><h3 style="color:#15803d">✅ 直接能做</h3>
+      <ul><li>𝔽ᵣ 上加 / 乘（任意算術）</li><li>自訂閘 degree ≤ ~6，含 rotation</li><li>查表（固定 / 共享表）</li><li>複製約束 / 任意 wiring</li><li>selector 做 2-路 MUX</li></ul></div>
+    <div class="card red"><h3 style="color:#b91c1c">⚠️ 需 gadget 或有硬限制</h3>
+      <ul><li><b>k ≤ ~28</b>（k=28 約 30 GB RAM）</li><li>位元運算需 boolean 拆解（SHA/Keccak 貴 2 個數量級）</li><li>除法 / 模逆：prover 提供 quotient witness</li><li><b>浮點無原生支援</b> → 我們用 pp=48 定點</li><li>資料相依控制流不允許</li></ul></div>
   </div>
-  <p class="muted" style="margin-top:.9rem">「浮點不支援」這一條，正是整篇論文存在的理由 → 下一節。</p>
-  <div class="foot"><span class="tnt">為什麼能用</span><span>12</span></div>
+  <p class="muted" style="margin-top:.8rem;font-size:.95rem">「浮點不支援」這一條，正是整篇論文存在的理由 → Part IV。</p>
 </section>
 
-<!-- 13 HOW WE USE IT -->
-<section class="slide">
-  <div class="kicker">⑤ 我們怎麼用它</div>
-  <h2>我們的貢獻：把<span class="accent">超越函數</span>塞進 Halo2 的閘</h2>
-  <p class="lead">Halo2 沒有浮點、沒有 exp/ln/erf。我們用 <em>定點 + 多項式逼近 + 逐步 Horner</em> 在它的閘上重建它們。</p>
-  <div class="flow">
-    <div class="step"><div class="n">① 定點</div><div class="ttl">pp = 48</div><small>每個值用 2⁴⁸ 縮放，整數模擬小數</small></div>
-    <div class="arrow">→</div>
-    <div class="step"><div class="n">② 逼近</div><div class="ttl">Remez minimax</div><small>d 次多項式，區間最大誤差最小</small></div>
-    <div class="arrow">→</div>
-    <div class="step"><div class="n">③ 求值</div><div class="ttl">逐步 Horner 閘</div><small>acc·R + c = acc_next·S + rem</small></div>
-    <div class="arrow">→</div>
-    <div class="step"><div class="n">④ 範圍</div><div class="ttl">ByteTable 查表</div><small>每步截斷餘數做 byte 範圍檢查</small></div>
-  </div>
-  <div class="cols c2" style="margin-top:.9rem">
-    <div class="card indigo"><h3>關鍵洞見</h3><p>一套電路、共用 256 條目的 ByteTable，<strong>換函數只換 d 個係數</strong>，不重設計電路 — 通用性來自 Halo2 的 fixed 欄。</p></div>
-    <div class="card amber"><h3>demo 閘 → 論文 kernel</h3><p>稍後 demo 的 <code class="inl">acc·x+c=acc_next</code>，在論文裡多了 <strong>÷S 截斷 + 餘數 byte 拆解 + lookup</strong>，就是完整的定點 Horner kernel。</p></div>
-  </div>
-  <div class="foot"><span class="tnt">我們怎麼用它</span><span>13</span></div>
+<!-- ===== PART IV OPENER ===== -->
+<section class="slide part-opener" data-part="IV" data-label="我們怎麼用它">
+  <div><div class="pnum">PART IV</div><h1>我們怎麼用它</h1>
+  <p class="lead">Halo2 沒有浮點、沒有 exp / ln / erf。我們用定點 + 多項式逼近 + 逐步 Horner，在它的閘上重建它們。</p></div>
 </section>
 
-<!-- 14 WHERE / deployments + our circuits -->
-<section class="slide">
-  <div class="kicker">④ 用在哪裡</div>
-  <h2>業界 · 與我們論文的<span class="accent">兩個真實電路</span></h2>
-  <div class="cols c2">
-    <div class="card">
-      <h3>業界部署</h3>
-      <ul>
-        <li><strong>Zcash Orchard</strong>（NU5）— 原版 IPA/Pasta <span class="muted">（非 KZG，勿混淆）</span></li>
-        <li><strong>Scroll</strong> · <strong>Taiko</strong> zkEVM — PSE KZG/BN254 路線</li>
-        <li>Aztec 等 — PLONK + KZG 同家族</li>
-      </ul>
-      <p class="muted" style="font-size:.85rem">註：Polygon 旗艦 zkEVM 走 Plonky2/STARK，非 halo2。</p>
-    </div>
-    <div class="card indigo">
-      <h3>我們的電路（真實實作 · Rust）</h3>
-      <ul>
-        <li><strong>PF1</strong> 投組風險限額合規：證明 <code class="inl">|Σ wΔ| ≤ τ</code>，不洩漏個別部位</li>
-        <li><strong>PF2</strong> 狀態轉移 / EdDSA·Poseidon Merkle</li>
-      </ul>
-      <div class="kpi" style="margin-top:.3rem">
-        <div><div class="v">31,872</div><div class="l">proof bytes (N 不變)</div></div>
-        <div><div class="v">~8 ms</div><div class="l">verify</div></div>
-      </div>
-    </div>
+<!-- IV-1 our method -->
+<section class="slide" data-part="IV" data-label="超越函數塞進閘">
+  <div class="slide-meta"><span class="part-label">PART IV</span> · 我們的貢獻</div>
+  <h2>把<span class="accent">超越函數</span>塞進 Halo2 的閘</h2>
+  <figure>
+    <svg viewBox="0 0 900 120" role="img" aria-label="我們的方法流程">
+      <g font-size="12" text-anchor="middle">
+        <rect x="20" y="35" width="180" height="56" rx="10" fill="#eef2ff" stroke="#c7d2fe"/><text x="110" y="58" font-weight="700" fill="#3730a3">① 定點 pp=48</text><text x="110" y="77" font-size="10.5" fill="#6366f1">每值 2⁴⁸ 縮放，整數模擬小數</text>
+        <text x="208" y="67" font-size="18" fill="#8b94a3">→</text>
+        <rect x="225" y="35" width="180" height="56" rx="10" fill="#f7f8fa" stroke="#d9dce3"/><text x="315" y="58" font-weight="700" fill="#4338ca">② Remez minimax</text><text x="315" y="77" font-size="10.5" fill="#55596b">d 次多項式，區間最大誤差最小</text>
+        <text x="413" y="67" font-size="18" fill="#8b94a3">→</text>
+        <rect x="430" y="35" width="180" height="56" rx="10" fill="#f7f8fa" stroke="#d9dce3"/><text x="520" y="58" font-weight="700" fill="#4338ca">③ 逐步 Horner 閘</text><text x="520" y="77" font-size="10.5" fill="#55596b">acc·R + c = acc下·S + rem</text>
+        <text x="618" y="67" font-size="18" fill="#8b94a3">→</text>
+        <rect x="635" y="35" width="180" height="56" rx="10" fill="#fffbeb" stroke="#fde68a"/><text x="725" y="58" font-weight="700" fill="#92400e">④ ByteTable 查表</text><text x="725" y="77" font-size="10.5" fill="#b45309">截斷餘數做 byte 範圍檢查</text>
+      </g>
+    </svg>
+    <figcaption>原始圖解（本報告自製）</figcaption>
+  </figure>
+  <div class="grid-2">
+    <div class="card accent"><h3>關鍵洞見</h3><p style="font-size:.95rem">一套電路、共用 256 條目 ByteTable，<b>換函數只換 d 個係數</b>，不重設計電路 — 通用性來自 fixed 欄。</p></div>
+    <div class="card amber"><h3>demo 閘 → 論文 kernel</h3><p style="font-size:.95rem">demo 的 <code class="inl">acc·x+c=acc_next</code>，論文多了 <b>÷S 截斷 + 餘數 byte 拆解 + lookup</b>，即完整定點 Horner kernel。</p></div>
   </div>
-  <div class="foot"><span class="tnt">用在哪裡</span><span>14</span></div>
 </section>
 
-<!-- 15 CODE: config + gate -->
-<section class="slide">
-  <div class="kicker">⑥ 舉例 · 真實程式碼 (1/3)</div>
+<!-- ===== PART V OPENER ===== -->
+<section class="slide part-opener" data-part="V" data-label="用在哪 + 範例">
+  <div><div class="pnum">PART V</div><h1>用在哪 · 舉例 · 跑一次</h1>
+  <p class="lead">業界部署、我們論文的兩個真實電路，以及一支會跑完整 prove / verify 的最小 Rust demo。</p></div>
+</section>
+
+<!-- V-1 deployments + numbers -->
+<section class="slide" data-part="V" data-label="用在哪裡">
+  <div class="slide-meta"><span class="part-label">PART V</span> · 用在哪裡</div>
+  <h2>業界部署 · 我們的<span class="accent">兩個真實電路</span></h2>
+  <div class="grid-2">
+    <div class="card"><h3>業界</h3>
+      <ul><li><b>Zcash Orchard</b>（NU5）— 原版 IPA/Pasta <span class="muted">（非 KZG，勿混淆）</span></li><li><b>Scroll · Taiko</b> zkEVM — PSE KZG/BN254 路線</li><li>Aztec — PLONK + KZG 同家族</li></ul>
+      <p class="muted" style="font-size:.84rem">註：Polygon 旗艦 zkEVM 走 Plonky2/STARK，非 halo2。</p></div>
+    <div class="card accent"><h3>我們的電路（Rust 已實作）</h3>
+      <ul><li><b>PF1</b> 投組風險限額合規：證明 <code class="inl">|Σ wΔ| ≤ τ</code>，不洩漏個別部位</li><li><b>PF2</b> 狀態轉移 / EdDSA·Poseidon Merkle</li></ul>
+      <div class="kpi" style="margin-top:.2rem"><div><div class="v">31,872</div><div class="l">proof bytes (N 不變)</div></div><div><div class="v">~8 ms</div><div class="l">verify</div></div></div></div>
+  </div>
+  <div class="defn"><span class="dt">原文 · Poseidon（我們的 Merkle 雜湊）</span>
+    <span class="quote">“Our hash function Poseidon uses up to 8x fewer constraints per message bit than Pedersen Hash.”</span>
+    <a class="src" href="https://eprint.iacr.org/2019/458" target="_blank" rel="noopener">Grassi, Khovratovich, Rechberger, Roy, Schofnegger — ePrint 2019/458 ↗</a></div>
+</section>
+
+<!-- V-2 code config -->
+<section class="slide" data-part="V" data-label="程式碼 1">
+  <div class="slide-meta"><span class="part-label">PART V</span> · 程式碼 1/3</div>
   <h2>Demo 電路：<span class="accent">欄位 + 那一個閘</span></h2>
-  <p class="muted">敘述：「我知道一個秘密 x，使 P(x)=2x³+3x²+4x+5 等於某公開值。」x=3 → P(3)=98。</p>
-  <pre><span class="k">fn</span> <span class="f">configure</span>(meta: &<span class="k">mut</span> ConstraintSystem&lt;Fr&gt;) -> HornerConfig {
-    <span class="k">let</span> acc   = meta.advice_column();   <span class="c">// 私密：Horner 累加器</span>
-    <span class="k">let</span> x     = meta.advice_column();   <span class="c">// 私密：求值點</span>
-    <span class="k">let</span> coeff = meta.fixed_column();    <span class="c">// 常數：每步係數</span>
+  <p class="muted" style="font-size:.92rem">敘述：「我知道秘密 x，使 P(x)=2x³+3x²+4x+5 = 某公開值。」x=3 → P(3)=98。</p>
+  <pre><span class="k">fn</span> <span class="f">configure</span>(meta: &amp;<span class="k">mut</span> ConstraintSystem&lt;Fr&gt;) -> HornerConfig {
+    <span class="k">let</span> acc = meta.advice_column();   <span class="c">// 私密：累加器</span>
+    <span class="k">let</span> x   = meta.advice_column();   <span class="c">// 私密：求值點</span>
+    <span class="k">let</span> coeff = meta.fixed_column();  <span class="c">// 常數：每步係數</span>
     <span class="k">let</span> instance = meta.instance_column(); <span class="c">// 公開：P(x)</span>
     <span class="k">let</span> s = meta.selector();
-
     meta.enable_equality(acc); meta.enable_equality(x); meta.enable_equality(instance);
-
-    <span class="c">// 整個電路就是這一條多項式恆等式：</span>
-    meta.<span class="f">create_gate</span>(<span class="s">"horner step"</span>, |meta| {
-        <span class="k">let</span> s       = meta.query_selector(s);
-        <span class="k">let</span> acc_cur = meta.query_advice(acc,   Rotation::cur());
-        <span class="k">let</span> x_cur   = meta.query_advice(x,     Rotation::cur());
+    meta.<span class="f">create_gate</span>(<span class="s">"horner step"</span>, |meta| {        <span class="c">// 整個電路就這一條恆等式</span>
+        <span class="k">let</span> s = meta.query_selector(s);
+        <span class="k">let</span> acc_cur = meta.query_advice(acc, Rotation::cur());
+        <span class="k">let</span> x_cur   = meta.query_advice(x,   Rotation::cur());
         <span class="k">let</span> c_cur   = meta.query_fixed (coeff, Rotation::cur());
-        <span class="k">let</span> acc_nxt = meta.query_advice(acc,   Rotation::<span class="hl">next</span>());
+        <span class="k">let</span> acc_nxt = meta.query_advice(acc, Rotation::<span class="hl">next</span>());
         <span class="k">vec!</span>[ s * (acc_cur * x_cur + c_cur - acc_nxt) ]   <span class="c">// = 0</span>
     });
     HornerConfig { acc, x, coeff, s, instance }
 }</pre>
-  <div class="foot"><span class="tnt">舉例 · 程式碼</span><span>15</span></div>
 </section>
 
-<!-- 16 CODE: synthesize + pipeline -->
-<section class="slide">
-  <div class="kicker">⑥ 舉例 · 真實程式碼 (2/3)</div>
-  <h2>填表（witness）+ <span class="accent">真 KZG 證明流水線</span></h2>
-  <div class="cols c2">
-    <div>
-      <pre style="font-size:.76rem"><span class="c">// synthesize：把 Horner 階梯填進區域</span>
+<!-- V-3 code synth + pipeline -->
+<section class="slide" data-part="V" data-label="程式碼 2">
+  <div class="slide-meta"><span class="part-label">PART V</span> · 程式碼 2/3</div>
+  <h2>填表 + <span class="accent">真 KZG 流水線</span></h2>
+  <div class="grid-2">
+    <pre style="font-size:.75rem"><span class="c">// synthesize：Horner 階梯</span>
 <span class="k">let</span> <span class="k">mut</span> acc = region.assign_advice(
     || <span class="s">"acc0=c3"</span>, acc, <span class="n">0</span>, || known(c3))?;
 <span class="k">let</span> x0 = region.assign_advice(|| <span class="s">"x"</span>, x, <span class="n">0</span>, || self.x)?;
 <span class="k">for</span> i <span class="k">in</span> <span class="n">0</span>..<span class="n">3</span> {
-    s.enable(&<span class="k">mut</span> region, i)?;
+    s.enable(&amp;<span class="k">mut</span> region, i)?;
     region.assign_fixed(|| <span class="s">"c"</span>, coeff, i, || known(c[i+1]))?;
-    <span class="k">if</span> i &gt; <span class="n">0</span> {  <span class="c">// x 每列須相同 → 複製約束</span>
+    <span class="k">if</span> i &gt; <span class="n">0</span> {  <span class="c">// x 每列相同 → 複製約束</span>
         <span class="k">let</span> xi = region.assign_advice(|| <span class="s">"x"</span>, x, i, || self.x)?;
         region.<span class="hl">constrain_equal</span>(xi.cell(), x0.cell())?;
     }
@@ -496,158 +586,145 @@ sel * ( acc·x + coeff − acc<span class="hl">_next</span> ) = 0
     acc = region.assign_advice(|| <span class="s">"acc"</span>, acc, i+<span class="n">1</span>, || nxt)?;
 }
 layouter.<span class="hl">constrain_instance</span>(acc.cell(), instance, <span class="n">0</span>)?;</pre>
-    </div>
-    <div>
-      <pre style="font-size:.76rem"><span class="c">// main：真實 setup → keygen → prove → verify</span>
+    <pre style="font-size:.75rem"><span class="c">// main：setup → keygen → prove → verify</span>
 <span class="k">let</span> params = ParamsKZG::&lt;Bn256&gt;::<span class="f">setup</span>(K, OsRng);
-<span class="k">let</span> vk = <span class="f">keygen_vk</span>(&amp;params, &circuit)?;
-<span class="k">let</span> pk = <span class="f">keygen_pk</span>(&amp;params, vk, &circuit)?;
+<span class="k">let</span> vk = <span class="f">keygen_vk</span>(&amp;params, &amp;circuit)?;
+<span class="k">let</span> pk = <span class="f">keygen_pk</span>(&amp;params, vk, &amp;circuit)?;
 
 <span class="f">create_proof</span>::&lt;KZGCommitmentScheme&lt;Bn256&gt;,
     <span class="hl">ProverSHPLONK</span>&lt;Bn256&gt;, ..&gt;(
-    &amp;params, &pk, &[circuit],
-    &[&[&public_inputs]], OsRng, &<span class="k">mut</span> transcript)?;
+    &amp;params, &amp;pk, &amp;[circuit],
+    &amp;[&amp;[&amp;public_inputs]], OsRng, &amp;<span class="k">mut</span> transcript)?;
 <span class="k">let</span> proof = transcript.finalize();
 
 <span class="f">verify_proof</span>::&lt;.., <span class="hl">VerifierSHPLONK</span>&lt;Bn256&gt;, ..&gt;(
     &amp;params, pk.get_vk(), strategy,
-    &[&[&public_inputs]], &<span class="k">mut</span> vt)?;  <span class="ok">// Ok ⇒ 接受</span></pre>
-      <p class="muted" style="font-size:.82rem;margin-top:.4rem">同一套 API、同一個 PSE v0.3.0 stack，與論文 PF1/PF2 完全一致。</p>
-    </div>
+    &amp;[&amp;[&amp;public_inputs]], &amp;<span class="k">mut</span> vt)?;  <span class="ok">// Ok ⇒ 接受</span></pre>
   </div>
-  <div class="foot"><span class="tnt">舉例 · 程式碼</span><span>16</span></div>
+  <p class="muted" style="font-size:.85rem;margin-top:.3rem">同一套 API、同一個 PSE v0.3.0 stack，與論文 PF1/PF2 完全一致。</p>
 </section>
 
-<!-- 17 CODE: real output -->
-<section class="slide">
-  <div class="kicker">⑥ 舉例 · 真實輸出 (3/3)</div>
+<!-- V-4 real output -->
+<section class="slide" data-part="V" data-label="真實輸出">
+  <div class="slide-meta"><span class="part-label">PART V</span> · 程式碼 3/3 · 真實輸出</div>
   <h2>現場跑一次：<span class="accent">真的證出來、真的驗過</span></h2>
-  <pre style="font-size:.82rem"><span class="f">$ cargo run --release --example halo2_talk_demo</span>
+  <div class="grid-2">
+    <pre style="font-size:.78rem"><span class="f">$ cargo run --release --example halo2_talk_demo</span>
 
-  HALO2 TALK DEMO · polynomial evaluation in zero knowledge
-  PSE halo2_proofs v0.3.0 · KZG commitment · BN254 curve
+P(x) = 2x^3+3x^2+4x+5 · 私密 x=3 · 公開 P(x)=98
 
-== The statement ==
-  Public polynomial : P(x) = 2x^3 + 3x^2 + 4x + 5
-  Private witness   : x = 3   <span class="c"><- never revealed</span>
-  Public output     : P(x) = 98
+Stage 0 MockProver   <span class="ok">OK</span> 所有閘 + 複製約束
+Stage 1 KZG setup    SRS ready     1.8 ms
+Stage 2 keygen       keys ready    3.9 ms
+Stage 3 PROVE  proof 11.6 ms  <span class="hl">size 864 bytes</span>
+Stage 4 VERIFY       verified      1.96 ms
 
-== Stage 0 — MockProver ==     <span class="ok">OK</span>  every gate + copy constraint holds
-== Stage 1 — KZG setup (k=4) ==        SRS ready      1.8 ms
-== Stage 2 — keygen ==                 keys ready     3.9 ms
-== Stage 3 — PROVE ==   proof produced 11.6 ms   <span class="hl">proof size  864 bytes</span>
-== Stage 4 — VERIFY ==                 proof verified 1.96 ms
-
-  <span class="ok">ACCEPT</span> — verifier is convinced P(x)=98 for some x it never saw.
-
-== Negative check — claim a wrong output P(x)=99 ==
-  <span class="bad">REJECT</span> — constraints fail, exactly as a sound system must.</pre>
-  <div class="kpi" style="justify-content:center;margin-top:.4rem">
-    <div><div class="v">864 B</div><div class="l">proof</div></div>
-    <div><div class="v">11.6 ms</div><div class="l">prove</div></div>
-    <div><div class="v">1.96 ms</div><div class="l">verify</div></div>
-    <div><div class="v">✓ / ✗</div><div class="l">accept / reject</div></div>
+  <span class="ok">ACCEPT</span> — 驗證者相信 P(x)=98，但沒看過 x
+謊報 P(x)=99 → <span class="bad">REJECT</span>（約束失敗，可靠系統應如此）</pre>
+    <figure>
+      <svg viewBox="0 0 420 220" role="img" aria-label="demo 各階段耗時">
+        <text x="10" y="16" font-size="12" fill="#8b94a3">各階段耗時（ms，實測 k=4）</text>
+        <g font-size="11" fill="#55596b">
+          <text x="80" y="46" text-anchor="end">SRS</text><rect x="90" y="36" width="9" height="14" fill="#c7d2fe"/><text x="104" y="47">1.8</text>
+          <text x="80" y="76" text-anchor="end">keygen</text><rect x="90" y="66" width="20" height="14" fill="#a5b4fc"/><text x="115" y="77">3.9</text>
+          <text x="80" y="106" text-anchor="end">prove</text><rect x="90" y="96" width="58" height="14" fill="#6366f1"/><text x="153" y="107">11.6</text>
+          <text x="80" y="136" text-anchor="end">verify</text><rect x="90" y="126" width="10" height="14" fill="#16a34a"/><text x="105" y="137">1.96</text>
+        </g>
+        <line x1="90" y1="155" x2="400" y2="155" stroke="#e5e7eb"/>
+        <text x="90" y="186" font-size="22" font-weight="800" fill="#4f46e5">864 bytes</text>
+        <text x="90" y="205" font-size="11" fill="#8b94a3">proof size（與列數無關）</text>
+      </svg>
+      <figcaption>原始圖解 · 真實量測值</figcaption>
+    </figure>
   </div>
-  <div class="foot"><span class="tnt">舉例 · 真實輸出</span><span>17</span></div>
 </section>
 
-<!-- 18 demo -> thesis -->
-<section class="slide">
-  <div class="kicker">串起來</div>
-  <h2>從這支 demo 到<span class="accent">完整論文 kernel</span></h2>
+<!-- V-5 demo -> thesis -->
+<section class="slide" data-part="V" data-label="demo → 論文">
+  <div class="slide-meta"><span class="part-label">PART V</span> · 串起來</div>
+  <h2>從 demo 到<span class="accent">完整論文 kernel</span></h2>
   <table>
-    <tr><th>面向</th><th>Demo（本頁）</th><th>論文 PF1 kernel</th></tr>
+    <tr><th>面向</th><th>Demo</th><th>論文 PF1 kernel</th></tr>
     <tr><td>閘</td><td><code class="inl">acc·x + c = acc_next</code></td><td><b>+ 定點截斷</b> <code class="inl">acc·R+c = acc_next·S + rem</code></td></tr>
     <tr><td>範圍檢查</td><td>無（小整數）</td><td><b>+ ByteTable lookup</b>（rem 逐 byte ∈ [0,255]）</td></tr>
     <tr><td>多項式</td><td>固定 2x³+3x²+4x+5</td><td><b>Remez minimax</b> 係數（exp/ln/erf…）</td></tr>
-    <tr><td>承諾 / 曲線</td><td colspan="2" style="text-align:center;background:#eef2ff"><b>完全相同</b>：KZG · BN254 · SHPLONK · Blake2b · PSE v0.3.0</td></tr>
+    <tr class="hl"><td>承諾 / 曲線</td><td colspan="2" style="text-align:center"><b>完全相同</b>：KZG · BN254 · SHPLONK · Blake2b · PSE v0.3.0</td></tr>
   </table>
-  <div class="card green" style="margin-top:1rem"><h3>所以這支 demo 的意義</h3>
-  <p>它證明了論文方法<strong>不是紙上談兵</strong>：同一條 Horner 閘、同一套 Halo2 pipeline，現場就能 prove + verify。論文只是把「整數」換成「定點 + 範圍檢查」把精度做到位。</p></div>
-  <div class="foot"><span class="tnt">串起來</span><span>18</span></div>
+  <div class="card green" style="margin-top:.7rem"><p style="font-size:.95rem">這支 demo 證明論文方法不是紙上談兵：同一條 Horner 閘、同一套 pipeline，現場就能 prove + verify。論文只是把「整數」換成「定點 + 範圍檢查」把精度做到位。</p></div>
 </section>
 
-<!-- 19 recap -->
-<section class="slide center">
-  <div class="title-bg"></div>
-  <div style="position:relative;z-index:1;max-width:880px">
-    <div class="kicker">一頁帶走</div>
-    <h2 style="font-size:2.2rem">如果只記得<span class="accent">五件事</span></h2>
-    <div style="text-align:left;margin-top:1rem">
-      <div class="hl-row"><span class="num">1</span><p><strong>Halo2 = PLONKish 算術化 + 多項式承諾</strong>；我們用 PSE 的 KZG/BN254 版（為了上鏈效率）。</p></div>
-      <div class="hl-row"><span class="num">2</span><p><strong>電路 = 一張 2ᵏ 列的表 + 一組「恆等於 0」的多項式閘</strong>，cell 用複製約束與查表接線。</p></div>
-      <div class="hl-row"><span class="num">3</span><p><strong>KZG + SHPLONK</strong> 讓證明又小（demo 864 B）又快驗（~2 ms），且大小不隨計算深度成長。</p></div>
-      <div class="hl-row"><span class="num">4</span><p><strong>Halo2 沒有浮點</strong> → 我們用定點 + Remez + 逐步 Horner 閘重建超越函數，這就是論文貢獻。</p></div>
-      <div class="hl-row"><span class="num">5</span><p><strong>同一條閘、同一套 pipeline</strong> 從 demo 一路長到 PF1/PF2 真實電路 — 已實作、已驗證。</p></div>
-    </div>
+<!-- ===== RECAP ===== -->
+<section class="slide" data-part="收尾" data-label="一頁帶走">
+  <div class="slide-meta"><span class="part-label">收尾</span></div>
+  <h2>如果只記得<span class="accent">五件事</span></h2>
+  <div class="hl-row"><span class="num">1</span><p><b>Halo2 = PLONKish 算術化 + 多項式承諾</b>；我們用 PSE 的 KZG/BN254 版（上鏈效率）。</p></div>
+  <div class="hl-row"><span class="num">2</span><p><b>電路 = 一張 2ᵏ 列的表 + 一組「恆等於 0」的多項式閘</b>，cell 用複製約束與查表接線。</p></div>
+  <div class="hl-row"><span class="num">3</span><p><b>KZG + SHPLONK</b> 讓證明又小（demo 864 B）又快驗（~2 ms），且大小不隨深度成長。</p></div>
+  <div class="hl-row"><span class="num">4</span><p><b>Halo2 沒有浮點</b> → 我們用定點 + Remez + 逐步 Horner 閘重建超越函數，這就是論文貢獻。</p></div>
+  <div class="hl-row"><span class="num">5</span><p><b>同一條閘、同一套 pipeline</b> 從 demo 一路長到 PF1/PF2 真實電路 — 已實作、已驗證。</p></div>
+</section>
+
+<!-- ===== REFERENCES ===== -->
+<section class="slide" data-part="收尾" data-label="出處">
+  <div class="slide-meta"><span class="part-label">收尾</span> · References（原文出處）</div>
+  <h2>References — <span class="accent">所有定義皆可查證</span></h2>
+  <div class="grid-2">
+    <ul style="font-size:.95rem">
+      <li>The halo2 Book — <a class="inl" href="https://zcash.github.io/halo2/" target="_blank" rel="noopener">zcash.github.io/halo2</a>（定義原文來源 · MIT/Apache）</li>
+      <li>Bowe, Grigg, Hopwood — Halo, <a href="https://eprint.iacr.org/2019/1021" target="_blank" rel="noopener">ePrint 2019/1021</a></li>
+      <li>Gabizon, Williamson, Ciobotaru — PLONK, <a href="https://eprint.iacr.org/2019/953" target="_blank" rel="noopener">ePrint 2019/953</a></li>
+      <li>Gabizon, Williamson — plookup, <a href="https://eprint.iacr.org/2020/315" target="_blank" rel="noopener">ePrint 2020/315</a></li>
+    </ul>
+    <ul style="font-size:.95rem">
+      <li>Boneh, Drake, Fisch, Gabizon — SHPLONK, <a href="https://eprint.iacr.org/2020/081" target="_blank" rel="noopener">ePrint 2020/081</a></li>
+      <li>Kate, Zaverucha, Goldberg — KZG, ASIACRYPT 2010</li>
+      <li>Grassi 等 — Poseidon, <a href="https://eprint.iacr.org/2019/458" target="_blank" rel="noopener">ePrint 2019/458</a></li>
+      <li>PSE — <code class="inl">github.com/privacy-scaling-explorations/halo2</code>（KZG fork, v0.3.0）</li>
+    </ul>
   </div>
+  <div class="card amber" style="margin-top:.5rem"><p style="font-size:.9rem">引用之定義均為<b>原文逐字</b>（halo2 Book 採 MIT/Apache，IACR 摘要採 CC-BY），已附連結可自行核對。BN254/KZG/API 細節對照實際可編譯 v0.3.0 程式碼。demo 原始碼：<code class="inl">scenario_a_full/examples/halo2_talk_demo.rs</code></p></div>
+  <div class="foot"><span>Halo2 技術專題 · 完</span><span>↑ 回頂</span></div>
 </section>
 
-<!-- 20 references -->
-<section class="slide">
-  <div class="kicker">出處</div>
-  <h2>References（已交叉查核）</h2>
-  <div class="cols c2">
-    <div>
-      <ul style="font-size:.95rem">
-        <li>Bowe, Grigg, Hopwood — <em>Halo</em>, ePrint <strong>2019/1021</strong></li>
-        <li>Gabizon, Williamson, Ciobotaru — <em>PLONK</em>, ePrint <strong>2019/953</strong></li>
-        <li>Gabizon, Williamson — <em>plookup</em>, ePrint <strong>2020/315</strong></li>
-        <li>Boneh, Drake, Fisch, Gabizon — <em>SHPLONK</em>, ePrint <strong>2020/081</strong></li>
-        <li>Kate, Zaverucha, Goldberg — <em>KZG</em>, ASIACRYPT 2010</li>
-      </ul>
-    </div>
-    <div>
-      <ul style="font-size:.95rem">
-        <li>ECC — <em>The halo2 Book</em>, zcash.github.io/halo2</li>
-        <li>PSE — <code class="inl">github.com/privacy-scaling-explorations/halo2</code>（KZG fork, v0.3.0）</li>
-        <li>Grassi 等 — <em>Poseidon</em>, ePrint 2019/458</li>
-        <li class="muted" style="font-size:.85rem">demo 程式：<code class="inl">scenario_a_full/examples/halo2_talk_demo.rs</code></li>
-      </ul>
-      <div class="card amber" style="margin-top:.6rem;padding:.7rem .9rem">
-        <p style="font-size:.86rem;margin:0">所有 BN254/KZG/API 細節皆對照<strong>實際可編譯 v0.3.0 程式碼</strong>查證；citation 經 ePrint 交叉確認。</p>
-      </div>
-    </div>
-  </div>
-  <div class="foot"><span class="tnt">Halo2 技術專題 · 完</span><span>20</span></div>
-</section>
-
-</div></div>
-
-<button class="navbtn" id="prev">‹</button>
-<button class="navbtn" id="next">›</button>
-<div id="cnt">1 / 20</div>
-<div id="dots"></div>
+</div>
 
 <script>
 (function(){
-  const track=document.getElementById('track');
-  const slides=[...document.querySelectorAll('.slide')];
-  const n=slides.length; let i=0;
-  const cnt=document.getElementById('cnt');
+  const deck=document.getElementById('deck');
+  const slides=[...deck.querySelectorAll('.slide')];
   const dots=document.getElementById('dots');
-  slides.forEach((_,k)=>{const d=document.createElement('i');d.onclick=()=>go(k);dots.appendChild(d);});
+  const pills=document.getElementById('pills');
+
+  slides.forEach((s,i)=>{const d=document.createElement('div');d.className='dot';d.title=s.dataset.label||('#'+(i+1));
+    d.onclick=()=>s.scrollIntoView({behavior:'smooth'});dots.appendChild(d);});
   const dotEls=[...dots.children];
-  function go(k){
-    i=Math.max(0,Math.min(n-1,k));
-    track.style.transform=`translateX(-${i*100}vw)`;
-    cnt.textContent=`${i+1} / ${n}`;
-    dotEls.forEach((d,x)=>d.classList.toggle('on',x===i));
-  }
-  document.getElementById('next').onclick=()=>go(i+1);
-  document.getElementById('prev').onclick=()=>go(i-1);
+
+  const parts=[];
+  slides.forEach((s,i)=>{const p=s.dataset.part;if(p&&!parts.find(x=>x.part===p))parts.push({part:p,idx:i});});
+  const partMap={};
+  parts.forEach(p=>{const b=document.createElement('div');b.className='pill';
+    b.textContent=(p.part==='收尾')?'收尾':('PART '+p.part);
+    b.onclick=()=>slides[p.idx].scrollIntoView({behavior:'smooth'});pills.appendChild(b);partMap[p.part]=b;});
+
+  const io=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting){
+      const i=slides.indexOf(e.target);
+      dotEls.forEach((d,x)=>d.classList.toggle('active',x===i));
+      const part=e.target.dataset.part;
+      Object.values(partMap).forEach(b=>b.classList.remove('active'));
+      if(part&&partMap[part])partMap[part].classList.add('active');
+    }});
+  },{root:deck,threshold:.5});
+  slides.forEach(s=>io.observe(s));
+
+  let cur=0;
+  deck.addEventListener('scroll',()=>{cur=Math.round(deck.scrollTop/deck.clientHeight);});
   window.addEventListener('keydown',e=>{
-    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ')  {e.preventDefault();go(i+1);}
-    if(e.key==='ArrowLeft' ||e.key==='PageUp')                 {e.preventDefault();go(i-1);}
-    if(e.key==='Home')go(0); if(e.key==='End')go(n-1);
+    if(e.key==='ArrowDown'||e.key==='PageDown'){e.preventDefault();cur=Math.min(slides.length-1,cur+1);slides[cur].scrollIntoView({behavior:'smooth'});}
+    if(e.key==='ArrowUp'||e.key==='PageUp'){e.preventDefault();cur=Math.max(0,cur-1);slides[cur].scrollIntoView({behavior:'smooth'});}
+    if(e.key==='Home'){e.preventDefault();slides[0].scrollIntoView({behavior:'smooth'});}
+    if(e.key==='End'){e.preventDefault();slides[slides.length-1].scrollIntoView({behavior:'smooth'});}
   });
-  let sx=null;
-  window.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
-  window.addEventListener('touchend',e=>{
-    if(sx===null)return; const dx=e.changedTouches[0].clientX-sx;
-    if(Math.abs(dx)>50)go(i+(dx<0?1:-1)); sx=null;
-  },{passive:true});
-  go(0);
 })();
 </script>
 </body>
