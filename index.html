@@ -119,6 +119,27 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 @media(max-width:820px){.slide{padding:2.6rem 1.6rem 3rem}.slide-meta{left:1.6rem}.foot{left:1.6rem;right:1.6rem}
   .grid-2,.grid-3{grid-template-columns:1fr}.deck{inset:56px 14px 0 0}}
+
+/* speaker notes (講稿) */
+.note-btn{position:fixed;right:20px;bottom:20px;z-index:45;background:var(--accent);color:#fff;border:none;
+  border-radius:999px;padding:.6rem 1.1rem;font-size:.85rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 16px rgba(79,70,229,.4);font-family:var(--font-sans)}
+.note-btn:hover{background:var(--accent-light)}
+.note-mask{position:fixed;inset:0;background:rgba(15,17,33,.5);backdrop-filter:blur(2px);z-index:60;display:none}
+.note-mask.open{display:block}
+.note-modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:61;display:none;
+  width:min(720px,92vw);max-height:82vh;background:#fff;border:1px solid var(--border);border-radius:16px;
+  box-shadow:0 24px 60px rgba(0,0,0,.28);flex-direction:column;overflow:hidden}
+.note-modal.open{display:flex}
+.note-head{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.3rem;border-bottom:1px solid var(--border)}
+.note-head h3{font-size:1.05rem;font-weight:800;color:var(--accent-light);margin:0}
+.note-head .tag{font-size:.78rem;color:var(--text-faint);font-weight:600}
+.note-close{background:none;border:none;font-size:1.6rem;color:var(--text-dim);cursor:pointer;line-height:1}
+.note-body{padding:1.3rem 1.5rem;overflow-y:auto;font-size:1.08rem;line-height:2;color:var(--text);white-space:pre-wrap}
+.note-foot{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.3rem;border-top:1px solid var(--border);background:var(--surface)}
+.note-nav{background:#fff;border:1px solid var(--border);border-radius:8px;padding:.4rem .85rem;font-size:.85rem;font-weight:600;color:var(--text-dim);cursor:pointer}
+.note-nav:hover{border-color:var(--accent);color:var(--accent)}
+.note-idx{font-size:.8rem;color:var(--text-faint);font-family:var(--font-mono)}
 </style>
 </head>
 <body>
@@ -129,6 +150,14 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <a class="home-link" href="https://github.com/xuancheng307/halo2-talk" target="_blank" rel="noopener">原始碼 ↗</a>
 </div>
 <div class="dots" id="dots"></div>
+
+<button class="note-btn" id="noteBtn" title="講稿（按 n 鍵開關）">📝 講稿</button>
+<div class="note-mask" id="noteMask"></div>
+<div class="note-modal" id="noteModal" role="dialog" aria-modal="true" aria-label="講稿">
+  <div class="note-head"><h3>講稿 <span class="tag" id="noteTag"></span></h3><button class="note-close" id="noteClose" aria-label="關閉">×</button></div>
+  <div class="note-body" id="noteBody"></div>
+  <div class="note-foot"><button class="note-nav" id="notePrev">◀ 上一節</button><span class="note-idx" id="noteIdx">— / —</span><button class="note-nav" id="noteNext">下一節 ▶</button></div>
+</div>
 
 <div class="deck" id="deck">
 
@@ -375,16 +404,13 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <h2>多項式承諾 KZG：把一條多項式壓成<span class="accent">一個群元素</span></h2>
   <div class="grid-2">
     <div>
-      <div class="defn"><span class="dt">KZG (2010)</span>
+      <div class="defn"><span class="dt">原文 · Polynomial commitment scheme</span>
+        <span class="quote">“A polynomial commitment scheme is a triplet S = (gen, com, open) such that gen(d) … outputs a structured reference string (SRS) srs; com(f, srs) … returns a commitment cm to f; open is a public coin protocol between [prover] and [verifier].”</span>
+        <a class="src" href="https://eprint.iacr.org/2020/081" target="_blank" rel="noopener">Boneh, Drake, Fisch, Gabizon — ePrint 2020/081, Def. 2.3 ↗</a></div>
+      <div class="defn"><span class="dt">KZG 的具體做法</span>
         <span class="quote">“Constant-Size Commitments to Polynomials and Their Applications.”</span>
-        <span class="gloss">對多項式 <code>f</code> 的承諾就是單一群元素 <code>[f(τ)]₁</code>；開啟某點值用一次配對檢查。</span>
+        <span class="gloss"><code>com(f) = [f(τ)]₁</code> 單一 G₁ 群元素；某點開啟用一次配對檢查。SRS = <code>{[τⁱ]₁}, [τ]₂</code>，通用、可更新（一人誠實即安全）、τ 用完即丟。</span>
         <a class="src" href="https://www.iacr.org/archive/asiacrypt2010/6477178/6477178.pdf" target="_blank" rel="noopener">Kate, Zaverucha, Goldberg — ASIACRYPT 2010 ↗</a></div>
-      <h3 style="margin-top:.6rem">SRS — 結構化參考字串</h3>
-      <ul>
-        <li><b>通用</b>：一次設定，所有 ≤ 2ᵏ 電路共用。</li>
-        <li><b>可更新</b>：設定儀式中只要一人誠實就安全。</li>
-        <li>內容 = 秘密 τ 的冪次 <code class="inl">{[τⁱ]₁}, [τ]₂</code>，τ 用完即丟。</li>
-      </ul>
     </div>
     <figure>
       <svg viewBox="0 0 440 230" role="img" aria-label="KZG 承諾流程">
@@ -461,9 +487,10 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="III" data-label="為什麼成立">
   <div class="slide-meta"><span class="part-label">PART III</span> · 為什麼能用</div>
   <h2>核心：<span class="accent">Schwartz–Zippel</span> + 承諾綁定</h2>
-  <div class="defn"><span class="dt">Schwartz–Zippel 引理</span>
-    <span class="quote">兩個次數 ≤ d 的相異多項式，在 |𝔽| ≈ 2²⁵⁴ 的體上隨機取一點相等的機率 ≤ d / |𝔽| → 可忽略。</span>
-    <span class="gloss">所以「在 Fiat–Shamir 抽的隨機點上恆等式成立」⇒ 幾乎必然處處成立。這是 PLONK 系列可靠性的根。</span></div>
+  <div class="defn"><span class="dt">Schwartz–Zippel Lemma（正式敘述）</span>
+    <span class="quote">Let P ∈ F[x₁,…,xₙ] be a non-zero polynomial of total degree d ≥ 0 over a field F. Let S be a finite subset of F and r₁,…,rₙ be chosen independently and uniformly at random from S. Then  Pr[ P(r₁,…,rₙ) = 0 ] ≤ d / |S|.</span>
+    <span class="gloss">在 |𝔽| ≈ 2²⁵⁴ 的體上 d/|𝔽| 可忽略 → 「隨機點上恆等式成立」⇒ 幾乎必然處處成立。這是 PLONK 系列可靠性的根。</span>
+    <a class="src" href="https://en.wikipedia.org/wiki/Schwartz%E2%80%93Zippel_lemma" target="_blank" rel="noopener">Schwartz (J. ACM, 1980) · Zippel (1979) ↗</a></div>
   <div class="grid-2" style="margin-top:.3rem">
     <table>
       <tr><th>性質</th><th>機制</th></tr>
@@ -725,6 +752,71 @@ Stage 4 VERIFY       verified      1.96 ms
     if(e.key==='Home'){e.preventDefault();slides[0].scrollIntoView({behavior:'smooth'});}
     if(e.key==='End'){e.preventDefault();slides[slides.length-1].scrollIntoView({behavior:'smooth'});}
   });
+})();
+</script>
+
+<script>
+(function(){
+  const NOTES = {
+'封面':'大家好。今天這場分享的主題是 Halo2 —— 也就是我們整篇論文底層所站的那套零知識證明系統。我會用六個問題把它講清楚:它在做什麼、怎麼做、為什麼能用、用在哪裡、我們怎麼用它,最後直接跑一支真的會產生並驗證證明的 Rust demo 給大家看。所有關鍵定義我都引原文,投影片上也附了出處連結,方便事後查證。我們開始。',
+'路線圖':'先給大家一張地圖。這份報告就是回答六個問題。前三個談 Halo2 本身:在做什麼、怎麼做、為什麼數學上成立;後三個把它接回我們的工作:業界用在哪、我們怎麼把超越函數塞進它的閘、最後實際跑一次。特別強調:所有密碼學定義我都不自己改寫,一律引 The halo2 Book 或 IACR 論文的原文。',
+'在做什麼':'先談第一件事 —— Halo2 到底在做什麼。一句話:它是一台「可驗證計算」的引擎。你能向別人證明「我正確執行了某段計算」,但不洩漏私密輸入,而且產生的證明又小、又能很快驗證。接下來幾張我把這句話拆開。',
+'家譜':'先看它從哪來。2019 年的 Halo,是第一個不需要可信設定的遞迴證明組合;投影片上這句就是它論文摘要的原文。後來 Electric Coin Company,也就是 Zcash 團隊,把這個想法重建在 PLONKish 算術化之上,變成通用的電路框架,就是 Halo2。我們用的是社群的 PSE 分支,把承諾換成 KZG、跑在 BN254 曲線上 —— 為什麼這樣選,下一張說。',
+'zk-SNARK 定義':'這張是純定義,而且我刻意全部引 The halo2 Book 的原文。可靠性:證明沒辦法騙過驗證者。知識可靠性:存在一個抽取器,能從證明者那把見證「抽」出來。零知識:證明不洩漏見證的任何資訊。簡潔性:證明長度只跟電路大小成 polylog。把這幾個性質合起來,加上零知識,就是 zk-SNARK。這幾個詞,等一下整場都會用到。',
+'兩層架構':'這張很關鍵。Halo2 其實是兩層:上層是 PLONKish 算術化,把計算排成一張表加一組多項式;下層才是多項式承諾。重點在下層有兩種選擇 —— 原版用 IPA、跑 Pasta 曲線、免可信設定;我們用的 PSE 分支換成 KZG、跑 BN254。為什麼選後者?因為 BN254 的配對是以太坊內建的,鏈上驗證便宜,而且 KZG 證明大小固定。代價就是需要一次性的可信設定。',
+'怎麼做':'好,知道它在做什麼了,接下來進到最核心的「怎麼做」。我會照這條鏈走一遍:算術化、自訂閘、複製約束跟查表、KZG 承諾、SHPLONK 跟 Fiat–Shamir,最後串成完整流水線。每一步我都會給原文定義跟一張圖。',
+'算術化':'第一層,算術化。原文說得很清楚:arithmetization 就是我們用來表達電路的語言,它把電路寫成體上變數的多項式約束;而 PLONKish 電路,就是定義在一個矩形數值矩陣上。右邊這張圖就是個具體例子 —— 待會 demo 要算的那個多項式,攤成四列的表。行是計算的一步,欄是一條多項式。',
+'四種欄':'表有四種欄,我一樣引原文:fixed 欄是電路固定的、advice 欄對應見證值、instance 欄放公開輸入。第四種是 selector,固定欄裡的 0/1 開關,決定某一列哪個閘生效。對應到我們的 demo:acc 跟 x 是 advice、係數是 fixed、輸出的 P(x) 是 instance。',
+'自訂閘':'閘是整個系統的靈魂。原文定義:每條約束是一個多元多項式,在每一列都必須等於零;而且變數可以引用本列、也可以引用相鄰的列。右邊就是我們論文的核心閘 —— 一步 Horner:acc 乘以 x 加係數,等於下一列的 acc。注意它讀「下一列」用的就是 rotation。因為閘只能看固定偏移的列,所以演算法得排成規則的縱向流水線,這直接決定了我們把多項式求值寫成逐列遞推。',
+'複製約束 / 查表':'兩個把 cell 接起來的工具。複製約束,原文:指定兩個 cell 必須相等。在 demo 裡,私密的 x 在每一列都要是同一個值,就靠它綁住,惡意證明者不能每列偷換 x。查表 plookup,原文:檢查一條多項式的值是否落在一張表裡。我們用它做 ByteTable 範圍檢查,保證定點截斷的餘數每個 byte 都合法。',
+'KZG 承諾':'第三層,多項式承諾。先給形式定義 —— 一個承諾方案是 gen、com、open 三件套,這句是 BDFG 論文 Definition 2.3 的原文。KZG 的具體做法:對一條多項式的承諾,就壓成單一個群元素;要證明它在某點的值,用一次配對檢查。SRS 是通用且可更新的,只要設定儀式中有一個人誠實就安全;那個秘密 τ 用完即丟。我們論文如實把這當成一條信任假設,不宣稱 trustless。',
+'SHPLONK':'為什麼證明可以又小、又不隨計算深度成長?關鍵在 SHPLONK。投影片這句是 BDFG 2020/081 的摘要原文:它把「多條多項式、各在不同點開啟」批次成單一開啟證明,他們的第二個方案只要兩個群元素、兩次配對。配合右邊這張圖:列數一直翻倍,proof 幾乎不動。我們論文的電路就是這性質的體現 —— N 不管多大,proof 恆 31,872 bytes。另外 Fiat–Shamir 把互動挑戰換成對 transcript 的雜湊,PSE 預設用 Blake2b。',
+'五階段流水線':'把前面接起來就是完整流水線:setup 產生 SRS、keygen 產生兩把鑰匙、prove 產生證明、verify 驗證。旁邊那個 MockProver 是除錯神器 —— 它不做真的密碼學,但會精準告訴你哪一個 cell、哪一條閘沒滿足。實務上一定先用它跑通,再上真的 KZG。',
+'為什麼能用':'第三部分:為什麼這套東西數學上站得住?我想回答一個直覺上的疑問 —— 為什麼只在一個隨機點檢查,就能相信整條多項式?',
+'為什麼成立':'答案是 Schwartz–Zippel 引理。投影片上是它的正式敘述:一個非零、總次數 d 的多項式,在隨機點等於零的機率,最多 d 除以取樣集合的大小;在 2 的 254 次方那麼大的體上,這機率小到可以忽略。所以只要在 Fiat–Shamir 抽的隨機點上恆等式成立,幾乎就保證它處處成立。配合承諾的綁定性,就撐起可靠性。再加上 advice 加隨機 blinding 給零知識、KZG 加 SHPLONK 給簡潔性,四個性質到齊。BN254 提供大約 128 位元的安全等級。',
+'能 / 不能':'也要誠實講它的邊界。左邊綠的是直接能做的:體上的加乘、有限次數的自訂閘、查表、複製約束。右邊紅的是有代價或做不到的:電路規模 k 有上限,大概到 28;位元運算很貴;除法要證明者額外提供商當見證;最關鍵的 —— 它沒有原生浮點。最後這一條,正是我們整篇論文存在的理由,接下來就講。',
+'我們怎麼用它':'第四部分,把 Halo2 接回我們自己的工作。一句話:Halo2 沒有浮點、沒有 exp、ln、erf 這些超越函數,我們得自己在它的閘上把它們重建出來。',
+'超越函數塞進閘':'方法四步:第一,定點,每個數用 2 的 48 次方縮放,用整數模擬小數;第二,用 Remez minimax 找一條多項式,讓區間內最大誤差最小;第三,用剛剛那個逐步 Horner 閘求值;第四,用 ByteTable 查表做範圍檢查。最漂亮的一點:換不同的函數,只要換那幾個係數,電路完全不用重設計 —— 這個通用性,就是來自 Halo2 的 fixed 欄。等一下 demo 的閘,加上截斷跟範圍檢查,就是論文完整的 kernel。',
+'用在哪 + 範例':'最後一部分,落地:業界把它用在哪、我們論文的兩個真實電路,以及一支現場會跑完的 demo。',
+'用在哪裡':'業界:Zcash 的 Orchard 用的是原版 IPA,不是 KZG,這點別搞混;Scroll、Taiko 這些 zkEVM 走的才是 PSE 的 KZG 路線。我們自己有兩個已經用 Rust 實作的電路:PF1 證明投組的淨 delta 在風險限額內,但不洩漏個別部位;PF2 處理狀態轉移。實測 proof 是 31,872 bytes、驗證約 8 毫秒。下面那句 Poseidon 的原文,是我們 Merkle 樹用的雜湊。',
+'程式碼 1':'進到 code。這張是電路的骨架:宣告四種欄,然後 create_gate 裡那一條 —— 就是整個電路唯一的約束:selector 乘以,acc 乘 x 加係數減下一列的 acc,等於零。注意 acc 用 Rotation::next 讀下一列。敘述很簡單:我知道一個秘密 x,讓這個三次多項式 P(x) 等於某個公開值;我們取 x 等於 3,P(3) 等於 98。',
+'程式碼 2':'左邊是填表 —— 把 Horner 階梯一列一列填進去,中間那個 constrain_equal 就是把每列的 x 綁成同一個值。右邊是真正的流水線:setup、keygen、create_proof、verify_proof。注意泛型參數 ProverSHPLONK 跟 VerifierSHPLONK —— 跟前面講的承諾方案完全對得上。這套 API、這個版本,跟論文的 PF1、PF2 用的一模一樣。',
+'真實輸出':'這是現場真的跑出來的輸出。MockProver 先過,然後 setup、keygen、prove、verify 一路下來:證明 11.6 毫秒產生、864 bytes、1.96 毫秒驗完。最後驗證者接受 —— 它相信 P(x) 等於 98,但從頭到尾沒看過 x。我還故意謊報答案是 99,系統立刻拒絕。這就是一個可靠的零知識證明該有的樣子。',
+'demo → 論文':'把 demo 跟論文接起來。同一條閘,論文多了定點截斷跟餘數的 byte 拆解、加上查表;多項式從固定係數換成 Remez 算出來的;但承諾、曲線、SHPLONK、transcript,整套 stack 完全相同。所以這支 demo 不是玩具 —— 它證明我們的方法用同一條閘、同一套 pipeline,現場就能 prove 跟 verify;論文只是把整數換成定點,把精度做到位。',
+'一頁帶走':'如果今天只記得五件事:第一,Halo2 是算術化加多項式承諾,我們用 KZG/BN254 版;第二,電路就是一張表加一組等於零的多項式閘;第三,KZG 加 SHPLONK 讓證明又小又快驗;第四,它沒有浮點,所以我們用定點加 Horner 重建超越函數,這是論文貢獻;第五,同一條閘從 demo 一路長到真實電路,已經實作、已經驗證。',
+'出處':'最後是出處。投影片上所有定義,都來自這幾個來源:The halo2 Book,還有 Halo、PLONK、plookup、SHPLONK、KZG、Poseidon 這幾篇論文,全部附了連結,大家可以自己核對。謝謝大家,接下來是問答時間。'
+  };
+
+  const deck=document.getElementById('deck');
+  const slides=[...deck.querySelectorAll('.slide')];
+  const labels=slides.map(s=>s.dataset.label||'');
+  let viewIdx=0;
+  deck.addEventListener('scroll',()=>{viewIdx=Math.max(0,Math.min(slides.length-1,Math.round(deck.scrollTop/deck.clientHeight)));},{passive:true});
+
+  const modal=document.getElementById('noteModal'), mask=document.getElementById('noteMask');
+  const body=document.getElementById('noteBody'), tag=document.getElementById('noteTag'), idxEl=document.getElementById('noteIdx');
+  let openIdx=0;
+  function render(){
+    const lab=labels[openIdx]||('#'+(openIdx+1));
+    tag.textContent='· '+lab;
+    body.textContent=NOTES[lab]||'（本節暫無講稿）';
+    idxEl.textContent=(openIdx+1)+' / '+slides.length;
+    body.scrollTop=0;
+  }
+  function openNote(i){openIdx=Math.max(0,Math.min(slides.length-1,i));render();modal.classList.add('open');mask.classList.add('open');}
+  function closeNote(){modal.classList.remove('open');mask.classList.remove('open');}
+  const isOpen=()=>modal.classList.contains('open');
+
+  document.getElementById('noteBtn').onclick=()=>openNote(viewIdx);
+  document.getElementById('noteClose').onclick=closeNote;
+  mask.onclick=closeNote;
+  document.getElementById('notePrev').onclick=()=>openNote(openIdx-1);
+  document.getElementById('noteNext').onclick=()=>openNote(openIdx+1);
+  window.addEventListener('keydown',e=>{
+    if(e.key==='n'||e.key==='N'){e.preventDefault(); isOpen()?closeNote():openNote(viewIdx);}
+    else if(e.key==='Escape'&&isOpen()){closeNote();}
+    else if(isOpen()&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();e.stopPropagation();openNote(openIdx+(e.key==='ArrowRight'?1:-1));}
+  },true);
 })();
 </script>
 </body>
