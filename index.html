@@ -185,6 +185,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 #ovExport textarea{flex:1;min-height:320px;border:none;padding:.8rem;font-family:var(--font-mono);font-size:.78rem;line-height:1.5;resize:none;white-space:pre;color:#111}
 #ovExport .ov-foot{display:flex;gap:10px;padding:.6rem .9rem;border-top:1px solid var(--border)}
 #ovExport .ov-foot button{padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);cursor:pointer;font-weight:700;background:var(--surface)}
+#savedBadge{position:fixed;left:14px;bottom:14px;z-index:70;background:rgba(22,163,74,.94);color:#fff;font-size:.78rem;font-weight:700;padding:.32rem .75rem;border-radius:999px;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 4px 14px rgba(22,163,74,.4)}
 /* formula boxes */
 .fbox{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:.55rem .9rem;margin:.5rem 0}
 .fbox .lbl{font-size:.82rem;font-weight:700;color:var(--accent-light);margin-bottom:.1rem}
@@ -1515,6 +1516,7 @@ Stage 4 VERIFY       verified      1.96 ms
 ],
 '自訂閘':[
  ["閘是在『計算』還是『檢查』？acc 指到自己不會自指嗎？","是『檢查』不是計算。兩階段：① prover 先按順序把表算好填死（acc：2→9→31→98）；② 閘只在每一列同時檢查相鄰兩列一致（如第0列 2·3+3−9=0）。acc 不是被帶回來，是早就在表裡；閘關聯的是『本列 acc』與『下一列 acc』兩個不同格子（下一列 acc = 本列 acc·x+係數），不是 acc=f(acc)，所以不自指。"],
+ ["這條 Horner 閘是固定的嗎？還是可以自訂？","可以自訂——它只是教學示範的一條閘，不是 Halo2 內建。你能定義各種閘：布林 x(1−x)=0、加法 a+b−c=0、乘法 a·b−c=0… 一張電路可有很多條、各用 selector 開關。但有邊界：必須是低次多項式恆等式（degree 常 ≤ 5–9）、只能引用固定 rotation 的列、只有體上加減乘。我們論文的 kernel 閘就比 demo 多了 ÷S 截斷 + rem∈[0,S) + byte 查表，正是自訂閘靈活的實證。"],
  ["為什麼閘只能看「相鄰列」？","每欄被插值成一條多項式，『下一列』對應代入 ωX，是固定旋轉；隨機跨列存取沒有對應的多項式平移，所以只能用固定 offset（cur/next/prev）。"],
  ["閘的次數有限制嗎？","有。次數越高證明越貴（影響商多項式次數與 FFT 大小），實務上自訂閘次數壓在個位數。"]
 ],
@@ -1615,8 +1617,12 @@ Stage 4 VERIFY       verified      1.96 ms
   }
   // ===== editable overlay (localStorage): edit / delete / mark + export for Claude to apply =====
   const OVK='h2deck_ov'; let OV={edit:{},del:{},mark:{}};
+  // when opened via the local authoring server (http://localhost), edits also auto-save to a file Claude reads directly
+  const LOCAL=location.protocol==='http:'&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   try{const s=localStorage.getItem(OVK); if(s)OV=Object.assign({edit:{},del:{},mark:{}},JSON.parse(s));}catch(e){}
-  function saveOV(){try{localStorage.setItem(OVK,JSON.stringify(OV));}catch(e){}}
+  function flashSaved(){if(!LOCAL)return;let b=document.getElementById('savedBadge');if(!b){b=document.createElement('div');b.id='savedBadge';b.textContent='💾 已自動存檔（Claude 可直接讀）';document.body.appendChild(b);}b.style.opacity='1';clearTimeout(b._t);b._t=setTimeout(()=>{b.style.opacity='0';},1300);}
+  function saveOV(){try{localStorage.setItem(OVK,JSON.stringify(OV));}catch(e){}
+    if(LOCAL){fetch('/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(OV)}).then(()=>flashSaved()).catch(()=>{});}}
   let editingId=null;
   const SEP='~~';
   const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1666,6 +1672,8 @@ Stage 4 VERIFY       verified      1.96 ms
     });
   }
   wire(notesP); wire(qaP);
+  // local authoring mode: seed overrides from the file so Claude's edits + your edits share one source of truth
+  if(LOCAL){fetch('/load').then(r=>r.ok?r.json():null).then(d=>{if(d&&typeof d==='object'){OV=Object.assign({edit:{},del:{},mark:{}},d);notesP.rerender();qaP.rerender();}}).catch(()=>{});}
 
   // export the override layer so Claude can bake it into the source
   function humanId(id){const p=id.split(SEP);if(p[0]==='t')return '名詞「'+p[1]+'」';if(p[0]==='q')return '問答「'+p[1]+'」#'+(parseInt(p[2],10)+1);if(p[0]==='n')return '講稿「'+p[1]+'」';return id;}
