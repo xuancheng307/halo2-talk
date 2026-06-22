@@ -207,6 +207,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 #playbar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:60;display:none;align-items:center;gap:.6rem;background:rgba(26,26,31,.92);color:#fff;border-radius:999px;padding:.4rem .8rem;box-shadow:0 8px 28px rgba(0,0,0,.35);font-family:var(--font-sans);max-width:min(620px,92vw)}
 #playbar.show{display:flex}
 #playbar button{background:rgba(255,255,255,.14);border:none;color:#fff;width:2rem;height:2rem;border-radius:50%;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center}
+#playbar #pbSpeed{width:auto;min-width:2.7rem;padding:0 .5rem;border-radius:12px;font-size:.74rem;font-weight:700}
 #playbar button:hover{background:rgba(255,255,255,.28)}
 #playbar .pb-title{font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
 #playbar .pb-idx{font-size:.72rem;color:#b9c0cf;font-family:var(--font-mono)}
@@ -238,7 +239,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <a class="home-link" href="https://github.com/xuancheng307/halo2-talk" target="_blank" rel="noopener">原始碼 ↗</a>
 </div>
 <div class="dots" id="dots"></div>
-<div id="playbar"><button id="pbPrev" title="上一段">⏮</button><button id="pbPlay" title="播放/暫停">⏸</button><button id="pbNext" title="下一段">⏭</button><span class="pb-title" id="pbTitle">—</span><span class="pb-prog"><i id="pbProg"></i></span><span class="pb-idx" id="pbIdx">—</span><button id="pbStop" title="結束導覽">✕</button></div>
+<div id="playbar"><button id="pbPrev" title="上一段">⏮</button><button id="pbPlay" title="播放/暫停">⏸</button><button id="pbNext" title="下一段">⏭</button><span class="pb-title" id="pbTitle">—</span><span class="pb-prog"><i id="pbProg"></i></span><span class="pb-idx" id="pbIdx">—</span><button id="pbSpeed" title="播放速度（點擊切換）">1×</button><button id="pbStop" title="結束導覽">✕</button></div>
 
 <button class="note-btn" id="noteBtn" title="講稿（按 n 鍵開關）">📝 講稿</button>
 <div class="note-mask" id="noteMask"></div>
@@ -1810,18 +1811,18 @@ Stage 4 VERIFY       verified      1.96 ms
   updateRail();
 
   // ===== audio tour: play per-slide narration + auto-advance (time-synced) =====
-  const TOUR={items:(window.AUDIO_MANIFEST||[]),i:0,base:'assets/audio/'}; let AUD=null;
+  const TOUR={items:(window.AUDIO_MANIFEST||[]),i:0,base:'assets/audio/'}; let AUD=null; let tourRate=1; const RATES=[1,1.25,1.5,1.75,2];
   if(!TOUR.items.length){fetch(TOUR.base+'manifest.json').then(r=>r.ok?r.json():null).then(d=>{if(Array.isArray(d))TOUR.items=d;else if(d&&Array.isArray(d.items))TOUR.items=d.items;}).catch(()=>{});}
   const pb=document.getElementById('playbar');
   function pbIcon(p){document.getElementById('pbPlay').textContent=p?'⏸':'▶';}
-  function ensureAud(){if(AUD)return;AUD=new Audio();AUD.onended=()=>{if(TOUR.i<TOUR.items.length-1)tourPlay(TOUR.i+1);else tourStop();};AUD.ontimeupdate=()=>{const f=AUD.duration?AUD.currentTime/AUD.duration:0;document.getElementById('pbProg').style.width=(f*100)+'%';};AUD.onplay=()=>pbIcon(true);AUD.onpause=()=>pbIcon(false);}
+  function ensureAud(){if(AUD)return;AUD=new Audio();AUD.onended=()=>{if(TOUR.i<TOUR.items.length-1)tourPlay(TOUR.i+1);else tourStop();};AUD.ontimeupdate=()=>{const f=AUD.duration?AUD.currentTime/AUD.duration:0;document.getElementById('pbProg').style.width=(f*100)+'%';};AUD.onloadedmetadata=()=>{AUD.playbackRate=tourRate;};AUD.onplay=()=>pbIcon(true);AUD.onpause=()=>pbIcon(false);}
   function tourPlay(k){
     if(!TOUR.items.length){alert('語音檔尚未產生（等「小湯圓」聲音 id 確認後再生成）。');return;}
     ensureAud();
     TOUR.i=Math.max(0,Math.min(TOUR.items.length-1,k));
     const it=TOUR.items[TOUR.i];
     const sl=slides.find(s=>s.dataset.label===it.label); if(sl)sl.scrollIntoView();
-    AUD.src=TOUR.base+it.file; AUD.play().catch(()=>{});
+    AUD.src=TOUR.base+it.file; AUD.play().catch(()=>{}); AUD.playbackRate=tourRate;
     document.getElementById('pbTitle').textContent=it.label;
     document.getElementById('pbIdx').textContent=(TOUR.i+1)+' / '+TOUR.items.length;
     pb.classList.add('show');
@@ -1832,6 +1833,7 @@ Stage 4 VERIFY       verified      1.96 ms
   document.getElementById('pbPlay').onclick=()=>{if(!AUD||!AUD.src){tourStart();return;}AUD.paused?AUD.play():AUD.pause();};
   document.getElementById('pbPrev').onclick=()=>tourPlay(TOUR.i-1);
   document.getElementById('pbNext').onclick=()=>tourPlay(TOUR.i+1);
+  document.getElementById('pbSpeed').onclick=()=>{tourRate=RATES[(RATES.indexOf(tourRate)+1)%RATES.length];if(AUD)AUD.playbackRate=tourRate;document.getElementById('pbSpeed').textContent=tourRate+'×';};
   document.getElementById('pbStop').onclick=tourStop;
 
   window.addEventListener('keydown',e=>{
