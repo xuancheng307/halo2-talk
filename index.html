@@ -718,43 +718,26 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- III-1 schwartz-zippel + properties -->
 <section class="slide" data-part="III" data-label="為什麼成立">
-  <div class="slide-meta"><span class="part-label">PART III</span> · 為什麼能用</div>
-  <h2>四個性質 — <span class="accent">各自怎麼成立</span></h2>
-  <p class="muted" style="margin:0 0 .5rem;font-size:.96rem">可靠性的數學核心 <b>Schwartz–Zippel</b>（\(\Pr[P(r)=0]\le d/|\mathbb F|\)，隨機點成立 \(\Rightarrow\) 處處成立）已在 Part II「驗證恆等式推導」用過 —— 這裡彙整四性質各自如何到位。</p>
-  <div class="grid-2" style="margin-top:.3rem">
+  <div class="slide-meta"><span class="part-label">PART III</span> · 為什麼能用 / 形式化</div>
+  <h2>四個性質 — <span class="accent">各自怎麼成立</span>（含形式化背書）</h2>
+  <p class="muted" style="margin:0 0 .45rem;font-size:.93rem">可靠性的數學核心 <b>Schwartz–Zippel</b>（\(\Pr[P(r)=0]\le d/|\mathbb F|\)，隨機點成立 \(\Rightarrow\) 幾乎處處成立）已在 Part II「驗證恆等式推導」用過。</p>
+  <div class="grid-2" style="margin-top:.2rem">
     <table>
-      <tr><th>性質</th><th>機制</th></tr>
-      <tr><td><b>完備性</b></td><td>合法 witness 滿足所有閘</td></tr>
-      <tr><td><b>可靠性</b></td><td>承諾綁定 + Schwartz–Zippel + 抽取器</td></tr>
-      <tr><td><b>零知識</b></td><td>advice 多項式加隨機 blinding</td></tr>
-      <tr><td><b>簡潔性</b></td><td>KZG + SHPLONK 常數配對</td></tr>
+      <tr><th>性質</th><th>怎麼成立（機制 + 證明策略）</th></tr>
+      <tr><td><b>完備性</b></td><td>合法 witness 逐列滿足每條閘 → 恆等式成立 → 必接受</td></tr>
+      <tr><td><b>可靠性</b></td><td>承諾綁定 + Schwartz–Zippel + AGM 下抽取器 \(E\) 導矛盾</td></tr>
+      <tr><td><b>零知識</b></td><td>advice 加隨機 blinding；模擬器 \(S\) 不靠見證產生同分布證明</td></tr>
+      <tr><td><b>簡潔性</b></td><td>KZG + SHPLONK 常數配對，proof 與電路大小無關</td></tr>
     </table>
-    <div class="card"><h3>安全立基</h3><p style="font-size:.95rem">KZG 知識可靠性建立在配對友善曲線的代數假設（AGM + q-type / ROM）。BN254 提供約 <b>128-bit</b> 安全等級。</p><p class="muted" style="font-size:.88rem;margin-top:.4rem">→ 論文 ch3 對完備 / 可靠 / 零知識三項給了形式化論證。</p></div>
-  </div>
-</section>
-
-<!-- III-1b formal statements + proof strategy -->
-<section class="slide" data-part="III" data-label="形式化證明">
-  <div class="slide-meta"><span class="part-label">PART III</span> · 形式化</div>
-  <h2>形式化：<span class="accent">正式陳述 + 證明策略</span></h2>
-  <div class="grid-2">
     <div>
       <div class="defn"><span class="dt">原文 · Knowledge soundness（AGM 形式定義）</span>
         <span class="quote">“… has Knowledge Soundness in the Algebraic Group Model if there exists an efficient E such that the probability of any algebraic adversary A winning the following game is negl(λ).”</span></div>
       <div class="defn"><span class="dt">原文 · q-DLOG 假設</span>
-        <span class="quote">“The Q-DLOG assumption … states that given [1]₁,[x]₁,…,[xᑫ]₁,[1]₂,[x]₂,…,[xᑫ]₂ for uniformly chosen x, the probability of an efficient A outputting x is negl(λ).”</span>
+        <span class="quote">“… given [1]₁,[x]₁,…,[xᑫ]₁,[1]₂,[x]₂,…,[xᑫ]₂ for uniformly chosen x, the probability of an efficient A outputting x is negl(λ).”</span>
         <a class="src" href="https://eprint.iacr.org/2020/081" target="_blank" rel="noopener">BDFG — ePrint 2020/081, Def. 2.1 ↗</a></div>
     </div>
-    <div class="card">
-      <h3>證明策略（完整證明見論文 ch3）</h3>
-      <ul>
-        <li><b>完備性</b>：honest prover 的合法 witness 逐列滿足每條閘 → 恆等式成立 → 接受。</li>
-        <li><b>可靠性</b>：承諾綁定 + Schwartz–Zippel + AGM/q-DLOG 下的抽取器 E，能從作弊證明抽出見證 → 矛盾。</li>
-        <li><b>零知識</b>：advice 加隨機 blinding，存在模擬器 S 不靠見證即可產生同分布的證明。</li>
-      </ul>
-      <p class="muted" style="margin-top:.5rem;font-size:.95rem">這份 deck 給定義 + 策略；逐步形式化證明在論文 ch3。</p>
-    </div>
   </div>
+  <p class="muted" style="margin-top:.5rem;font-size:.9rem">KZG 知識可靠性立基於配對友善曲線的代數假設（AGM + q-DLOG / ROM），BN254 約 <b>128-bit</b> 安全；完整形式化論證見論文 <b>ch3</b>。</p>
 </section>
 
 <!-- III-2 capabilities / limits -->
@@ -1054,18 +1037,17 @@ Stage 4 VERIFY       verified      1.96 ms
 '怎麼做':"好,知道它在做什麼了,接下來進到最核心的「怎麼做」。\n我會照這條鏈走一遍:算術化、自訂閘、複製約束跟查表、KZG 承諾、SHPLONK 跟 Fiat–Shamir,最後串成完整流水線。\n每一步我都會給原文定義跟一張圖。",
 '要證什麼 + 限制':"在看流程圖之前,先講清楚整條流程到底在證什麼。\n① 我們有一個想證的 statement,形式上就是某個關係的成員 (x,w) 屬於 R,也就是 Part I 講的 R_C。\n命題是:我知道一個私密的 w,使公開的 x 跟 w 一起滿足這個關係 R,x 公開、w 私密。\n對到例子,demo 就是我知道 x 使 P(x) 等於 98;PF1 就是我知道一個投組,使淨加權 delta 的絕對值小於等於 τ。\n② 這個 statement 不是什麼都能塞,它有限制:R 必須能寫成有限域上的算術電路,沒有原生浮點;電路是固定大小的,2 的 k 次方列、有界欄,不能有資料相依的分支、迴圈要有上界;約束是低次多項式。\n本質上,任何「給了見證就能多項式時間驗證」的 NP 關係都行。\n③ 接下來就是把這個 statement 算術化,編成 trace table 加約束 —— 那正是下一張完整流程圖的第一步。",
 '完整流程圖':"在進細節之前,先給各位一張地圖,看完整條流程怎麼走,後面每一步就是把這張圖的每個方塊放大。\n最上面有兩件預備:私下準備電路跟輸入,公開的 instance x、私密的見證 w;還有一次性的可信設定,產生 SRS 再 keygen 出 pk、vk。\n然後 prover 走六步:\n① 算術化,把計算填成 2 的 k 次方列的 trace table;\n② 加約束,自訂閘、複製約束、查表,全都是等於零的多項式;\n③ 承諾,把每一欄多項式用 KZG 壓成一個群元素;\n④ Fiat–Shamir,對 transcript 雜湊抽一個隨機挑戰點;\n⑤ SHPLONK 批次開啟,產生大約幾 KB 的證明 π;\n· 最後把 π 加公開的 x 交給 verifier,第六步做配對檢查,輸出接受或拒絕,就一個 bit、常數時間、不重跑計算。\n補一句:MockProver 只跑前兩步、純查約束、不做密碼學,是除錯用的。\n記住三件事:x 公開、w 私密、π 不洩漏 w。",
-'算術化':"第一層,算術化。\n原文說得很清楚:arithmetization 就是我們用來表達電路的語言,它把電路寫成體上變數的多項式約束;而 PLONKish 電路,就是定義在一個矩形數值矩陣上。\n右邊這張圖就是個具體例子 —— 待會 demo 要算的那個多項式,攤成四列的表。\n行是計算的一步,欄是一條多項式。",
+'算術化':"第一層,算術化。\n原文:arithmetization 就是我們表達電路的語言,把電路寫成體上變數的多項式約束;PLONKish 電路就是定義在一個矩形數值矩陣上。\n行 = 計算的一步,欄 = 一條多項式。\n\n【右邊範例逐列念】\n要算的是 P(x)=2x³+3x²+4x+5,取 x=3。\n用 Horner 拆成一層層:((2·x+3)·x+4)·x+5,acc 欄就照這個遞推填:\n· 第 1 列 acc = 2(最高次係數);\n· 第 2 列 acc = 2·3+3 = 9;\n· 第 3 列 acc = 9·3+4 = 31;\n· 第 4 列 acc = 31·3+5 = 98 —— 就是答案。\n每列的 x 欄都是 3、coeff 欄放當層係數、sel 欄是 1 代表這列閘生效;最後那列 acc=98 用複製約束綁到公開的 instance。\n一句話:這張表不是示意圖,是 demo 真的會填進去、逐列被閘檢查的資料。",
 '四種欄':"表有四種欄,我一樣引原文:fixed 欄是電路固定的、advice 欄對應見證值、instance 欄放公開輸入。\n第四種是 selector,固定欄裡的 0/1 開關,決定某一列哪個閘生效。\n對應到我們的 demo:acc 跟 x 是 advice、係數是 fixed、輸出的 P(x) 是 instance。",
-'自訂閘':"閘是整個系統的靈魂。\n原文定義:每條約束是一個多元多項式,在每一列都必須等於零;而且變數可以引用本列、也可以引用相鄰的列。\n右邊就是我們論文的核心閘 —— 一步 Horner:acc 乘以 x 加係數,等於下一列的 acc。\n注意它讀「下一列」用的就是 rotation。\n因為閘只能看固定偏移的列,所以演算法得排成規則的縱向流水線,這直接決定了我們把多項式求值寫成逐列遞推。",
-'複製約束 / 查表':"兩個把 cell 接起來的工具。\n複製約束,原文:指定兩個 cell 必須相等。\n在 demo 裡,私密的 x 在每一列都要是同一個值,就靠它綁住,惡意證明者不能每列偷換 x。\n查表 plookup,原文:檢查一條多項式的值是否落在一張表裡。\n我們用它做 ByteTable 範圍檢查,保證定點截斷的餘數每個 byte 都合法。",
+'自訂閘':"閘是整個系統的靈魂。\n原文定義:每條約束是一個多元多項式,在每一列都必須等於零;變數可以引用本列、也可以引用相鄰的列。\n\n【公式逐項】\n核心閘就一條:sel · ( acc·x + coeff − acc_next ) = 0。\n· sel 是 selector,只有設 1 的那列這條閘才生效,設 0 的列整條乘成 0、自動跳過;\n· acc 是本列的累積值,acc_next 是「下一列」的累積值,用 rotation(Rotation::next)去讀;\n· 移項就是 acc_next = acc·x + coeff —— 正好是 Horner 的一步。\n所以每一列都強制「上一層結果乘 x 加這層係數等於下一層」,一路逼到最後一列就是 P(x)。\n關鍵限制:閘只能看固定偏移的列(本列、下一列),不能隨機跳,所以演算法必須排成規則的縱向流水線 —— 這直接決定了我們把多項式求值寫成逐列遞推。",
+'複製約束 / 查表':"兩個把 cell 接起來的工具,各自背後有一條 grand-product(連乘)公式,我講原理就好,細節投影片有。\n\n【複製約束】原文:指定兩個 cell 必須相等。\n背後是一個排列論證:把所有要相等的 cell 用一個置換 σ 串成環,建一條連乘 Z,要求「原始值配位置」跟「σ 重排後配位置」兩串乘積相等,Z 才能從 1 走一圈回到 1。\n在 demo 裡就是把私密 x 在每一列綁成同一個值,惡意證明者不能每列偷換 x。\n\n【查表 plookup】原文:檢查一條多項式的值是否落在一張表裡。\n原理一樣是連乘式:要求「被查值的多重集合」是「表的多重集合」的子集,用一條 grand-product 在隨機挑戰下檢查。\n我們用它做 ByteTable 範圍檢查:把定點截斷的餘數拆成 byte,每個 byte 查 0–255 這張表,保證餘數真的落在合法範圍 —— 這就是範圍檢查在電路裡的作法。",
 '整除性推導':"這張是整條 Halo2 的數學心臟,每一步都完整列出,可以照著推。\n① 選一個 2 的 k 次方階的乘法子群 H,它的 vanishing 多項式就是 X 的 n 次方減 1,在 H 上恆為零。\n② 把每一欄插值成一個多項式,讓它在 ω 的 i 次方那點等於第 i 列的值;要讀下一列,就代入 ω 乘 X。\n③ 把所有約束 —— 閘、複製約束、查表 —— 用一個挑戰 α 的次方合成成一條大多項式 G。\n④ 也是關鍵的等價:每一列都滿足約束,等價於 G 在 H 上恆為零,又等價於 Z_H 整除 G,也就是存在一條商多項式 t 使 G 等於 t 乘 Z_H。\n所以「計算正確」就被化成「我有一條 t 使 G 等於 t 乘 Z_H」—— 下一步就是承諾這些多項式、在隨機點驗這條等式。",
 'KZG 承諾':"第三層,多項式承諾。\n先給形式定義 —— 一個承諾方案是 gen、com、open 三件套,這句是 BDFG 論文 Definition 2.3 的原文。\nKZG 的具體做法:對一條多項式的承諾,就壓成單一個群元素;要證明它在某點的值,用一次配對檢查。\nSRS 是通用且可更新的,只要設定儀式中有一個人誠實就安全;那個秘密 τ 用完即丟。\n我們論文如實把這當成一條信任假設,不宣稱 trustless。",
 'KZG 完整推導':"這張把 KZG 每一步完整列出,各位可以照著推。\n先講記號:中括號 x 下標 1 表示 x 乘上群 G1 的生成元,SRS 就是 τ 的各次方藏在指數裡,τ 本人銷毀。\n承諾就是把 f 在 τ 的值算在指數裡,得到單一個群元素 C。\n再來是整個 KZG 的靈魂那條恆等式:f 在 z 等於 v,等價於 X 減 z 整除 f 減 v,也就是存在商多項式 q 使 f 減 v 等於 q 乘 X 減 z。\n開啟就是送 q 在 τ 的承諾 π。\n驗證是一條配對等式。\n為什麼這條配對等式就驗證了那條恆等式?用雙線性:e 把指數裡的乘法搬出來,左邊變成 f(τ) 減 v、右邊變成 q(τ) 乘 τ 減 z,兩邊相等就等於恆等式在 τ 這個秘密點成立。\n如果證明者說謊,X 減 z 不整除,根本沒有合法的 q,偽造機率可忽略。\n最後:承諾跟證明都只有一個群元素、驗證兩次配對,跟多項式次數無關 —— 純 KZG 只綁定,要零知識得加 blinding。",
 'SHPLONK':"為什麼證明可以又小、又不隨計算深度成長?關鍵在 SHPLONK。\n投影片這句是 BDFG 2020/081 的摘要原文:它把「多條多項式、各在不同點開啟」批次成單一開啟證明,他們的第二個方案只要兩個群元素、兩次配對。\n配合右邊這張圖:列數一直翻倍,proof 幾乎不動。\n我們論文的電路就是這性質的體現 —— N 不管多大,proof 恆 31,872 bytes。\n另外 Fiat–Shamir 把互動挑戰換成對 transcript 的雜湊,PSE 預設用 Blake2b。",
 '驗證恆等式推導':"這張把整條協議收尾。先強調一個 soundness 關鍵:Fiat–Shamir 的每個挑戰,都必須在相關承諾送出之後才抽,所以這是承諾跟挑戰交錯的回合,不是一次全送、一次全抽。\n① 第一回合,承諾各個 advice 欄,先加 blinding 隨機項給零知識。\n② 對 transcript 雜湊抽出 β、γ,第二回合用它們建排列跟查表的 grand-product Z 並承諾。\n③ 再抽 α,第三回合算商 t 等於 G 除以 Z_H;因為 t 次數高,要切成多塊小於 n 次的 t0、t1 各自承諾。\n④ 最後抽求值點 ζ,在 ζ 開啟所有多項式,需要讀下一列的就在 ω 乘 ζ 也開一次,每個都附 KZG 開啟證明。\n⑤ 驗證者把開啟值代進去,檢查 G 在 ζ 等於 t 在 ζ 乘上 ζ 的 n 次方減 1;Schwartz–Zippel 保證在隨機 ζ 成立就幾乎處處成立。\n所有開啟用 SHPLONK 批次,實作再用 linearization 減少開啟數。",
 '為什麼能用':"第三部分:為什麼這套東西數學上站得住?我想回答一個直覺上的疑問 —— 為什麼只在一個隨機點檢查,就能相信整條多項式?",
-'為什麼成立':"這張把四個安全性質各自怎麼成立彙整一次。\n可靠性的數學核心是 Schwartz–Zippel:非零多項式在隨機點等於零的機率,最多次數除以體大小,在 2 的 254 次方的體上可忽略 —— 這條我們在 Part II 驗證恆等式那張已經用過,這裡就不重推。\n所以四性質:完備性靠合法 witness 滿足所有閘;可靠性靠承諾綁定加 Schwartz–Zippel 加抽取器;零知識靠 advice 加隨機 blinding;簡潔性靠 KZG 加 SHPLONK 的常數配對。\nKZG 的知識可靠性建立在配對友善曲線的代數假設,AGM 加 q-type;BN254 提供大約 128 位元安全。\n完整的形式化論證在論文 ch3。",
-'形式化證明':"有人會問:有沒有形式化證明?有,完整的在論文 ch3,這裡我給定義加證明策略。\n左邊兩格是原文:知識可靠性在代數群模型 AGM 下的正式定義 —— 存在一個有效率的抽取器,讓任何代數對手贏的機率可忽略;以及它依賴的 q-DLOG 假設。\n右邊是三個性質的證明策略:完備性靠逐列滿足每條閘;可靠性靠承諾綁定加 Schwartz–Zippel,在 AGM 下用抽取器導矛盾;零知識靠 advice 加 blinding,存在一個模擬器,不靠見證就能產生同分布的證明。",
+'為什麼成立':"這張把原本兩張(四性質 + 形式化)合成一張,完整講一次「為什麼成立」。\n先給總綱:可靠性的數學核心是 Schwartz–Zippel —— 一條非零、次數 d 的多項式在隨機點等於零的機率最多 d 除以體大小,在約 2 的 254 次方的體上完全可忽略;這條 Part II 驗證恆等式那張已用過,這裡不重推。\n\n【四性質逐項解釋】\n① 完備性:誠實 prover 的合法 witness 逐列滿足每條閘,合成多項式 G 在子群 H 上恆為零,等式必成立,驗證者機率 1 接受。\n② 可靠性:KZG 承諾先把多項式綁死(binding),作弊者改不了已承諾的值;再加 Schwartz–Zippel,他無法在隨機點蒙混;最強的一層是 AGM 下存在抽取器 E,能直接從一個會過關的證明把見證抽出來 —— 抽得出來就代表他「真的知道」w,抽不出來就導出矛盾。\n③ 零知識:advice 欄送出前加隨機 blinding,存在模擬器 S,不看見證也能產生與真證明同分布的假證明,所以證明本身漏不出 w。\n④ 簡潔性:KZG 加 SHPLONK,proof 是固定幾個群元素、驗證是固定次數配對,跟電路多大無關。\n\n【右邊兩段原文怎麼念】\n· 知識可靠性的正式定義(AGM):存在一個有效率的抽取器 E,使任何「代數對手」A 贏的機率可忽略 —— 代數對手就是每丟出一個群元素都得說出它是哪些已知元素的線性組合,正是這個限制讓抽取器抽得出見證。\n· 它靠的硬假設是 q-DLOG:就算把 τ 的 1 到 q 次方都掛在 G1、G2 的指數上給你,你也算不回 τ;BN254 在這假設下約 128 位元安全。\n收尾一句:這份報告給的是定義加證明策略,逐步形式化證明寫在論文 ch3。",
 '能 / 不能':"也要誠實講它的邊界。\n左邊綠的是直接能做的:體上的加乘、有限次數的自訂閘、查表、複製約束。\n右邊紅的是有代價或做不到的:電路規模 k 有上限,大概到 28;位元運算很貴;除法要證明者額外提供商當見證;最關鍵的 —— 它沒有原生浮點。\n最後這一條,正是我們整篇論文存在的理由,接下來就講。",
 '我們怎麼用它':"第四部分,把 Halo2 接回我們自己的工作。\n一句話:Halo2 沒有浮點、沒有 exp、ln、erf 這些超越函數,我們得自己在它的閘上把它們重建出來。",
 '超越函數塞進閘':"方法四步:\n① 定點,每個數用 2 的 48 次方縮放,用整數模擬小數;\n② 用 Remez minimax 找一條多項式,讓區間內最大誤差最小;\n③ 用剛剛那個逐步 Horner 閘求值;\n④ 用 ByteTable 查表做範圍檢查。\n最漂亮的一點:換不同的函數,只要換那幾個係數,電路完全不用重設計 —— 這個通用性,就是來自 Halo2 的 fixed 欄。\n等一下 demo 的閘,加上截斷跟範圍檢查,就是論文完整的 kernel。",
