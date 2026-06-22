@@ -233,6 +233,27 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   </div>
 </section>
 
+<!-- I-0c PLONK — the modern paradigm they may not know -->
+<section class="slide" data-part="I" data-label="PLONK">
+  <div class="slide-meta"><span class="part-label">PART I</span> · 你可能還沒碰過的那一步</div>
+  <h2>這條「第三路」的名字叫 <span class="accent">PLONK</span></h2>
+  <p class="lead">如果你對 ZK 的印象停在 Sigma / Schnorr 或 Groth16，<b>PLONK（2019）</b>就是中間那個範式轉移 —— 而 Halo2 是它的一個實作。</p>
+  <div class="grid-2">
+    <div class="defn"><span class="dt">原文 · PLONK</span>
+      <span class="quote">“We present a universal SNARK construction with fully succinct verification, and significantly lower prover running time … we focus on ‘Evaluations on a subgroup rather than coefficients of monomials’, which enables simplifying both the permutation argument and the arithmetization step.”</span>
+      <a class="src" href="https://eprint.iacr.org/2019/953" target="_blank" rel="noopener">Gabizon, Williamson, Ciobotaru — ePrint 2019/953 ↗</a></div>
+    <div class="card accent">
+      <h3>PLONK 帶來的三個「新」</h3>
+      <ul>
+        <li><b>通用 + 可更新 SRS</b>：一次設定，任意電路共用（不像 Groth16 每電路一次）。</li>
+        <li><b>多項式 IOP</b>：電路 → 多項式約束，用承諾 + 隨機點檢查取代「reduce 到單一困難問題」。</li>
+        <li><b>自訂閘 + 查表</b>（UltraPLONK / Plonkish）：表達複雜運算。</li>
+      </ul>
+      <p class="muted" style="margin-top:.4rem">Halo2 = <b>PLONKish 算術化 + KZG 承諾</b>。你今天要懂的「新東西」就是這個 PLONK 家族。</p>
+    </div>
+  </div>
+</section>
+
 <!-- I-1 What is Halo2 -->
 <section class="slide" data-part="I" data-label="家譜">
   <div class="slide-meta"><span class="part-label">PART I</span> · 在做什麼</div>
@@ -655,6 +676,20 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <p class="lead">業界部署、我們論文的兩個真實電路，以及一支會跑完整 prove / verify 的最小 Rust demo。</p></div>
 </section>
 
+<!-- V-0 recent ZK applications landscape -->
+<section class="slide" data-part="V" data-label="最近的 ZK 應用">
+  <div class="slide-meta"><span class="part-label">PART V</span> · 最近的零知識應用</div>
+  <h2>ZK 現在<span class="accent">用在哪</span>（這幾年的 landscape）</h2>
+  <div class="grid-3">
+    <div class="card"><h3>zkRollup / zkEVM</h3><p>以太坊擴容：把一批交易壓成一個證明上鏈。Scroll、zkSync、Taiko、Polygon zkEVM。</p></div>
+    <div class="card"><h3>zkML</h3><p>證明「我用某模型對某輸入推論出此結果」，而不洩漏模型或輸入（如 ezkl）。</p></div>
+    <div class="card"><h3>隱私身分 / 憑證</h3><p>zk passport、proof of personhood、選擇性揭露（只證「我成年」不洩漏生日）。</p></div>
+    <div class="card"><h3>償付能力 / 合規證明</h3><p>交易所 proof of solvency；<b>基金 / 投組合規（我們的 PF1）</b> — 證明風險在限額內而不洩漏部位。</p></div>
+    <div class="card"><h3>遞迴 / 聚合證明</h3><p>把多個證明併成一個（Halo 的起點），支撐近乎無限的擴展。</p></div>
+    <div class="card accent"><h3>我們站在哪</h3><p>這些應用常要算<b>非線性函數</b>（金融 Greeks、ML 激活、科學模型）。我們讓 ZK 電路<b>算得動超越函數</b> — 補上缺的那塊。</p></div>
+  </div>
+</section>
+
 <!-- V-1 deployments + numbers -->
 <section class="slide" data-part="V" data-label="用在哪裡">
   <div class="slide-meta"><span class="part-label">PART V</span> · 用在哪裡</div>
@@ -783,17 +818,17 @@ Stage 4 VERIFY       verified      1.96 ms
   <div class="card green" style="margin-top:.7rem"><p style="font-size:.95rem">這支 demo 證明論文方法不是紙上談兵：同一條 Horner 閘、同一套 pipeline，現場就能 prove + verify。論文只是把「整數」換成「定點 + 範圍檢查」把精度做到位。</p></div>
 </section>
 
-<!-- ===== FAQ / misconceptions (appendix) ===== -->
-<section class="slide" data-part="收尾" data-label="常見疑問">
-  <div class="slide-meta"><span class="part-label">附錄</span> · 常見先入為主的疑問</div>
-  <h2>「其實不是那樣」 — <span class="accent">六個常見誤解</span></h2>
+<!-- ===== appendix: classical ZK -> modern ZK updates ===== -->
+<section class="slide" data-part="收尾" data-label="現代 ZK 更新">
+  <div class="slide-meta"><span class="part-label">附錄</span> · 如果你的 ZK 印象停在幾年前</div>
+  <h2>從<span class="accent">經典 ZK</span> 到<span class="accent">現代 ZK</span>：更新了什麼</h2>
   <div class="grid-3">
-    <div class="card"><h3>ZK = 加密？</h3><p>不是。加密把資料藏起來；ZK 是<b>證明一段計算正確、卻不洩漏輸入</b>。proof 不是密文。</p></div>
-    <div class="card"><h3>ZK 只用在區塊鏈？</h3><p>不是。ZK 是通用工具（合規 / 身分 / 外包計算）；區塊鏈只是其中一個應用。</p></div>
-    <div class="card"><h3>要互動、來回挑戰？</h3><p>不用。Fiat–Shamir 把挑戰換成雜湊 → <b>單一份非互動證明</b>，寄出去就好。</p></div>
-    <div class="card"><h3>驗證要信任第三方？</h3><p>驗證不用。只有 KZG 的<b>一次性通用設定</b>需要儀式（一人誠實即安全）— 跟「信任驗證者」是兩回事。</p></div>
-    <div class="card"><h3>能跑任意程式（像 CPU）？</h3><p>不能。必須能寫成<b>有限域算術電路</b>、trace 大小固定、不能資料相依分支、迴圈要有上界。</p></div>
-    <div class="card"><h3>後量子安全？</h3><p>否。基於 pairing / 離散對數 → <b>非後量子</b>（STARK/FRI 才是）。誠實講清楚。</p></div>
+    <div class="card"><h3>不只 reduce 到離散對數</h3><p>經典：針對某 statement 設計 Sigma / Schnorr 協議。現代：<b>算術化 + 多項式承諾</b>（PLONK 範式）。</p></div>
+    <div class="card"><h3>不用每個 statement 設計協議</h3><p>PLONK 給<b>通用電路框架</b> — 一套框架描述任意計算，不用為每個問題重新設計。</p></div>
+    <div class="card"><h3>不用每電路重做 setup</h3><p>Groth16 每電路一次可信設定；PLONK/KZG 用<b>通用 + 可更新 SRS</b>，一次到處用。</p></div>
+    <div class="card"><h3>證明不再大又慢</h3><p>Bulletproofs 驗證線性；KZG <b>小證明 + 常數驗證</b>（~ms），且不隨計算深度成長。</p></div>
+    <div class="card"><h3>不只理論 / 隱私貨幣</h3><p>已大規模部署：<b>zkEVM / zkRollup / zkML</b>、償付能力與合規證明。</p></div>
+    <div class="card accent"><h3>仍有的硬限制</h3><p><b>沒有原生浮點</b>、非後量子。前者正是我們論文在解的。</p></div>
   </div>
 </section>
 
@@ -880,6 +915,7 @@ Stage 4 VERIFY       verified      1.96 ms
 '在做什麼':'先談第一件事 —— Halo2 到底在做什麼。一句話:它是一台「可驗證計算」的引擎。你能向別人證明「我正確執行了某段計算」,但不洩漏私密輸入,而且產生的證明又小、又能很快驗證。接下來幾張我把這句話拆開。',
 '為什麼要有 Halo2':'這張最重要,我先把它接到各位熟的東西。你們做證明,習慣的是兩條路。第一條 Bulletproofs:把問題 reduce 到離散對數,用內積論證,好處是不需要可信設定、證明只有對數大小;但它的死穴是「驗證時間是線性的」—— 電路一大,驗證就慢。第二條 Groth16:走 pairing,證明只有三個群元素、驗證三次配對、最小最快;但它每換一個電路就要重做一次可信設定,而且 gate 是死板的 R1CS。Halo2 走第三條:先把計算算術化成多項式約束,再用多項式承諾。它用的是「通用又可更新」的設定 —— 做一次,所有電路共用,不像 Groth16 每個電路一次;而且支援自訂閘跟查表。最後這點請記住:自訂閘跟查表,正是我等一下能把超越函數塞進電路的前提。',
 '原文背書 + 那座橋':'我知道各位不會因為我講就信,所以這張直接給原文。左邊是 Bulletproofs 的摘要原文:免設定、離散對數假設、驗證線性。右邊是 Groth16 的原文:三個群元素、三次配對。最重要的是下面這座橋:三者的安全性質其實是同一套 —— 完備、知識可靠、零知識,定義不變,差的只是建構跟信任模型。而且有個漂亮的接點:原版 Halo2 的承諾用的就是 IPA,跟 Bulletproofs 同一個離散對數家族,各位其實認得;我們用的 PSE 版,只是把這一層換成 KZG 的 pairing 承諾,換來通用設定跟快驗證。所以這不是憑空冒出來的新東西,是各位熟的那條線長出來的。',
+'PLONK':'這條第三路有個名字,叫 PLONK,2019 年出來的。各位如果對 ZK 的印象停在 Sigma、Schnorr,或停在 Groth16,PLONK 就是中間那個範式轉移,而 Halo2 就是它的一個實作。它帶來三個新東西:第一,通用又可更新的 SRS —— 一次設定,任意電路共用,不像 Groth16 每個電路都要重做。第二,它是個多項式 IOP:把電路變成多項式約束,用承諾加隨機點檢查,取代「把問題 reduce 到單一困難問題」的老思路。第三,它支援自訂閘跟查表,所以能表達複雜運算。投影片左邊是 PLONK 的摘要原文。一句話:各位今天要更新的「新東西」,就是這個 PLONK 家族。',
 '家譜':'先看它從哪來。2019 年的 Halo,是第一個不需要可信設定的遞迴證明組合;投影片上這句就是它論文摘要的原文。後來 Electric Coin Company,也就是 Zcash 團隊,把這個想法重建在 PLONKish 算術化之上,變成通用的電路框架,就是 Halo2。我們用的是社群的 PSE 分支,把承諾換成 KZG、跑在 BN254 曲線上 —— 為什麼這樣選,下一張說。',
 '基礎定義':'在講性質之前,先把三個詞定下來,而且都引 The halo2 Book 的原文。關係 R:它規定哪些「公開輸入加私密輸入」的組合算合法。電路:就是把這個關係實作成證明系統能跑的東西。見證:私密輸入加上中間的 advice 值,合起來叫見證。對到我們的 demo:關係就是「P(x) 等於 98 嗎」,電路是那條 Horner 閘,見證是私密的 x 等於 3。',
 '輸入什麼 + 形式化':'學長教授最愛問的兩題,我直接放前面回答。形式上,一個電路就定義了一個 NP 關係 R_C:所有「公開輸入 x、私密見證 w」的合法組合 —— 合法的意思是,存在一張 trace,讓所有閘、查表、複製約束同時成立。整個證明系統,就是對這個 R_C 的 SNARK:Setup、Prove、Verify 三件套。你實際「輸入」的有三種:公開的 instance(驗證者看得到,例如 P(x)=98)、私密的 witness(永不洩漏,例如 x=3)、還有電路本身(setup 時固定)。最關鍵、最常被忽略的一點:你輸入的不是任意 byte,是有限域的元素;任何資料 —— 數字、簽章、Merkle 路徑、甚至我們的定點小數 —— 都要先編碼成 field elements,才進得了電路。',
@@ -900,12 +936,13 @@ Stage 4 VERIFY       verified      1.96 ms
 '我們怎麼用它':'第四部分,把 Halo2 接回我們自己的工作。一句話:Halo2 沒有浮點、沒有 exp、ln、erf 這些超越函數,我們得自己在它的閘上把它們重建出來。',
 '超越函數塞進閘':'方法四步:第一,定點,每個數用 2 的 48 次方縮放,用整數模擬小數;第二,用 Remez minimax 找一條多項式,讓區間內最大誤差最小;第三,用剛剛那個逐步 Horner 閘求值;第四,用 ByteTable 查表做範圍檢查。最漂亮的一點:換不同的函數,只要換那幾個係數,電路完全不用重設計 —— 這個通用性,就是來自 Halo2 的 fixed 欄。等一下 demo 的閘,加上截斷跟範圍檢查,就是論文完整的 kernel。',
 '用在哪 + 範例':'最後一部分,落地:業界把它用在哪、我們論文的兩個真實電路,以及一支現場會跑完的 demo。',
+'最近的 ZK 應用':'各位對 ZK 的應用印象可能停在隱私貨幣,我快速更新一下這幾年的 landscape。第一,zkRollup 跟 zkEVM:把一批以太坊交易壓成一個證明上鏈,Scroll、zkSync、Taiko 都是。第二,zkML:證明我用某個模型對某輸入推論出這個結果,卻不洩漏模型或輸入。第三,隱私身分:zk passport、選擇性揭露,只證我成年不洩漏生日。第四,償付能力跟合規證明:交易所證明有足額儲備,而我們的 PF1 就是這一類 —— 證明投組風險在限額內卻不洩漏部位。第五,遞迴跟聚合證明,把多個證明併成一個,這正是 Halo 的起點。最後一格是我們站的位置:這些應用常常要算非線性函數,金融的 Greeks、ML 的激活函數、科學模型,而 ZK 電路本來算不動超越函數 —— 我們補上的就是這塊。',
 '用在哪裡':'業界:Zcash 的 Orchard 用的是原版 IPA,不是 KZG,這點別搞混;Scroll、Taiko 這些 zkEVM 走的才是 PSE 的 KZG 路線。我們自己有兩個已經用 Rust 實作的電路:PF1 證明投組的淨 delta 在風險限額內,但不洩漏個別部位;PF2 處理狀態轉移。實測 proof 是 31,872 bytes、驗證約 8 毫秒。下面那句 Poseidon 的原文,是我們 Merkle 樹用的雜湊。',
 '程式碼 1':'進到 code。這張是電路的骨架:宣告四種欄,然後 create_gate 裡那一條 —— 就是整個電路唯一的約束:selector 乘以,acc 乘 x 加係數減下一列的 acc,等於零。注意 acc 用 Rotation::next 讀下一列。敘述很簡單:我知道一個秘密 x,讓這個三次多項式 P(x) 等於某個公開值;我們取 x 等於 3,P(3) 等於 98。',
 '程式碼 2':'左邊是填表 —— 把 Horner 階梯一列一列填進去,中間那個 constrain_equal 就是把每列的 x 綁成同一個值。右邊是真正的流水線:setup、keygen、create_proof、verify_proof。注意泛型參數 ProverSHPLONK 跟 VerifierSHPLONK —— 跟前面講的承諾方案完全對得上。這套 API、這個版本,跟論文的 PF1、PF2 用的一模一樣。',
 '真實輸出':'這是現場真的跑出來的輸出。MockProver 先過,然後 setup、keygen、prove、verify 一路下來:證明 11.6 毫秒產生、864 bytes、1.96 毫秒驗完。最後驗證者接受 —— 它相信 P(x) 等於 98,但從頭到尾沒看過 x。我還故意謊報答案是 99,系統立刻拒絕。這就是一個可靠的零知識證明該有的樣子。',
 'demo → 論文':'把 demo 跟論文接起來。同一條閘,論文多了定點截斷跟餘數的 byte 拆解、加上查表;多項式從固定係數換成 Remez 算出來的;但承諾、曲線、SHPLONK、transcript,整套 stack 完全相同。所以這支 demo 不是玩具 —— 它證明我們的方法用同一條閘、同一套 pipeline,現場就能 prove 跟 verify;論文只是把整數換成定點,把精度做到位。',
-'常見疑問':'這張是備援,Q&A 被問到先入為主的問題時翻出來。六個最常見的誤解:一,ZK 不是加密,是證明計算正確而不洩漏輸入,proof 不是密文。二,ZK 不只用在區塊鏈,是通用工具,區塊鏈只是其中一個應用。三,不需要來回互動,Fiat–Shamir 之後是單一份非互動證明。四,驗證不需要信任第三方,只有 KZG 的一次性設定需要儀式,跟信任驗證者是兩回事。五,不能跑任意程式,必須寫成有限域算術電路、大小固定、不能資料相依分支。六,不是後量子安全,基於 pairing 跟離散對數。誠實講清楚這六點,比含糊帶過更得信任。',
+'現代 ZK 更新':'這張是備援,假設各位對 ZK 的印象停在幾年前,我更新幾件變了的事。第一,證明不再只能 reduce 到離散對數那種 Sigma 協議,現代是算術化加多項式承諾,也就是 PLONK 範式。第二,不用再為每個 statement 設計專屬協議,PLONK 給的是通用電路框架,一套描述任意計算。第三,不用每個電路都重做可信設定,KZG 用的是通用又可更新的 SRS,做一次到處用。第四,證明不再又大又慢,Bulletproofs 驗證是線性的,KZG 是小證明加常數驗證,而且不隨深度成長。第五,ZK 已經不只是理論或隱私貨幣,zkEVM、zkRollup、zkML 都已大規模部署。最後,仍有的硬限制是沒有原生浮點、非後量子,而前者正是我們論文在解的。',
 '一頁帶走':'如果今天只記得五件事:第一,Halo2 是算術化加多項式承諾,我們用 KZG/BN254 版;第二,電路就是一張表加一組等於零的多項式閘;第三,KZG 加 SHPLONK 讓證明又小又快驗;第四,它沒有浮點,所以我們用定點加 Horner 重建超越函數,這是論文貢獻;第五,同一條閘從 demo 一路長到真實電路,已經實作、已經驗證。',
 '出處':'最後是出處。投影片上所有定義,都來自這幾個來源:The halo2 Book,還有 Halo、PLONK、plookup、SHPLONK、KZG、Poseidon 這幾篇論文,全部附了連結,大家可以自己核對。謝謝大家,接下來是問答時間。'
   };
