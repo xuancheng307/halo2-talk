@@ -197,6 +197,41 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <p class="lead">Halo2 是一台「可驗證計算」引擎：證明你正確執行了某段計算，卻不洩漏私密輸入，且證明又小又快驗。</p></div>
 </section>
 
+<!-- I-0a why halo2 — vs old tech (3-way) -->
+<section class="slide" data-part="I" data-label="為什麼要有 Halo2">
+  <div class="slide-meta"><span class="part-label">PART I</span> · 為什麼要有 Halo2</div>
+  <h2>跟你們熟的舊技術差在哪？<span class="accent">Bulletproofs · Groth16 · Halo2</span></h2>
+  <p class="lead">你們熟的兩條路 — <b>Bulletproofs</b>：把證明 reduce 到<b>離散對數</b>（IPA）；<b>Groth16</b>：<b>pairing</b> + 每電路一次可信設定。Halo2 走第三條：<b>算術化 + 多項式承諾</b>。</p>
+  <table>
+    <tr><th>維度</th><th>Bulletproofs (2017)</th><th>Groth16 (2016)</th><th>Halo2 (PSE · KZG) ← 我們</th></tr>
+    <tr><td>思路 / 承諾</td><td>reduce 到離散對數 · IPA</td><td>pairing · QAP</td><td><b>算術化 + 多項式承諾 (KZG)</b></td></tr>
+    <tr><td>可信設定</td><td>不需要</td><td>每電路一次</td><td><b>通用 + 可更新</b>（做一次到處用）</td></tr>
+    <tr><td>證明大小</td><td>O(log n)</td><td><b>3 群元素</b> ~128–192 B</td><td>~數 KB（不隨深度）</td></tr>
+    <tr><td>驗證</td><td><b>線性 n（慢）</b></td><td>3 配對（快）</td><td>~2 配對 + MSM（快）</td></tr>
+    <tr><td>假設</td><td>離散對數</td><td>AGM / KoE</td><td>AGM + q-DLOG</td></tr>
+    <tr class="hl"><td>表達力</td><td>算術電路</td><td>固定 R1CS</td><td><b>自訂閘 + 查表</b></td></tr>
+  </table>
+  <p style="margin-top:.6rem"><b>一句話：</b>Bulletproofs 免設定但<b>驗證慢</b>；Groth16 證明最小但<b>每電路要重做設定、gate 死板</b>；Halo2 用<b>通用設定 + 自訂閘/查表</b> — 最後這點正是我們能塞超越函數的前提。</p>
+</section>
+
+<!-- I-0b verbatim backing + the IPA bridge -->
+<section class="slide" data-part="I" data-label="原文背書 + 那座橋">
+  <div class="slide-meta"><span class="part-label">PART I</span> · 原文背書（不是我說的）</div>
+  <h2>三者的安全<span class="accent">「定義」相同</span>，差別在建構</h2>
+  <div class="grid-2">
+    <div class="defn"><span class="dt">原文 · Bulletproofs</span>
+      <span class="quote">“We propose Bulletproofs, a new non-interactive zero-knowledge proof protocol with very short proofs and without a trusted setup … relying on the discrete logarithm assumption … Proof generation and verification times are linear in n.”</span>
+      <a class="src" href="https://eprint.iacr.org/2017/1066" target="_blank" rel="noopener">Bünz, Bootle, Boneh, Poelstra, Wuille, Maxwell — ePrint 2017/1066 ↗</a></div>
+    <div class="defn"><span class="dt">原文 · Groth16</span>
+      <span class="quote">“… a proof is only 3 group elements, and verification consists of checking a single pairing product equation using 3 pairings in total.”</span>
+      <a class="src" href="https://eprint.iacr.org/2016/260" target="_blank" rel="noopener">Jens Groth — EUROCRYPT 2016, ePrint 2016/260 ↗</a></div>
+  </div>
+  <div class="card accent" style="margin-top:.8rem">
+    <h3>那座橋（接回你們熟的東西）</h3>
+    <p>三者的安全性質是<b>同一套</b>（completeness / knowledge soundness / zero-knowledge）—— 差別在<b>建構與信任模型</b>，不在定義。關鍵接點：<b>原版 Halo2 的承諾用 IPA — 就是 Bulletproofs 的離散對數家族，你們認得</b>；我們用的 PSE 版只是把這層換成 <b>KZG（pairing 多項式承諾）</b>，為了通用設定與快驗證。</p>
+  </div>
+</section>
+
 <!-- I-1 What is Halo2 -->
 <section class="slide" data-part="I" data-label="家譜">
   <div class="slide-meta"><span class="part-label">PART I</span> · 在做什麼</div>
@@ -554,31 +589,6 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   </div>
 </section>
 
-<!-- III-1c Groth16 comparison -->
-<section class="slide" data-part="III" data-label="Halo2 vs Groth16">
-  <div class="slide-meta"><span class="part-label">PART III</span> · 比較</div>
-  <h2>跟經典的 <span class="accent">Groth16</span> 差在哪？</h2>
-  <p class="lead"><b>安全「定義」是同一套</b>（completeness / knowledge soundness / zero-knowledge / succinctness）；<b>差別在建構與信任模型</b>。</p>
-  <div class="grid-2">
-    <table>
-      <tr><th>維度</th><th>Groth16 (2016)</th><th>Halo2 (PSE · KZG/BN254)</th></tr>
-      <tr><td>算術化</td><td>R1CS → QAP</td><td><b>PLONKish</b>（自訂閘+查表）</td></tr>
-      <tr><td>信任設定</td><td>每電路一次</td><td><b>通用 + 可更新</b></td></tr>
-      <tr><td>證明大小</td><td><b>3 群元素</b> ~128–192 B</td><td>~數 KB（不隨深度）</td></tr>
-      <tr><td>驗證</td><td>3 配對</td><td>~2 配對 + MSM</td></tr>
-      <tr><td>假設</td><td>AGM / KoE</td><td>AGM + q-DLOG</td></tr>
-      <tr><td>表達力</td><td>固定 R1CS</td><td><b>自訂閘 / 查表</b></td></tr>
-    </table>
-    <div>
-      <div class="defn"><span class="dt">原文 · Groth16</span>
-        <span class="quote">“… a proof is only 3 group elements, and verification consists of checking a single pairing product equation using 3 pairings in total.”</span>
-        <a class="src" href="https://eprint.iacr.org/2016/260" target="_blank" rel="noopener">Jens Groth — EUROCRYPT 2016, ePrint 2016/260 ↗</a></div>
-      <div class="card amber"><h3>為什麼我們不用 Groth16？</h3>
-        <p>Groth16 證明最小、驗證最快，但 <b>每換一個電路就要一次新的可信設定</b>，且 gate 是死板的 R1CS。Halo2 用通用設定 + <b>自訂閘與查表</b> — 這正是我們能把定點 Horner 與 ByteTable 塞進電路的前提。代價是證明較大。</p></div>
-    </div>
-  </div>
-</section>
-
 <!-- III-2 capabilities / limits -->
 <section class="slide" data-part="III" data-label="能 / 不能">
   <div class="slide-meta"><span class="part-label">PART III</span> · 邊界</div>
@@ -837,6 +847,8 @@ Stage 4 VERIFY       verified      1.96 ms
 '封面':'大家好。今天這場分享的主題是 Halo2 —— 也就是我們整篇論文底層所站的那套零知識證明系統。我會用六個問題把它講清楚:它在做什麼、怎麼做、為什麼能用、用在哪裡、我們怎麼用它,最後直接跑一支真的會產生並驗證證明的 Rust demo 給大家看。所有關鍵定義我都引原文,投影片上也附了出處連結,方便事後查證。我們開始。',
 '路線圖':'先給大家一張地圖。這份報告就是回答六個問題。前三個談 Halo2 本身:在做什麼、怎麼做、為什麼數學上成立;後三個把它接回我們的工作:業界用在哪、我們怎麼把超越函數塞進它的閘、最後實際跑一次。特別強調:所有密碼學定義我都不自己改寫,一律引 The halo2 Book 或 IACR 論文的原文。',
 '在做什麼':'先談第一件事 —— Halo2 到底在做什麼。一句話:它是一台「可驗證計算」的引擎。你能向別人證明「我正確執行了某段計算」,但不洩漏私密輸入,而且產生的證明又小、又能很快驗證。接下來幾張我把這句話拆開。',
+'為什麼要有 Halo2':'這張最重要,我先把它接到各位熟的東西。你們做證明,習慣的是兩條路。第一條 Bulletproofs:把問題 reduce 到離散對數,用內積論證,好處是不需要可信設定、證明只有對數大小;但它的死穴是「驗證時間是線性的」—— 電路一大,驗證就慢。第二條 Groth16:走 pairing,證明只有三個群元素、驗證三次配對、最小最快;但它每換一個電路就要重做一次可信設定,而且 gate 是死板的 R1CS。Halo2 走第三條:先把計算算術化成多項式約束,再用多項式承諾。它用的是「通用又可更新」的設定 —— 做一次,所有電路共用,不像 Groth16 每個電路一次;而且支援自訂閘跟查表。最後這點請記住:自訂閘跟查表,正是我等一下能把超越函數塞進電路的前提。',
+'原文背書 + 那座橋':'我知道各位不會因為我講就信,所以這張直接給原文。左邊是 Bulletproofs 的摘要原文:免設定、離散對數假設、驗證線性。右邊是 Groth16 的原文:三個群元素、三次配對。最重要的是下面這座橋:三者的安全性質其實是同一套 —— 完備、知識可靠、零知識,定義不變,差的只是建構跟信任模型。而且有個漂亮的接點:原版 Halo2 的承諾用的就是 IPA,跟 Bulletproofs 同一個離散對數家族,各位其實認得;我們用的 PSE 版,只是把這一層換成 KZG 的 pairing 承諾,換來通用設定跟快驗證。所以這不是憑空冒出來的新東西,是各位熟的那條線長出來的。',
 '家譜':'先看它從哪來。2019 年的 Halo,是第一個不需要可信設定的遞迴證明組合;投影片上這句就是它論文摘要的原文。後來 Electric Coin Company,也就是 Zcash 團隊,把這個想法重建在 PLONKish 算術化之上,變成通用的電路框架,就是 Halo2。我們用的是社群的 PSE 分支,把承諾換成 KZG、跑在 BN254 曲線上 —— 為什麼這樣選,下一張說。',
 '基礎定義':'在講性質之前,先把三個詞定下來,而且都引 The halo2 Book 的原文。關係 R:它規定哪些「公開輸入加私密輸入」的組合算合法。電路:就是把這個關係實作成證明系統能跑的東西。見證:私密輸入加上中間的 advice 值,合起來叫見證。對到我們的 demo:關係就是「P(x) 等於 98 嗎」,電路是那條 Horner 閘,見證是私密的 x 等於 3。',
 'zk-SNARK 性質':'四個安全性質,一樣引原文。完備性:誠實證明者照規則跑,驗證者一定接受,機率是一。可靠性:證明沒辦法騙過驗證者。知識可靠性:存在一個抽取器,能把證明者的見證抽出來 —— 這比單純可靠性更強。零知識:證明不洩漏見證的任何資訊。最下面那條把簡潔性跟 zk-SNARK 補上:證明長度只跟電路大小成 polylog,這樣的 NARK 叫 SNARK,再加上零知識就是 zk-SNARK。',
@@ -852,7 +864,6 @@ Stage 4 VERIFY       verified      1.96 ms
 '為什麼能用':'第三部分:為什麼這套東西數學上站得住?我想回答一個直覺上的疑問 —— 為什麼只在一個隨機點檢查,就能相信整條多項式?',
 '為什麼成立':'答案是 Schwartz–Zippel 引理。投影片上是它的正式敘述:一個非零、總次數 d 的多項式,在隨機點等於零的機率,最多 d 除以取樣集合的大小;在 2 的 254 次方那麼大的體上,這機率小到可以忽略。所以只要在 Fiat–Shamir 抽的隨機點上恆等式成立,幾乎就保證它處處成立。配合承諾的綁定性,就撐起可靠性。再加上 advice 加隨機 blinding 給零知識、KZG 加 SHPLONK 給簡潔性,四個性質到齊。BN254 提供大約 128 位元的安全等級。',
 '形式化證明':'有人會問:有沒有形式化證明?有,完整的在論文 ch3,這裡我給定義加證明策略。左邊兩格是原文:知識可靠性在代數群模型 AGM 下的正式定義 —— 存在一個有效率的抽取器,讓任何代數對手贏的機率可忽略;以及它依賴的 q-DLOG 假設。右邊是三個性質的證明策略:完備性靠逐列滿足每條閘;可靠性靠承諾綁定加 Schwartz–Zippel,在 AGM 下用抽取器導矛盾;零知識靠 advice 加 blinding,存在一個模擬器,不靠見證就能產生同分布的證明。',
-'Halo2 vs Groth16':'很多人熟的是 Groth16,所以講一下差別。最重要的一句:安全定義是同一套 —— 完備、知識可靠、零知識、簡潔,Groth16 跟 Halo2 都是這四個,定義不變。差的是建構跟信任模型。Groth16 的證明只有三個群元素、驗證三次配對,是目前最小的;但它每換一個電路就要重跑一次可信設定,而且 gate 是死板的 R1CS。Halo2 用通用又可更新的設定,而且支援自訂閘跟查表 —— 這正是我們能把定點 Horner 跟 ByteTable 塞進電路的前提。代價就是證明比較大,落在幾 KB。所以不是誰比較好,是適用場景不同。',
 '能 / 不能':'也要誠實講它的邊界。左邊綠的是直接能做的:體上的加乘、有限次數的自訂閘、查表、複製約束。右邊紅的是有代價或做不到的:電路規模 k 有上限,大概到 28;位元運算很貴;除法要證明者額外提供商當見證;最關鍵的 —— 它沒有原生浮點。最後這一條,正是我們整篇論文存在的理由,接下來就講。',
 '我們怎麼用它':'第四部分,把 Halo2 接回我們自己的工作。一句話:Halo2 沒有浮點、沒有 exp、ln、erf 這些超越函數,我們得自己在它的閘上把它們重建出來。',
 '超越函數塞進閘':'方法四步:第一,定點,每個數用 2 的 48 次方縮放,用整數模擬小數;第二,用 Remez minimax 找一條多項式,讓區間內最大誤差最小;第三,用剛剛那個逐步 Horner 閘求值;第四,用 ByteTable 查表做範圍檢查。最漂亮的一點:換不同的函數,只要換那幾個係數,電路完全不用重設計 —— 這個通用性,就是來自 Halo2 的 fixed 欄。等一下 demo 的閘,加上截斷跟範圍檢查,就是論文完整的 kernel。',
