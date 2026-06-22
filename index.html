@@ -217,8 +217,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <!-- I-0a why halo2 — vs old tech (3-way) -->
 <section class="slide" data-part="I" data-label="為什麼要有 Halo2">
   <div class="slide-meta"><span class="part-label">PART I</span> · 為什麼要有 Halo2</div>
-  <h2>跟你們熟的舊技術差在哪？<span class="accent">Bulletproofs · Groth16 · Halo2</span></h2>
-  <p class="lead">你們熟的兩條路 — <b>Bulletproofs</b>：把證明 reduce 到<b>離散對數</b>（IPA）；<b>Groth16</b>：<b>pairing</b> + 每電路一次可信設定。Halo2 走第三條：<b>算術化 + 多項式承諾</b>。</p>
+  <h2>與既有技術的差異：<span class="accent">Bulletproofs · Groth16 · Halo2</span></h2>
+  <p class="lead">兩條既有路線 — <b>Bulletproofs</b>：把證明 reduce 到<b>離散對數</b>（IPA）；<b>Groth16</b>：<b>pairing</b> + 每電路一次可信設定。Halo2 走第三條：<b>算術化 + 多項式承諾</b>。</p>
   <table>
     <tr><th>維度</th><th>Bulletproofs (2017)</th><th>Groth16 (2016)</th><th>Halo2 (PSE · KZG) ← 我們</th></tr>
     <tr><td>思路 / 承諾</td><td>reduce 到離散對數 · IPA</td><td>pairing · QAP</td><td><b>算術化 + 多項式承諾 (KZG)</b></td></tr>
@@ -244,16 +244,16 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <a class="src" href="https://eprint.iacr.org/2016/260" target="_blank" rel="noopener">Jens Groth — EUROCRYPT 2016, ePrint 2016/260 ↗</a></div>
   </div>
   <div class="card accent" style="margin-top:.8rem">
-    <h3>那座橋（接回你們熟的東西）</h3>
+    <h3>那座橋（接回既有技術）</h3>
     <p>三者的安全性質是<b>同一套</b>（completeness / knowledge soundness / zero-knowledge）—— 差別在<b>建構與信任模型</b>，不在定義。關鍵接點：<b>原版 Halo2 的承諾用 IPA — 就是 Bulletproofs 的離散對數家族，你們認得</b>；我們用的 PSE 版只是把這層換成 <b>KZG（pairing 多項式承諾）</b>，為了通用設定與快驗證。</p>
   </div>
 </section>
 
 <!-- I-0c PLONK — the modern paradigm they may not know -->
 <section class="slide" data-part="I" data-label="PLONK">
-  <div class="slide-meta"><span class="part-label">PART I</span> · 你可能還沒碰過的那一步</div>
+  <div class="slide-meta"><span class="part-label">PART I</span> · 現代範式</div>
   <h2>這條「第三路」的名字叫 <span class="accent">PLONK</span></h2>
-  <p class="lead">如果你對 ZK 的印象停在 Sigma / Schnorr 或 Groth16，<b>PLONK（2019）</b>就是中間那個範式轉移 —— 而 Halo2 是它的一個實作。</p>
+  <p class="lead">從 Sigma / Schnorr、Groth16 到現代通用 SNARK 之間的範式轉移，就是 <b>PLONK（2019）</b> —— 而 Halo2 是它的一個實作。</p>
   <div class="grid-2">
     <div class="defn"><span class="dt">原文 · PLONK</span>
       <span class="quote">“We present a universal SNARK construction with fully succinct verification, and significantly lower prover running time … we focus on ‘Evaluations on a subgroup rather than coefficients of monomials’, which enables simplifying both the permutation argument and the arithmetization step.”</span>
@@ -325,14 +325,14 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- I-1c what you input + formal definition (the two most-asked) -->
 <section class="slide" data-part="I" data-label="輸入什麼 + 形式化">
-  <div class="slide-meta"><span class="part-label">PART I</span> · 最常被問的兩題</div>
-  <h2>你到底「輸入」什麼？<span class="accent">relation 的形式化定義</span></h2>
+  <div class="slide-meta"><span class="part-label">PART I</span> · Relation 與輸入定義</div>
+  <h2>輸入與 <span class="accent">relation 的形式化定義</span></h2>
   <div class="defn"><span class="dt">形式化 · 關係 R_C（= 輸入 / relation 的定義，對應古典 R ⊆ X×Y）</span>
     <span class="quote">R_C = { (x, w) : 存在 trace M ∈ 𝔽ᵣ^(n×c)，instance = x、advice = w、fixed = 預處理，同時滿足 (i) 所有 Gate (ii) 所有 Lookup (iii) 所有 Copy constraint }</span>
     <span class="gloss"><b>原文根據</b>｜<u>古典</u>：<i>“Let R ⊆ X×Y be an effective relation … L_R := { y ∈ Y : (x,y) ∈ R for some x ∈ X }.”</i>（Boneh–Shoup，<a href="https://toc.cryptobook.us/" target="_blank" rel="noopener">A Graduate Course in Applied Cryptography</a>）｜<u>Halo2</u>：<i>“a relation, R, that specifies which combinations of public and private inputs are valid”</i>，約束為 polynomial constraints「evaluate to zero for each row」、equality「two given cells must have equal values」、lookup arguments。</span>
     <a class="src" href="https://zcash.github.io/halo2/concepts/proofs.html" target="_blank" rel="noopener">The halo2 Book — Proof systems / PLONKish Arithmetization ↗</a></div>
   <div class="grid-2">
-    <div class="fbox"><div class="lbl">具體的 relation（被問就寫這個）</div>
+    <div class="fbox"><div class="lbl">Relation 實例</div>
       <div style="margin:.2rem 0"><b>demo：</b>\( R=\{(y,x)\in\mathbb F^2 : P(x)=y\},\ P(x)=2x^3{+}3x^2{+}4x{+}5 \)</div>
       <div style="margin:.2rem 0"><b>PF1：</b>\( R=\{(\mathrm{roots},\tau,\mathrm{today}\,;\,w): \mathrm{Merkle\ valid}\,\wedge\,\big|\textstyle\sum_i w_i\Delta_i\big|\le\tau\} \)</div>
       <div class="cmt">跟古典 \(v=g^\beta\) 同格式 — 內容換成多項式求值 / 金融合規。</div></div>
@@ -582,7 +582,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- II-4b arithmetization+gates -> divisibility (self-derivable) -->
 <section class="slide" data-part="II" data-label="整除性推導">
-  <div class="slide-meta"><span class="part-label">PART II</span> · 完整推導（卡住時自己看）</div>
+  <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導</div>
   <h2>算術化 → 多項式 → <span class="accent">整除 Z_H</span></h2>
   <ol class="steps">
     <li><b>求值域</b>：取 \(n=2^k\) 階乘法子群 \(H=\langle\omega\rangle=\{1,\omega,\dots,\omega^{\,n-1}\}\)；vanishing 多項式 \(Z_H(X)=X^{n}-1\)（在 \(H\) 上恆為 0，因為 \((\omega^i)^n=1\)）。</li>
@@ -627,8 +627,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- II-5b KZG full derivation (self-derivable) -->
 <section class="slide" data-part="II" data-label="KZG 完整推導">
-  <div class="slide-meta"><span class="part-label">PART II</span> · 完整推導（卡住時自己看）</div>
-  <h2>KZG：<span class="accent">每一步寫死，能自己推完</span></h2>
+  <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導</div>
+  <h2>KZG：<span class="accent">逐步形式推導</span></h2>
   <ol class="steps">
     <li><b>記號 &amp; SRS</b>：\([x]_1:=x\,g_1,\ [x]_2:=x\,g_2\)；\(\ \mathrm{srs}=\big([\tau^i]_1\big)_{i=0}^{d},\,[1]_2,[\tau]_2\)。秘密 \(\tau\) 用完即銷毀。</li>
     <li><b>承諾</b>（用 srs，不需知道 \(\tau\)）：\[ C=[f(\tau)]_1=\sum_{i=0}^{d} f_i\,[\tau^i]_1 \]</li>
@@ -671,7 +671,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- II-6b protocol -> verify identity (self-derivable) -->
 <section class="slide" data-part="II" data-label="驗證恆等式推導">
-  <div class="slide-meta"><span class="part-label">PART II</span> · 完整推導（卡住時自己看）</div>
+  <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導</div>
   <h2>協議 → <span class="accent">在隨機點 ζ 驗一條等式</span></h2>
   <ol class="steps">
     <li><b>承諾</b>：prover 用 KZG 承諾 \(a(X),\dots\)、grand-product \(Z(X)\)、商 \(t(X)\) → 一串群元素。</li>
@@ -941,7 +941,7 @@ Stage 4 VERIFY       verified      1.96 ms
 
 <!-- ===== appendix: classical ZK -> modern ZK updates ===== -->
 <section class="slide" data-part="收尾" data-label="現代 ZK 更新">
-  <div class="slide-meta"><span class="part-label">附錄</span> · 如果你的 ZK 印象停在幾年前</div>
+  <div class="slide-meta"><span class="part-label">附錄</span> · 經典 ZK → 現代 ZK</div>
   <h2>從<span class="accent">經典 ZK</span> 到<span class="accent">現代 ZK</span>：更新了什麼</h2>
   <div class="grid-3">
     <div class="card"><h3>不只 reduce 到離散對數</h3><p>經典：針對某 statement 設計 Sigma / Schnorr 協議。現代：<b>算術化 + 多項式承諾</b>（PLONK 範式）。</p></div>
