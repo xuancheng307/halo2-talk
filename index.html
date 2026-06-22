@@ -92,7 +92,7 @@ em{font-style:normal;color:var(--accent);font-weight:700}
 .defn{background:#f5f3ff;border-left:4px solid var(--violet);border-radius:0 8px 8px 0;padding:.7rem .95rem;margin:.6rem 0}
 .defn .dt{font-weight:800;color:#5b21b6;font-size:.86rem;letter-spacing:.05em;text-transform:uppercase;margin-right:.4rem}
 .defn .quote{font-family:'Inter',var(--font-sans);font-style:italic;color:#2b1769;font-size:1.06rem;line-height:1.6}
-.defn .gloss{font-size:.98rem;color:var(--text-dim);margin-top:.4rem;font-style:normal;line-height:1.55}
+.defn .gloss{font-size:.98rem;color:var(--text);margin-top:.4rem;font-style:normal;line-height:1.55}
 .defn .src{display:block;margin-top:.5rem;font-size:.82rem;color:#7c3aed;font-weight:600;text-decoration:none}
 .defn .src:hover{text-decoration:underline}
 .defn code{background:rgba(124,58,237,.1);padding:0 .25rem;border-radius:3px;font-family:var(--font-mono);font-size:.86em}
@@ -109,7 +109,7 @@ pre .k{color:#ff7b72}pre .c{color:#8b949e;font-style:italic}pre .s{color:#a5d6ff
 pre .n{color:#79c0ff}pre .ok{color:#3fb950;font-weight:700}pre .bad{color:#f85149;font-weight:700}pre .hl{color:#ffa657}
 
 table{border-collapse:collapse;width:100%;font-size:.99rem;margin-top:.4rem}
-th,td{border:1px solid var(--border);padding:.5rem .7rem;text-align:left;color:var(--text-dim)}
+th,td{border:1px solid var(--border);padding:.5rem .7rem;text-align:left;color:var(--text)}
 th{background:var(--surface);color:var(--text);font-weight:700}td b{color:var(--text)}
 tr.hl td{background:rgba(99,102,241,.07)}
 
@@ -219,8 +219,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 /* formula boxes */
 .fbox{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:.55rem .9rem;margin:.5rem 0}
 .fbox .lbl{font-size:.82rem;font-weight:700;color:var(--accent-light);margin-bottom:.1rem}
-.fbox .cmt{font-size:.86rem;color:var(--text-dim);margin-top:.15rem}
-.katex{font-size:1.06em}
+.fbox .cmt{font-size:.86rem;color:var(--text);margin-top:.15rem}
+.katex{font-size:1.06em;color:var(--text)}
 .katex-display{margin:.35rem 0}
 .steps{counter-reset:st;list-style:none;padding-left:0}
 .steps li{padding-left:2rem;position:relative;margin:.5rem 0}
@@ -665,6 +665,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   </div>
   <div class="fbox"><div class="lbl">這條閘的多項式形式（demo）</div>
     \[ s\cdot\big(\mathrm{acc}\cdot x + c - \mathrm{acc}'\big)=0,\qquad \mathrm{acc}'=\mathrm{acc}\ @\ \texttt{Rotation::next} \]
+    <div class="cmt" style="color:#15803d"><b>套我們的例子（第 0 列）：</b>\(s{=}1,\ \mathrm{acc}{=}2,\ x{=}3,\ c{=}3,\ \mathrm{acc}'{=}9\ \Rightarrow\ 1\cdot(2\cdot3+3-9)=0\ ✓\)（一路逼到第 3 列就是 98）。</div>
     <div class="cmt"><b>關鍵：</b>閘只能引用固定偏移的列（cur / next / prev），所以演算法要排成規則的縱向流水線 —— 這就是我們把 Horner 寫成「逐列遞推」的原因。一般地，一個閘是 \(\textstyle\sum_i s_i\,g_i(\text{cells})=0\)，每個 \(g_i\) 是多元多項式、每列須為 0。</div></div>
 </section>
 
@@ -787,6 +788,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <span class="gloss"><code>com(f)=[f(τ)]₁</code>（單一 G₁ 元素）、SRS = <code>{[τⁱ]₁},[τ]₂</code>，通用可更新、τ 用完即丟。</span>
         <a class="src" href="https://www.iacr.org/archive/asiacrypt2010/6477178/6477178.pdf" target="_blank" rel="noopener">Kate, Zaverucha, Goldberg — ASIACRYPT 2010 ↗</a></div>
       <p class="muted" style="font-size:.92rem;margin-top:.4rem">三步公式：<b>com</b> 承諾 \(C=[f(\tau)]_1\)、<b>open</b> 開啟 \(\pi=[q(\tau)]_1\)（\(q=\tfrac{f-v}{X-z}\)）、驗證一次配對 —— <b>完整推導見下一張</b>。</p>
+      <p class="muted" style="font-size:.9rem;margin-top:.2rem;color:#15803d">🔗 套例子：承諾我們的 \(a(X)\)（=[2,9,31,98] 插值）→ 群元素 \(C=[a(\tau)]_1\)（254-bit，真實位元組在 Part V）。</p>
     </div>
     <figure>
       <svg viewBox="0 0 440 230" role="img" aria-label="KZG 承諾流程">
@@ -816,7 +818,22 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <li><b>為何成立</b>（雙線性 \(e([a]_1,[b]_2)=e(g_1,g_2)^{ab}\)）：左 \(=e(g_1,g_2)^{f(\tau)-v}\)，右 \(=e(g_1,g_2)^{q(\tau)(\tau-z)}\)；相等 \(\Leftrightarrow f(\tau)-v=q(\tau)(\tau-z)\)，即恆等式在 \(X=\tau\) 成立。</li>
     <li><b>可靠性</b>：若 \(f(z)\neq v\)，則 \((X-z)\nmid(f(X)-v)\)，無合法 \(q\) → 偽造成功機率 \(\le \mathrm{negl}(\lambda)\)（q-DLOG / Schwartz–Zippel，\(\tau\) 為秘密隨機點）。</li>
   </ol>
-  <p class="muted" style="font-size:.92rem;margin-top:.2rem">大小：\(|C|=|\pi|=1\) 個 \(G_1\) 元素、驗證 = 2 次配對，<b>皆與 \(\deg f\)（電路大小）無關</b>。純 KZG 只綁定；要零知識需在 \(f\) 加 blinding。</p>
+  <p class="muted" style="font-size:.92rem;margin-top:.2rem">大小：\(|C|=|\pi|=1\) 個 \(G_1\) 元素、驗證 = 2 次配對，<b>皆與 \(\deg f\)（電路大小）無關</b>。純 KZG 只綁定；要零知識需在 \(f\) 加 blinding。<b style="color:#15803d"> 具體開啟見下一張範例。</b></p>
+</section>
+
+<!-- II-5c KZG worked example (concrete quotient) -->
+<section class="slide" data-part="II" data-label="KZG 範例">
+  <div class="slide-meta"><span class="part-label">PART II</span> · 第 3 層 · 範例</div>
+  <h2>KZG 範例：<span class="accent">開啟一個值（quotient 怎麼來）</span></h2>
+  <p class="muted" style="margin:0 0 .4rem;font-size:.96rem">要證「多項式 \(f\) 在 \(z\) 的值是 \(v\)」。用乾淨小例：取 \(f(X)=X^3,\ z=3,\ v=27\)。</p>
+  <ol class="steps">
+    <li><b>靈魂恆等式</b>：\(f(z)=v\ \Longleftrightarrow\ (X-z)\mid\big(f(X)-v\big)\)。這裡 \(f-v=X^3-27\)。</li>
+    <li><b>算商多項式 \(q\)（= 開啟證明的核心）</b>：\[ q(X)=\frac{X^3-27}{X-3}=X^2+3X+9 \]<span class="cmt">驗算：\((X^2+3X+9)(X-3)=X^3-27\ ✓\)。<b>能整除 ⟺ \(f(3)=27\) 真的成立。</b></span></li>
+    <li><b>承諾 + 開啟</b>：\(C=[f(\tau)]_1\)；開啟證明 \(\pi=[q(\tau)]_1=[\tau^2+3\tau+9]_1\)，<b>單一群元素</b>。</li>
+    <li><b>驗證（一條配對）</b>：\(e\big(C-[v]_1,[1]_2\big)\overset{?}{=}e\big(\pi,[\tau]_2-[z]_2\big)\)；雙線性下兩邊都 \(=e(g_1,g_2)^{\,f(\tau)-27}\)，相等就過。</li>
+  </ol>
+  <div class="fbox" style="border-left-color:#16a34a"><div class="lbl" style="color:#15803d">重點：為什麼這證明了 f(3)=27</div>
+    <div class="cmt">prover 算得出 \(q\)（整除成功）就證明了 \(f(3)=27\)；他若<b>說謊</b>（值不對），\((X-3)\) 不整除 \(f-v\)，<b>根本沒有合法的 \(q\)</b>，偽造機率可忽略。\(C,\pi\) 是 254-bit 群元素，真實位元組在 Part V 跑出來。</div></div>
 </section>
 
 <!-- II-6 SHPLONK + proof size -->
@@ -830,7 +847,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <span class="gloss">把「多條多項式、各在不同點開啟」批次成單一開啟證明（其方案 2：2 個 G₁ 元素），驗證僅 2 次配對 → 證明小、驗證快。</span>
         <a class="src" href="https://eprint.iacr.org/2020/081" target="_blank" rel="noopener">Boneh, Drake, Fisch, Gabizon — ePrint 2020/081 ↗</a></div>
       <p style="font-size:.95rem"><b>Fiat–Shamir</b>：把互動挑戰換成對 transcript 的雜湊；PSE v0.3.0 預設 <b>Blake2b</b> → 非互動。</p>
-      <p class="muted" style="font-size:.9rem;margin-top:.45rem">🔗 接續例子：\(a(X)\)、\(G(X)\)、\(t(X)\)、\(Z(X)\) 這幾條在 \(\zeta\)／\(\omega\zeta\) 的開啟，批次成<b>一個</b> \(\pi\)。</p>
+      <p class="muted" style="font-size:.9rem;margin-top:.45rem">🔗 接續例子：\(a(X)\)、\(G(X)\)、\(t(X)\)、\(Z(X)\) 這幾條在 \(\zeta\)／\(\omega\zeta\) 的開啟（我們 \(n=4,\ Z_H=X^4-1\)），批次成<b>一個</b> \(\pi\)。</p>
     </div>
     <figure>
       <svg viewBox="0 0 440 230" role="img" aria-label="證明大小不隨列數成長">
@@ -1224,6 +1241,7 @@ Stage 4 VERIFY       verified      1.96 ms
 '整除性範例':"承接上一張的抽象推導，這張直接拿我們的 demo 跑一遍，讓抽象變具體。\n例子：P(x)=2x³+3x²+4x+5，取 x=3，逐步 Horner 把 acc 從 2 一路算到 98。\n【五步走查】\n① 算術化：填成 4 列 trace —— acc=[2,9,31,98]、x 都是 3、coeff=[3,4,5]、sel=[1,1,1,0]。\n② 每欄插值成一條多項式：a(X) 在 ωⁱ 取 [2,9,31,98]、x(X) 恆 3、c(X)、s(X) 同理；讀「下一列」就是 a(ωX)。\n③ 整條閘變成一條多項式 g(X)=s(X)(a(X)x(X)+c(X)−a(ωX))。\n④ 逐列檢查 g 在每個 ωⁱ 是不是 0：ω⁰ 是 2·3+3−9=0、ω¹ 是 9·3+4−31=0、ω² 是 31·3+5−98=0、ω³ 那列 sel=0 整條關掉 —— 全是 0。\n⑤ g 在整個 H 上為 0，就等價於 Z_H 整除 g，也就是存在一條商多項式 t 使 g=t·Z_H（這裡 Z_H=X⁴−1）。\n一句話：上一張抽象的『計算正確 ⟺ ∃t 使 G=t·Z_H』，這張用我們的例子真的兌現了一次。",
 'KZG 承諾':"第三層,多項式承諾。\n先給形式定義 —— 一個承諾方案是 gen、com、open 三件套,這句是 BDFG 論文 Definition 2.3 的原文。\n【gen / com / open 是什麼】\ngen 產 SRS(一次性、所有電路共用、秘密 τ 用完即丟);com 把一條多項式 f 壓成一個簡短綁定的承諾 cm(KZG 就是一個群元素 [f(τ)]₁);open 證「這條已承諾的 f 在某點 z 的值是 v」,送一個開啟證明 π,驗證者一次配對就信。\nKZG 的具體做法:對一條多項式的承諾,就壓成單一個群元素;要證明它在某點的值,用一次配對檢查。\nSRS 是通用且可更新的,只要設定儀式中有一個人誠實就安全;那個秘密 τ 用完即丟。\n我們論文如實把這當成一條信任假設,不宣稱 trustless。\n【接續我們的例子】\n要承諾的就是上一張那些多項式 —— a(X)（插值 [2,9,31,98]）、合成的 G(X)、商 t(X);每一條用 KZG 壓成一個 G₁ 群元素 [·(τ)]₁。",
 'KZG 完整推導':"這張把 KZG 每一步完整列出,各位可以照著推。\n【KZG 逐步推導】\n先講記號:中括號 x 下標 1 表示 x 乘上群 G1 的生成元,SRS 就是 τ 的各次方藏在指數裡,τ 本人銷毀。\n承諾就是把 f 在 τ 的值算在指數裡,得到單一個群元素 C。\n再來是整個 KZG 的靈魂那條恆等式:f 在 z 等於 v,等價於 X 減 z 整除 f 減 v,也就是存在商多項式 q 使 f 減 v 等於 q 乘 X 減 z。\n開啟就是送 q 在 τ 的承諾 π。\n驗證是一條配對等式。\n為什麼這條配對等式就驗證了那條恆等式?用雙線性:e 把指數裡的乘法搬出來,左邊變成 f(τ) 減 v、右邊變成 q(τ) 乘 τ 減 z,兩邊相等就等於恆等式在 τ 這個秘密點成立。\n如果證明者說謊,X 減 z 不整除,根本沒有合法的 q,偽造機率可忽略。\n最後:承諾跟證明都只有一個群元素、驗證兩次配對,跟多項式次數無關 —— 純 KZG 只綁定,要零知識得加 blinding。\n【接續我們的例子】\n把那條 f 想成我們的 a(X);要證它在某點 z 等於 v,就送 q=(a−v)/(X−z) 在 τ 的承諾,配對等式驗的就是這條恆等式。",
+'KZG 範例':"上一張是抽象推導，這張用一個乾淨小例把 KZG 的「開啟」講具體。\n要證的是『某條多項式 f 在 z 的值是 v』，我取 f(X)=X³、z=3、v=27。\n【開啟怎麼算】\n① 靈魂恆等式：f(z)=v 等價於 (X−z) 整除 f−v。這裡 f−v=X³−27。\n② 算商多項式：q(X)=(X³−27)/(X−3)=X²+3X+9（差立方）；驗算 (X²+3X+9)(X−3)=X³−27，對。能整除就證明 f(3)=27。\n③ 承諾 C=[f(τ)]₁、開啟證明 π=[q(τ)]₁，都只是一個群元素。\n④ 驗證一條配對：用雙線性，兩邊都等於 e(g1,g2) 的 f(τ)−27 次方，相等就過。\n重點：算得出 q 就是真的；說謊時 X−3 不整除 f−v，沒有合法的 q，偽造機率可忽略。群元素是 254-bit，真實位元組在 Part V 跑出來。",
 'SHPLONK':"為什麼證明可以又小、又不隨計算深度成長?關鍵在 SHPLONK。\n投影片這句是 BDFG 2020/081 的摘要原文:它把「多條多項式、各在不同點開啟」批次成單一開啟證明,他們的第二個方案只要兩個群元素、兩次配對。\n配合右邊這張圖:列數一直翻倍,proof 幾乎不動。\n我們論文的電路就是這性質的體現 —— N 不管多大,proof 恆 31,872 bytes。\n另外 Fiat–Shamir 把互動挑戰換成對 transcript 的雜湊,PSE 預設用 Blake2b。\n下一張就把這些隨機挑戰按正確順序串起來,收尾整條協議。\n【接續我們的例子】\na(X)、合成 G(X)、商 t(X)、排列 Z(X) 這幾條,在 ζ（和讀下一列的 ωζ）各自要開啟的值,全部批次成一個 π;N 多大都恆 31,872 bytes 講的就是這件事。",
 '驗證恆等式推導':"這張把整條協議收尾。先強調一個 soundness 關鍵:Fiat–Shamir 的每個挑戰,都必須在相關承諾送出之後才抽,所以這是承諾跟挑戰交錯的回合,不是一次全送、一次全抽。\n【承諾 ↔ 挑戰 回合詳解】\n① 第一回合,承諾各個 advice 欄,先加 blinding 隨機項給零知識。\n② 對 transcript 雜湊抽出 β、γ,第二回合用它們建排列跟查表的 grand-product Z 並承諾。\n③ 再抽 α,第三回合算商 t 等於 G 除以 Z_H;因為 t 次數高,要切成多塊小於 n 次的 t0、t1 各自承諾。\n④ 最後抽求值點 ζ,在 ζ 開啟所有多項式,需要讀下一列的就在 ω 乘 ζ 也開一次,每個都附 KZG 開啟證明。\n⑤ 驗證者把開啟值代進去,檢查 G 在 ζ 等於 t 在 ζ 乘上 ζ 的 n 次方減 1;Schwartz–Zippel 保證在隨機 ζ 成立就幾乎處處成立。\n所有開啟用 SHPLONK 批次,實作再用 linearization 減少開啟數。\n【接續我們的例子】\n我們例子 n=4,所以最後驗的就是 G(ζ)=t(ζ)(ζ⁴−1);ζ 是對 transcript 雜湊抽出的隨機點。",
 '為什麼能用':"第三部分:為什麼這套東西數學上站得住?我想回答一個直覺上的疑問 —— 為什麼只在一個隨機點檢查,就能相信整條多項式?",
@@ -1779,7 +1797,7 @@ Stage 4 VERIFY       verified      1.96 ms
 
   // teleprompter: while open, panels follow the slide you scroll to
   // ===== pipeline locator rail: mark which stage we are on + the connecting action between steps =====
-  const STAGE={'算術化':1,'四種欄':1,'自訂閘':2,'複製約束 / 查表':2,'整除性推導':3,'整除性範例':3,'KZG 承諾':4,'KZG 完整推導':4,'SHPLONK':5,'驗證恆等式推導':6};
+  const STAGE={'算術化':1,'四種欄':1,'自訂閘':2,'複製約束 / 查表':2,'整除性推導':3,'整除性範例':3,'KZG 承諾':4,'KZG 完整推導':4,'KZG 範例':4,'SHPLONK':5,'驗證恆等式推導':6};
   slides.forEach(s=>{if(STAGE[s.dataset.label])s.classList.add('rail');});
   const rail=document.createElement('div'); rail.className='flowrail';
   rail.innerHTML='<div class="fr-title">證明流程 · 你在這</div>'+[[1,'算術化 · 排表','填見證 + 加規則'],[2,'加約束 · 閘/複製/查表','每欄插值成多項式'],[3,'多項式 · 整除 Z_H','承諾每條多項式'],[4,'KZG 承諾','FS 抽隨機點 + 批次'],[5,'SHPLONK 批次開啟','在 ζ 開啟 + 配對'],[6,'隨機點驗證',null]].map(a=>'<div class="fr-stage" data-s="'+a[0]+'"><span class="fr-n">'+a[0]+'</span>'+a[1]+'</div>'+(a[2]?'<div class="fr-arrow">↓ '+a[2]+'</div>':'')).join('');
