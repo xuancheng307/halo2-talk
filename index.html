@@ -160,6 +160,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .qa-body .qa-q{font-weight:800;color:#b45309;margin-bottom:.2rem}
 .qa-body .qa-a{color:#1a1a1f}
 .qa-body .qa-empty{color:var(--text-dim);font-style:italic}
+.qa-body .qa-sec{font-weight:800;color:#92400e;margin:.7rem 0 .5rem;padding-bottom:.18rem;border-bottom:2px solid rgba(217,119,6,.4);font-size:.9rem}
+.qa-body .qa-sec:first-child{margin-top:0}
 /* formula boxes */
 .fbox{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:.55rem .9rem;margin:.5rem 0}
 .fbox .lbl{font-size:.82rem;font-weight:700;color:var(--accent-light);margin-bottom:.1rem}
@@ -190,9 +192,9 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="note-foot"><button class="note-nav" id="notePrev">◀ 上一節</button><span class="note-idx" id="noteIdx">— / —</span><button class="note-nav" id="noteNext">下一節 ▶</button></div>
 </div>
 
-<button class="note-btn qa-btn" id="qaBtn" title="可能被問（按 q 鍵開關）">❓ 問答</button>
-<div class="note-modal qa" id="qaModal" role="dialog" aria-modal="true" aria-label="可能被問">
-  <div class="note-head"><h3>可能被問 <span class="tag" id="qaTag"></span></h3><button class="note-close" id="qaClose" aria-label="關閉">×</button></div>
+<button class="note-btn qa-btn" id="qaBtn" title="名詞解釋 + 可能被問（按 q 鍵開關）">❓ 名詞·問答</button>
+<div class="note-modal qa" id="qaModal" role="dialog" aria-modal="true" aria-label="名詞解釋與問答">
+  <div class="note-head"><h3>名詞 · 問答 <span class="tag" id="qaTag"></span></h3><button class="note-close" id="qaClose" aria-label="關閉">×</button></div>
   <div class="note-body qa-body" id="qaBody"></div>
   <div class="note-foot"><button class="note-nav" id="qaPrev">◀ 上一節</button><span class="note-idx" id="qaIdx">— / —</span><button class="note-nav" id="qaNext">下一節 ▶</button></div>
 </div>
@@ -1165,6 +1167,208 @@ Stage 4 VERIFY       verified      1.96 ms
   const labels=slides.map(s=>s.dataset.label||'');
   let viewIdx=0;
 
+  // ===== glossary: define every term once, then map per slide =====
+  const GLOSS = {
+"Halo2":"PLONKish 算術化 + 多項式承諾的零知識證明框架；不是單一協議，而是『描述電路 → 自動產生/驗證證明』的系統。",
+"零知識證明":"證明某敘述為真、卻不洩漏除『為真』以外任何資訊的協議。",
+"可驗證計算":"證明『我正確執行了某段計算』，讓他人不重算也能信任結果。",
+"PLONKish 算術化":"Halo2 的電路表示法：把計算排成矩形表（列=步驟、欄=多項式），用多項式約束描述正確性。",
+"算術化":"把『計算正確』翻譯成『有限域上的多項式約束成立』的過程。",
+"KZG":"一種多項式承諾：把整條多項式壓成單一群元素，某點取值用一次配對驗證；需一次性可信設定。",
+"BN254":"配對友善橢圓曲線（約 128-bit 安全）；以太坊內建其配對 precompile，上鏈驗證便宜。",
+"SHPLONK":"批次開啟技術：把多條多項式在多個點的開啟合併成單一證明（2 群元素、2 配對）→ 證明小、驗證快。",
+"PSE":"Privacy & Scaling Explorations，以太坊基金會旗下團隊；維護把 Halo2 承諾換成 KZG/BN254 的社群分支。",
+"halo2_proofs v0.3.0":"我們用的 PSE Halo2 函式庫版本；PF1/PF2 與 demo 都鎖這版。",
+"prove / verify":"prove=證明者產生證明 π；verify=驗證者用公開輸入+π 檢查是否接受。",
+"私密輸入":"只有證明者知道、不洩漏給驗證者的輸入（witness 的一部分）。",
+"見證 (witness)":"讓敘述成立的私密資料（私密輸入 + 中間 advice 值）。",
+"Halo":"2019 年 Bowe–Grigg–Hopwood 提出的『免可信設定遞迴證明組合』，Halo2 的前身。",
+"遞迴證明組合":"讓一個證明去驗證另一個證明，把多個證明摺疊聚合（recursion）。",
+"可信設定 (trusted setup)":"產生公共參數的一次性儀式；若其秘密未銷毀可偽造證明。KZG 需要、IPA 不需要。",
+"離散對數假設":"已知 g 與 h=g 的 a 次方卻無法有效求出 a；Pedersen/IPA 的安全根基。",
+"橢圓曲線":"密碼學用的代數群，群上離散對數困難。",
+"多項式承諾":"對一條多項式產生簡短承諾，日後可證明它在某點的取值而不揭露整條多項式。",
+"IACR ePrint":"密碼學論文預印本庫（eprint.iacr.org）；本報告定義出處。",
+"Bulletproofs":"2017 年的短證明、免可信設定 ZK 系統；核心是內積論證 IPA，安全靠離散對數，驗證為線性。",
+"Groth16":"2016 年 pairing-based zk-SNARK；證明僅 3 群元素、驗證 3 配對，但每電路要專屬可信設定、用 R1CS。",
+"IPA (內積論證)":"Inner-Product Argument：用對折手法證明兩向量內積正確，證明 O(log n)、免設定、驗證線性。",
+"pairing (配對)":"雙線性映射 e(aG,bH)=e(G,H) 的 ab 次方；讓驗證者在指數裡檢查乘法關係，是 KZG/Groth16 的核心。",
+"QAP":"Quadratic Arithmetic Program：Groth16 把 R1CS 轉成多項式整除關係的編碼。",
+"R1CS":"Rank-1 Constraint System：每條約束形如 (a·s)(b·s)=(c·s) 的電路表示法（Groth16 用）。",
+"O(log n)":"與輸入規模 n 成對數成長（Bulletproofs 證明大小）。",
+"群元素":"橢圓曲線群上的一個點；證明大小常以『幾個群元素』衡量。",
+"MSM":"Multi-Scalar Multiplication：一堆『純量×點』再相加，是驗證/證明的主要計算量。",
+"AGM":"Algebraic Group Model：分析 pairing 型 SNARK 的理想化模型，假設對手每個群元素都能交代其線性組合。",
+"KoE":"Knowledge-of-Exponent 假設：Groth16 等用到的較強代數假設。",
+"q-DLOG":"離散對數的多項式推廣：給 τ 的各次方仍算不回 τ；KZG 知識可靠性的假設。",
+"自訂閘 (custom gate)":"使用者自定義、可跨相鄰列的低次多項式約束；Halo2/PLONK 的彈性來源。",
+"查表 (lookup)":"證明某值落在一張預定義表內；做範圍檢查、S-box 等很便宜（原始協議 plookup）。",
+"算術電路":"由有限域上加法/乘法閘組成的計算圖；電路 SAT 是 NP-complete。",
+"完備性 (completeness)":"誠實證明者照規則跑，驗證者必接受（機率 1）。",
+"可靠性 (soundness)":"假敘述無法騙過驗證者（除可忽略機率）。",
+"知識可靠性 (knowledge soundness)":"比可靠性更強：能過關就表示證明者真的『知道』見證（存在抽取器把它抽出）。",
+"零知識 (zero knowledge)":"證明不洩漏見證的任何資訊（存在模擬器可偽造同分布證明）。",
+"非互動 (non-interactive)":"證明者一次送出證明、不需來回互動；用 Fiat–Shamir 把互動挑戰換成雜湊達成。",
+"PLONK":"2019 年通用可更新 SNARK；用『子群上的取值 + 排列論證』，是 Halo2 的範式基礎。",
+"Sigma 協議":"經典三步（承諾-挑戰-回應）互動證明，如 Schnorr。",
+"Schnorr":"證明『我知道某公鑰的離散對數私鑰』的經典 Sigma 協議。",
+"SNARK":"簡潔非互動知識論證：證明短、驗證快（與計算量成 polylog）。",
+"zk-SNARK":"再加上零知識性質的 SNARK。",
+"範式轉移":"從『把問題 reduce 到單一困難問題（如離散對數）』轉向『算術化 + 多項式承諾』的思路改變。",
+"通用 SNARK":"一次設定可用於任意電路（universal），不必每電路重做。",
+"通用可更新 SRS":"一份所有電路共用、且可由新參與者持續更新增強的公共參數。",
+"SRS":"Structured Reference String：承諾方案的公共參數（如 KZG 的 τ 各次方）。",
+"多項式 IOP":"把電路正確性編碼成多項式恆等式，證明者承諾多項式、驗證者隨機點抽查的框架。",
+"UltraPLONK":"PLONK 加上查表（lookup）能力的版本，Halo2 採用。",
+"關係 R":"規定哪些『公開輸入 x + 私密見證 w』組合算合法的集合；定義『要證什麼』。",
+"電路 (circuit)":"關係 R 在證明系統裡的具體實作。",
+"advice 欄":"對應見證的欄；prover 私有（如 acc 累加器、x）。",
+"instance 欄":"放公開輸入/輸出的欄；prover 與 verifier 共享（如 P(x)=98）。",
+"fixed 欄":"電路固定的常數欄（如係數、ByteTable），屬 verification key。",
+"selector":"fixed 欄裡的 0/1 開關，決定某列哪條閘生效。",
+"Horner 閘":"逐步求多項式值的閘：acc_next = acc·x + 係數；我們論文的核心結構。",
+"R_C":"由電路誘導的 NP 關係：所有 (x,w) 使存在 trace 讓全部閘/查表/複製約束成立。",
+"trace (table)":"電路執行填出的數值表（2^k 列 × 數欄），每格是有限域元素。",
+"𝔽ᵣ (有限域)":"模一個大質數 r 的整數體；電路所有值都在此體內，沒有小數。",
+"Gate (閘)":"在每列都必須等於 0 的多項式約束。",
+"Lookup":"查表約束：被查值必須落在指定表內。",
+"Copy constraint (複製約束)":"指定兩個 cell 必須相等的約束。",
+"effective relation":"古典定義裡可有效驗證的關係 R ⊆ X×Y。",
+"L_R (language)":"關係 R 對應的語言：存在見證使 (x,y)∈R 的所有 y。",
+"polynomial constraints":"多項式約束：電路規則寫成『每列須為 0 的多項式』。",
+"arithmetization soundness":"電路誘導的 R_C 是否真等於想證的數學關係；我們用截斷閘/範圍檢查/誤差界補上。",
+"extractor (抽取器)":"理論演算法：能從會過關的證明中抽出見證，用來證明知識可靠性。",
+"NARK":"非互動知識論證（未必簡潔）；加上簡潔性才叫 SNARK。",
+"簡潔性 (succinct)":"證明長度與驗證時間只與電路大小成 polylog（甚至常數）。",
+"兩層架構":"上層 PLONKish 算術化 + 下層多項式承諾；換承諾層（IPA 換 KZG）不動上層。",
+"Pasta (Pallas/Vesta)":"一對互為循環的橢圓曲線；原版 Halo2 用於 IPA + 遞迴。",
+"EVM precompile":"以太坊虛擬機內建的高效運算（如 BN254 配對），讓鏈上驗證便宜。",
+"Zcash Orchard":"Zcash 的隱私交易電路；用原版 Halo2（IPA/Pasta），非 KZG。",
+"statement":"要證的命題：某個 (x,w)∈R 成立。",
+"低次多項式":"次數受小常數限制的約束（次數越高證明越貴）。",
+"NP 關係":"給了見證就能多項式時間驗證的關係；電路型系統都能表達。",
+"poly-time":"多項式時間（可有效完成）。",
+"PF1":"我們的電路一：證明投組淨加權 delta 在風險限額內 |Σ wΔ|≤τ，不洩漏個別部位。",
+"PF2":"我們的電路二：處理狀態轉移（EdDSA、Poseidon Merkle）。",
+"τ (toxic waste)":"KZG 可信設定的秘密；用完必須銷毀，否則可偽造證明。",
+"π (proof)":"證明者送給驗證者的證明物件。",
+"多元多項式":"含多個變數的多項式；自訂閘約束就是這種、每列須為 0。",
+"rotation":"在閘裡引用『相鄰列』同一欄的值（cur/next/prev），對應代入 ωX。",
+"排列大乘積 (grand product)":"用一個連乘 Z 檢查兩個多重集相等的技巧（複製約束/查表都用）。",
+"置換 σ (permutation)":"把要相等的 cell 串成環的對應關係。",
+"多重集 (multiset)":"允許重複的集合；排列論證要求兩多重集相等。",
+"β,γ,α,ζ":"Fiat–Shamir 抽出的隨機挑戰（排列用 β,γ；合成約束用 α；最終取值點用 ζ）。",
+"乘法子群 H":"有限域乘法群裡 2^k 階的子群 H=⟨ω⟩；trace 各列對應其元素。",
+"logUp / log-derivative":"用對數導數連乘式做查表論證的高效方法。",
+"ByteTable":"0–255 的固定表；把數拆成 byte 逐一查表即完成範圍檢查。",
+"ω (單位根)":"H 的生成元（primitive root of unity）；第 i 列對應 ωⁱ。",
+"vanishing 多項式 Z_H":"在子群 H 上恆為 0 的多項式 Z_H(X)=Xⁿ−1。",
+"Lagrange 插值":"由各列的值還原出一條多項式，使其在 ωⁱ 取到第 i 列的值。",
+"商多項式 t (quotient)":"t=G/Z_H；t 存在 ⟺ G 在 H 上恆 0 ⟺ 每列約束都成立。",
+"整除 (Z_H | G)":"Z_H 整除 G：存在 t 使 G=t·Z_H。",
+"gen/com/open":"承諾方案三件套：產生參數、對多項式承諾、開啟某點取值。",
+"G₁ / G₂":"配對用的兩個來源群；KZG 承諾在 G₁、驗證配對跨 G₁×G₂。",
+"雙線性 (bilinearity)":"e(aG,bH)=e(G,H) 的 ab 次方；把指數裡的乘法搬到配對外，使配對等式能驗恆等式。",
+"配對檢查":"用一條 pairing 等式驗證 KZG 開啟是否正確。",
+"transcript":"目前為止所有承諾/訊息的紀錄；Fiat–Shamir 對它雜湊產生挑戰。",
+"Blake2b":"一種雜湊函數；PSE v0.3.0 預設的 Fiat–Shamir transcript 雜湊。",
+"Fiat–Shamir":"把互動式挑戰換成『對 transcript 雜湊』→ 協議變非互動（隨機預言機模型下安全）。",
+"blinding":"在 advice 多項式加隨機項，讓承諾/開啟不洩漏見證 → 零知識。",
+"grand-product Z":"排列/查表論證用的連乘多項式，從 1 走回 1 才表示約束成立。",
+"linearization":"把多條要開啟的多項式線性組合，減少開啟點與驗證成本的實作優化。",
+"Schwartz–Zippel":"非零、次數 d 的多項式在隨機點為 0 的機率 ≤ d/|𝔽|；故隨機點成立幾乎等於處處成立。",
+"承諾綁定 (binding)":"承諾後無法再改成別的多項式/值（KZG 在 q-DLOG 下成立）。",
+"模擬器 (simulator)":"零知識裡：不知見證也能產生同分布證明的理論演算法。",
+"ROM (隨機預言機)":"把雜湊理想化成隨機函數的模型；Fiat–Shamir 安全性在此模型下成立。",
+"128-bit 安全":"破解約需 2^128 次運算、目前視為安全；BN254 提供此等級。",
+"degree (次數)":"多項式最高次方；閘次數影響證明成本（Halo2 約 ≤6）。",
+"wiring":"把電路不同 cell 接線在一起（複製約束實現）。",
+"MUX":"多工器；用 selector 在兩條路徑間選一條。",
+"k (電路規模)":"電路為 2^k 列；k 越大越耗記憶體（k=28 約 30GB）。",
+"boolean 拆解":"把一個值拆成位元再各自約束；位元運算（SHA/Keccak）因此很貴。",
+"SHA / Keccak":"雜湊函數；在算術電路裡做位元運算成本高（貴約 2 個數量級）。",
+"除法 / 模逆":"有限域沒有原生除法；prover 提供商/逆當見證再用乘法驗證。",
+"quotient witness":"把『除法結果』當見證提供，再用乘法約束驗證正確。",
+"浮點":"IEEE 小數運算；有限域沒有原生支援，是 Halo2 的硬限制。",
+"pp=48 定點":"用尺度 S=2^48 把實數編碼成整數來模擬小數（fixed-point precision 48）。",
+"資料相依控制流":"分支/迴圈次數取決於私密資料；電路固定大小，不允許。",
+"exp / ln / erf":"指數、自然對數、誤差函數等超越函數；Halo2 無原生支援。",
+"超越函數":"非多項式/非代數的函數（exp、ln、erf…）；我們用多項式逼近在電路重建。",
+"多項式逼近":"用一條多項式近似目標函數，讓電路只需加乘即可求值。",
+"Remez minimax":"求『整個區間最大誤差最小』的逼近多項式係數的演算法。",
+"尺度 S=2^pp":"定點縮放因子；實數 v 編碼成 round(v·S)。",
+"餘數 rem":"截斷除法 ÷S 的餘數；閘強制 rem∈[0,S) 保證誠實截斷。",
+"floor ⌊⌋":"下取整；定點截斷每步除以 S 後取整。",
+"NU5":"Zcash 的 Network Upgrade 5，啟用 Orchard。",
+"Scroll / Taiko":"以太坊 zkEVM 專案；走 PSE Halo2 KZG/BN254 路線。",
+"zkEVM":"用 ZK 證明以太坊虛擬機執行正確的系統。",
+"Aztec":"隱私 L2；用 PLONK + KZG，同家族。",
+"Plonky2":"Polygon 的證明系統，走 STARK/FRI（非 Halo2）。",
+"STARK":"用雜湊與 FRI、免可信設定、後量子較友善的證明系統。",
+"EdDSA":"基於橢圓曲線的數位簽章；PF2 在電路內驗證。",
+"Poseidon":"為 ZK 電路設計的低約束雜湊；我們 Merkle 樹用它。",
+"Merkle 樹":"用雜湊把多筆資料壓成單一根；證明某葉存在只需一條路徑。",
+"ConstraintSystem":"Halo2 設定電路（宣告欄、閘、約束）的 API 物件。",
+"advice_column / fixed_column / instance_column":"宣告三種欄（私密見證 / 固定常數 / 公開輸入）的 API。",
+"enable_equality":"開啟某欄可參與複製約束（cell 相等）。",
+"create_gate":"定義一條自訂閘（多項式約束）的 API。",
+"query_selector / query_advice":"在閘裡取出 selector / advice 欄（可帶 rotation）的值。",
+"Rotation::cur / next":"取本列 / 下一列的同欄值。",
+"synthesize":"把見證實際填進 trace 表的階段。",
+"region":"配置 cell 的局部區域；在其中 assign 值。",
+"assign_advice / assign_fixed":"把值填進 advice / fixed 欄的某格。",
+"constrain_equal":"宣告兩個 cell 必須相等（複製約束）。",
+"constrain_instance":"把某 cell 綁到公開 instance 的值。",
+"layouter":"負責把多個 region 排進整張表的配置器。",
+"MockProver":"只檢查約束、不做密碼學的除錯工具；prove 前先過它。",
+"keygen":"從電路 + SRS 產生 proving key / verification key。",
+"zkRollup":"把大量交易在鏈下證明、鏈上只驗一個證明的擴容方案。",
+"zkML":"用 ZK 證明機器學習推論正確。",
+"償付能力證明":"交易所證明『資產 ≥ 負債』而不洩漏明細（proof of solvency）。",
+"後量子":"能抵抗量子電腦攻擊；KZG/離散對數型非後量子，STARK 較友善。",
+"The halo2 Book":"Halo2 官方文件（zcash.github.io/halo2）；本報告定義原文出處（MIT/Apache）。",
+"MIT/Apache / CC-BY":"開源/開放授權；本報告引用原文均依其授權標註出處。"
+  };
+  const TERMS = {
+'封面':["零知識證明","Halo2","PLONKish 算術化","KZG","BN254","SHPLONK","PSE","halo2_proofs v0.3.0","prove / verify"],
+'路線圖':["算術化","自訂閘 (custom gate)","多項式承諾","完備性 (completeness)","可靠性 (soundness)","零知識 (zero knowledge)","簡潔性 (succinct)","Horner 閘","超越函數","可信設定 (trusted setup)"],
+'在做什麼':["可驗證計算","私密輸入"],
+'家譜':["Halo","遞迴證明組合","可信設定 (trusted setup)","離散對數假設","橢圓曲線","算術化","多項式承諾","IACR ePrint"],
+'為什麼要有 Halo2':["Bulletproofs","Groth16","IPA (內積論證)","pairing (配對)","可信設定 (trusted setup)","QAP","R1CS","O(log n)","群元素","MSM","AGM","KoE","q-DLOG","自訂閘 (custom gate)","查表 (lookup)","算術電路","離散對數假設","KZG","算術化","多項式承諾","超越函數"],
+'原文背書 + 那座橋':["Bulletproofs","Groth16","完備性 (completeness)","可靠性 (soundness)","知識可靠性 (knowledge soundness)","零知識 (zero knowledge)","非互動 (non-interactive)","離散對數假設","pairing (配對)","IPA (內積論證)"],
+'PLONK':["PLONK","Sigma 協議","Schnorr","SNARK","zk-SNARK","範式轉移","通用 SNARK","通用可更新 SRS","SRS","多項式 IOP","自訂閘 (custom gate)","查表 (lookup)","UltraPLONK"],
+'基礎定義':["關係 R","電路 (circuit)","見證 (witness)","advice 欄","instance 欄","Horner 閘","zk-SNARK"],
+'輸入什麼 + 形式化':["R_C","trace (table)","𝔽ᵣ (有限域)","instance 欄","advice 欄","fixed 欄","Gate (閘)","Lookup","Copy constraint (複製約束)","effective relation","L_R (language)","polynomial constraints","關係 R","arithmetization soundness"],
+'zk-SNARK 性質':["完備性 (completeness)","可靠性 (soundness)","知識可靠性 (knowledge soundness)","extractor (抽取器)","零知識 (zero knowledge)","NARK","SNARK","zk-SNARK","簡潔性 (succinct)"],
+'兩層架構':["兩層架構","算術化","多項式承諾","IPA (內積論證)","Pasta (Pallas/Vesta)","KZG","BN254","SRS","EVM precompile","Zcash Orchard","可信設定 (trusted setup)"],
+'怎麼做':["算術化","自訂閘 (custom gate)","Copy constraint (複製約束)","查表 (lookup)","KZG","SHPLONK","Fiat–Shamir","prove / verify"],
+'要證什麼 + 限制':["statement","關係 R","R_C","𝔽ᵣ (有限域)","算術電路","k (電路規模)","低次多項式","NP 關係","poly-time","trace (table)","PF1","τ (toxic waste)","浮點"],
+'完整流程圖':["算術化","SRS","keygen","π (proof)","prove / verify"],
+'算術化':["算術化","polynomial constraints","PLONKish 算術化","𝔽ᵣ (有限域)","trace (table)"],
+'四種欄':["fixed 欄","advice 欄","instance 欄","selector","見證 (witness)"],
+'自訂閘':["自訂閘 (custom gate)","多元多項式","selector","rotation","Gate (閘)","Horner 閘"],
+'複製約束 / 查表':["Copy constraint (複製約束)","查表 (lookup)","排列大乘積 (grand product)","置換 σ (permutation)","多重集 (multiset)","β,γ,α,ζ","Fiat–Shamir","乘法子群 H","logUp / log-derivative","ByteTable"],
+'整除性推導':["乘法子群 H","ω (單位根)","vanishing 多項式 Z_H","Lagrange 插值","rotation","β,γ,α,ζ","商多項式 t (quotient)","整除 (Z_H | G)","Gate (閘)"],
+'KZG 承諾':["多項式承諾","KZG","gen/com/open","SRS","G₁ / G₂","配對檢查","τ (toxic waste)","通用可更新 SRS"],
+'KZG 完整推導':["KZG","SRS","τ (toxic waste)","商多項式 t (quotient)","π (proof)","配對檢查","雙線性 (bilinearity)","G₁ / G₂","q-DLOG","Schwartz–Zippel"],
+'SHPLONK':["SHPLONK","KZG","群元素","配對檢查","Fiat–Shamir","transcript","Blake2b","非互動 (non-interactive)"],
+'驗證恆等式推導':["Fiat–Shamir","可靠性 (soundness)","blinding","grand-product Z","β,γ,α,ζ","商多項式 t (quotient)","rotation","KZG","Schwartz–Zippel","linearization","vanishing 多項式 Z_H"],
+'為什麼成立':["Schwartz–Zippel","完備性 (completeness)","可靠性 (soundness)","零知識 (zero knowledge)","簡潔性 (succinct)","承諾綁定 (binding)","AGM","extractor (抽取器)","模擬器 (simulator)","q-DLOG","128-bit 安全","ROM (隨機預言機)","KZG","SHPLONK"],
+'能 / 不能':["𝔽ᵣ (有限域)","degree (次數)","rotation","查表 (lookup)","Copy constraint (複製約束)","wiring","selector","MUX","k (電路規模)","boolean 拆解","SHA / Keccak","除法 / 模逆","quotient witness","浮點","pp=48 定點","資料相依控制流"],
+'我們怎麼用它':["浮點","exp / ln / erf","超越函數","pp=48 定點","多項式逼近","Horner 閘"],
+'超越函數塞進閘':["超越函數","ByteTable","fixed 欄","餘數 rem","Lookup","Horner 閘","pp=48 定點"],
+'kernel 公式':["pp=48 定點","尺度 S=2^pp","Remez minimax","Horner 閘","餘數 rem","floor ⌊⌋","fixed 欄","超越函數"],
+'用在哪 + 範例':["prove / verify","PF1","PF2"],
+'用在哪裡':["Zcash Orchard","NU5","IPA (內積論證)","Pasta (Pallas/Vesta)","Scroll / Taiko","zkEVM","KZG","BN254","Aztec","PLONK","Plonky2","STARK","PF1","PF2","EdDSA","Poseidon","Merkle 樹"],
+'程式碼 1':["ConstraintSystem","advice_column / fixed_column / instance_column","selector","enable_equality","create_gate","query_selector / query_advice","Rotation::cur / next","Horner 閘"],
+'程式碼 2':["synthesize","region","assign_advice / assign_fixed","constrain_equal","constrain_instance","layouter","Copy constraint (複製約束)","KZG"],
+'真實輸出':["MockProver","Copy constraint (複製約束)","KZG","SRS","keygen","prove / verify","π (proof)","可靠性 (soundness)"],
+'demo → 論文':["Horner 閘","餘數 rem","ByteTable","Lookup","Remez minimax","KZG","BN254","SHPLONK","Blake2b","PSE","PF1"],
+'現代 ZK 更新':["離散對數假設","Sigma 協議","Schnorr","算術化","多項式承諾","PLONK","通用可更新 SRS","Groth16","可信設定 (trusted setup)","Bulletproofs","KZG","zkEVM","zkRollup","zkML","償付能力證明","後量子"],
+'一頁帶走':["PLONKish 算術化","多項式承諾","PSE","KZG","BN254","Copy constraint (複製約束)","查表 (lookup)","SHPLONK","Remez minimax","Horner 閘","超越函數","PF1","PF2"],
+'出處':["The halo2 Book","IACR ePrint","PLONK","查表 (lookup)","SHPLONK","KZG","Poseidon","PSE","MIT/Apache / CC-BY","BN254"]
+  };
+
   // ===== anticipated Q&A per slide (hidden ❓ panel; press q) =====
   const QA = {
 '家譜':[["為什麼要 fork Halo2，不直接用官方版？","官方 Halo2 用 IPA/Pasta（免設定但驗證線性、不利上鏈）；PSE fork 換成 KZG/BN254，換來常數驗證與以太坊 precompile 上鏈便宜，符合我們金融合規上鏈的需求。"]],
@@ -1306,7 +1510,14 @@ Stage 4 VERIFY       verified      1.96 ms
     makeDraggable(modal);
     return {open,close,isOpen,toggle:()=>isOpen()?close():open(viewIdx),follow:()=>{if(isOpen()){openIdx=viewIdx;render();}}};
   }
-  function qaHTML(lab){const a=QA[lab];if(!a)return '<div class="qa-empty">（本節暫無預備問答，可臨場回答）</div>';return a.map(p=>'<div class="qa-item"><div class="qa-q">Q：'+p[0]+'</div><div class="qa-a">'+p[1]+'</div></div>').join('');}
+  function qaHTML(lab){
+    let h='';
+    const ts=TERMS[lab];
+    if(ts&&ts.length){h+='<div class="qa-sec">📖 名詞（本頁出現）</div>'+ts.map(t=>'<div class="qa-item"><div class="qa-q">'+t+'</div><div class="qa-a">'+(GLOSS[t]||'（待補）')+'</div></div>').join('');}
+    const qs=QA[lab];
+    if(qs&&qs.length){h+='<div class="qa-sec">❓ 可能被問</div>'+qs.map(p=>'<div class="qa-item"><div class="qa-q">Q：'+p[0]+'</div><div class="qa-a">'+p[1]+'</div></div>').join('');}
+    return h||'<div class="qa-empty">（本節暫無預備內容）</div>';
+  }
 
   const notesP=setupPanel({modal:'noteModal',btn:'noteBtn',body:'noteBody',tag:'noteTag',idx:'noteIdx',close:'noteClose',prev:'notePrev',next:'noteNext',get:l=>NOTES[l]||'（本節暫無講稿）',html:false});
   const qaP=setupPanel({modal:'qaModal',btn:'qaBtn',body:'qaBody',tag:'qaTag',idx:'qaIdx',close:'qaClose',prev:'qaPrev',next:'qaNext',get:qaHTML,html:true});
