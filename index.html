@@ -329,7 +329,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <h2>你到底「輸入」什麼？<span class="accent">relation 的形式化定義</span></h2>
   <div class="defn"><span class="dt">形式化 · 關係 R_C（= 輸入 / relation 的定義，對應古典 R ⊆ X×Y）</span>
     <span class="quote">R_C = { (x, w) : 存在 trace M ∈ 𝔽ᵣ^(n×c)，instance = x、advice = w、fixed = 預處理，同時滿足 (i) 所有 Gate (ii) 所有 Lookup (iii) 所有 Copy constraint }</span>
-    <span class="gloss">古典是<b>手寫謂詞</b>（如 \(v=g^\beta\)）；我們的 relation 由<b>電路誘導</b> —— 描述計算，約束就定義出 R_C。證明系統 = 對 R_C 的 SNARK (Setup, Prove, Verify)。</span></div>
+    <span class="gloss"><b>原文根據</b>｜<u>古典</u>：<i>“Let R ⊆ X×Y be an effective relation … L_R := { y ∈ Y : (x,y) ∈ R for some x ∈ X }.”</i>（Boneh–Shoup，<a href="https://toc.cryptobook.us/" target="_blank" rel="noopener">A Graduate Course in Applied Cryptography</a>）｜<u>Halo2</u>：<i>“a relation, R, that specifies which combinations of public and private inputs are valid”</i>，約束為 polynomial constraints「evaluate to zero for each row」、equality「two given cells must have equal values」、lookup arguments。</span>
+    <a class="src" href="https://zcash.github.io/halo2/concepts/proofs.html" target="_blank" rel="noopener">The halo2 Book — Proof systems / PLONKish Arithmetization ↗</a></div>
   <div class="grid-2">
     <div class="fbox"><div class="lbl">具體的 relation（被問就寫這個）</div>
       <div style="margin:.2rem 0"><b>demo：</b>\( R=\{(y,x)\in\mathbb F^2 : P(x)=y\},\ P(x)=2x^3{+}3x^2{+}4x{+}5 \)</div>
@@ -342,7 +343,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <tr><td>電路 / R_C（fixed+閘）</td><td>Horner 閘</td><td>setup 固定</td></tr>
     </table>
   </div>
-  <p class="muted" style="font-size:.9rem;margin-top:.4rem"><b>盲點：</b>「輸入」必須是<b>有限域 𝔽ᵣ 元素</b>（BN254 ~2²⁵⁴）—— 數字 / 簽章 / Merkle 路徑 / 定點小數都要先編碼。<b>更深一層：</b>電路誘導的 R_C 是否 = 你想證的 relation？那就是 <b>arithmetization soundness</b>（截斷閘 + 範圍檢查 + 誤差界）—— 我們論文補的正是這塊。</p>
+  <p class="muted" style="font-size:.88rem;margin-top:.35rem"><b>盲點：</b>「輸入」必須是<b>𝔽ᵣ 元素</b>（先編碼）。<b>更深一層：</b>電路誘導的 R_C 是否 = 你想證的 relation？= <b>arithmetization soundness</b>（截斷閘 + 範圍檢查 + 誤差界）。</p>
 </section>
 
 <!-- I-2b zk-SNARK properties (verbatim) -->
