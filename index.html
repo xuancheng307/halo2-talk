@@ -121,25 +121,26 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   .grid-2,.grid-3{grid-template-columns:1fr}.deck{inset:56px 14px 0 0}}
 
 /* speaker notes (講稿) */
-.note-btn{position:fixed;right:20px;bottom:20px;z-index:45;background:var(--accent);color:#fff;border:none;
-  border-radius:999px;padding:.6rem 1.1rem;font-size:.85rem;font-weight:700;cursor:pointer;
+.note-btn{position:fixed;right:18px;bottom:18px;z-index:45;background:var(--accent);color:#fff;border:none;
+  border-radius:999px;padding:.55rem 1rem;font-size:.82rem;font-weight:700;cursor:pointer;
   box-shadow:0 4px 16px rgba(79,70,229,.4);font-family:var(--font-sans)}
 .note-btn:hover{background:var(--accent-light)}
-.note-mask{position:fixed;inset:0;background:rgba(15,17,33,.5);backdrop-filter:blur(2px);z-index:60;display:none}
-.note-mask.open{display:block}
-.note-modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:61;display:none;
-  width:min(720px,92vw);max-height:82vh;background:#fff;border:1px solid var(--border);border-radius:16px;
-  box-shadow:0 24px 60px rgba(0,0,0,.28);flex-direction:column;overflow:hidden}
+.note-mask{display:none !important}
+/* teleprompter — docked bottom-right, semi-transparent, follows current section */
+.note-modal{position:fixed;right:18px;bottom:18px;z-index:61;display:none;
+  width:min(460px,42vw);max-height:46vh;background:rgba(255,255,255,.88);backdrop-filter:blur(9px);
+  border:1px solid rgba(124,58,237,.35);border-radius:14px;
+  box-shadow:0 14px 40px rgba(0,0,0,.22);flex-direction:column;overflow:hidden}
 .note-modal.open{display:flex}
-.note-head{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.3rem;border-bottom:1px solid var(--border)}
-.note-head h3{font-size:1.05rem;font-weight:800;color:var(--accent-light);margin:0}
-.note-head .tag{font-size:.78rem;color:var(--text-faint);font-weight:600}
-.note-close{background:none;border:none;font-size:1.6rem;color:var(--text-dim);cursor:pointer;line-height:1}
-.note-body{padding:1.3rem 1.5rem;overflow-y:auto;font-size:1.08rem;line-height:2;color:var(--text);white-space:pre-wrap}
-.note-foot{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.3rem;border-top:1px solid var(--border);background:var(--surface)}
-.note-nav{background:#fff;border:1px solid var(--border);border-radius:8px;padding:.4rem .85rem;font-size:.85rem;font-weight:600;color:var(--text-dim);cursor:pointer}
+.note-head{display:flex;align-items:center;justify-content:space-between;padding:.55rem .85rem;border-bottom:1px solid rgba(124,58,237,.18);background:rgba(245,243,255,.7)}
+.note-head h3{font-size:.88rem;font-weight:800;color:var(--accent-light);margin:0}
+.note-head .tag{font-size:.74rem;color:var(--text-dim);font-weight:600}
+.note-close{background:none;border:none;font-size:1.4rem;color:var(--text-dim);cursor:pointer;line-height:1}
+.note-body{padding:.75rem 1rem;overflow-y:auto;font-size:1.02rem;line-height:1.85;color:var(--text);white-space:pre-wrap}
+.note-foot{display:flex;align-items:center;justify-content:space-between;padding:.45rem .85rem;border-top:1px solid rgba(124,58,237,.18)}
+.note-nav{background:rgba(255,255,255,.7);border:1px solid var(--border);border-radius:8px;padding:.28rem .7rem;font-size:.78rem;font-weight:600;color:var(--text-dim);cursor:pointer}
 .note-nav:hover{border-color:var(--accent);color:var(--accent)}
-.note-idx{font-size:.8rem;color:var(--text-faint);font-family:var(--font-mono)}
+.note-idx{font-size:.76rem;color:var(--text-faint);font-family:var(--font-mono)}
 </style>
 </head>
 <body>
@@ -881,9 +882,8 @@ Stage 4 VERIFY       verified      1.96 ms
   const slides=[...deck.querySelectorAll('.slide')];
   const labels=slides.map(s=>s.dataset.label||'');
   let viewIdx=0;
-  deck.addEventListener('scroll',()=>{viewIdx=Math.max(0,Math.min(slides.length-1,Math.round(deck.scrollTop/deck.clientHeight)));},{passive:true});
 
-  const modal=document.getElementById('noteModal'), mask=document.getElementById('noteMask');
+  const modal=document.getElementById('noteModal'), btn=document.getElementById('noteBtn');
   const body=document.getElementById('noteBody'), tag=document.getElementById('noteTag'), idxEl=document.getElementById('noteIdx');
   let openIdx=0;
   function render(){
@@ -893,13 +893,18 @@ Stage 4 VERIFY       verified      1.96 ms
     idxEl.textContent=(openIdx+1)+' / '+slides.length;
     body.scrollTop=0;
   }
-  function openNote(i){openIdx=Math.max(0,Math.min(slides.length-1,i));render();modal.classList.add('open');mask.classList.add('open');}
-  function closeNote(){modal.classList.remove('open');mask.classList.remove('open');}
   const isOpen=()=>modal.classList.contains('open');
+  function openNote(i){openIdx=Math.max(0,Math.min(slides.length-1,i));render();modal.classList.add('open');btn.style.display='none';}
+  function closeNote(){modal.classList.remove('open');btn.style.display='';}
 
-  document.getElementById('noteBtn').onclick=()=>openNote(viewIdx);
+  // track current section; while open, the panel follows the slide you scroll to (teleprompter)
+  deck.addEventListener('scroll',()=>{
+    viewIdx=Math.max(0,Math.min(slides.length-1,Math.round(deck.scrollTop/deck.clientHeight)));
+    if(isOpen()&&viewIdx!==openIdx){openIdx=viewIdx;render();}
+  },{passive:true});
+
+  btn.onclick=()=>openNote(viewIdx);
   document.getElementById('noteClose').onclick=closeNote;
-  mask.onclick=closeNote;
   document.getElementById('notePrev').onclick=()=>openNote(openIdx-1);
   document.getElementById('noteNext').onclick=()=>openNote(openIdx+1);
   window.addEventListener('keydown',e=>{
