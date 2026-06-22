@@ -147,6 +147,19 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .note-nav{background:rgba(255,255,255,.7);border:1px solid var(--border);border-radius:8px;padding:.28rem .7rem;font-size:.78rem;font-weight:600;color:var(--text-dim);cursor:pointer}
 .note-nav:hover{border-color:var(--accent);color:var(--accent)}
 .note-idx{font-size:.76rem;color:var(--text-faint);font-family:var(--font-mono)}
+/* Q&A panel (可能被問) — reuses .note-* internals, amber accent, docked top-right */
+.qa-btn{bottom:62px;background:var(--amber)}
+.qa-btn:hover{background:#b45309}
+.note-modal.qa{left:auto;right:18px;top:74px;bottom:auto;transform:none;border-color:rgba(217,119,6,.4)}
+.note-modal.qa .note-head{background:rgba(254,243,199,.72);border-bottom-color:rgba(217,119,6,.22)}
+.note-modal.qa .note-head h3{color:#b45309}
+.note-modal.qa .note-foot{border-top-color:rgba(217,119,6,.18)}
+.qa-body{white-space:normal;font-size:.96rem;line-height:1.7}
+.qa-body .qa-item{margin:0 0 .8rem;padding-bottom:.6rem;border-bottom:1px dashed rgba(217,119,6,.25)}
+.qa-body .qa-item:last-child{border-bottom:none}
+.qa-body .qa-q{font-weight:800;color:#b45309;margin-bottom:.2rem}
+.qa-body .qa-a{color:#1a1a1f}
+.qa-body .qa-empty{color:var(--text-dim);font-style:italic}
 /* formula boxes */
 .fbox{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:.55rem .9rem;margin:.5rem 0}
 .fbox .lbl{font-size:.82rem;font-weight:700;color:var(--accent-light);margin-bottom:.1rem}
@@ -175,6 +188,13 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="note-head"><h3>講稿 <span class="tag" id="noteTag"></span></h3><button class="note-close" id="noteClose" aria-label="關閉">×</button></div>
   <div class="note-body" id="noteBody"></div>
   <div class="note-foot"><button class="note-nav" id="notePrev">◀ 上一節</button><span class="note-idx" id="noteIdx">— / —</span><button class="note-nav" id="noteNext">下一節 ▶</button></div>
+</div>
+
+<button class="note-btn qa-btn" id="qaBtn" title="可能被問（按 q 鍵開關）">❓ 問答</button>
+<div class="note-modal qa" id="qaModal" role="dialog" aria-modal="true" aria-label="可能被問">
+  <div class="note-head"><h3>可能被問 <span class="tag" id="qaTag"></span></h3><button class="note-close" id="qaClose" aria-label="關閉">×</button></div>
+  <div class="note-body qa-body" id="qaBody"></div>
+  <div class="note-foot"><button class="note-nav" id="qaPrev">◀ 上一節</button><span class="note-idx" id="qaIdx">— / —</span><button class="note-nav" id="qaNext">下一節 ▶</button></div>
 </div>
 
 <div class="deck" id="deck">
@@ -1145,69 +1165,160 @@ Stage 4 VERIFY       verified      1.96 ms
   const labels=slides.map(s=>s.dataset.label||'');
   let viewIdx=0;
 
-  const modal=document.getElementById('noteModal'), btn=document.getElementById('noteBtn');
-  const body=document.getElementById('noteBody'), tag=document.getElementById('noteTag'), idxEl=document.getElementById('noteIdx');
-  let openIdx=0;
-  function render(){
-    const lab=labels[openIdx]||('#'+(openIdx+1));
-    tag.textContent='· '+lab;
-    body.textContent=NOTES[lab]||'（本節暫無講稿）';
-    idxEl.textContent=(openIdx+1)+' / '+slides.length;
-    body.scrollTop=0;
+  // ===== anticipated Q&A per slide (hidden ❓ panel; press q) =====
+  const QA = {
+'家譜':[["為什麼要 fork Halo2，不直接用官方版？","官方 Halo2 用 IPA/Pasta（免設定但驗證線性、不利上鏈）；PSE fork 換成 KZG/BN254，換來常數驗證與以太坊 precompile 上鏈便宜，符合我們金融合規上鏈的需求。"]],
+'在做什麼':[
+ ["Halo2 跟「加密」差在哪？","加密是把資料藏起來、之後還能解開；Halo2 是證明『我正確做了某計算』而不洩漏輸入，產物是一個無法解回原資料的證明。目的是取信，不是保密通訊。"],
+ ["跟一般數位簽章差在哪？","簽章只證『我持有某把私鑰』；Halo2 能證『任意一段計算的正確性』（例如某投組滿足風險限額），表達力差很多。"]
+],
+'為什麼要有 Halo2':[
+ ["Bulletproofs 也能證所有 NP 嗎？","能。三者都是電路型（Bulletproofs=算術電路、Groth16=R1CS、Halo2=PLONKish），而電路 SAT 是 NP-complete，任何 NP 敘述都能編碼進去。能不能證 NP 不是它們的差別。"],
+ ["那 Bulletproofs 跟 Halo2 到底差在哪？","三點：① 可信設定（Bulletproofs 不用、Halo2 要一次通用設定）；② 驗證成本（Bulletproofs 線性 O(n)、Halo2 常數）；③ 自訂閘/查表（Halo2 有，讓某些運算便宜很多、且能遞迴）。"],
+ ["「把問題 reduce 到離散對數」對嗎？","半對。它 reduce 的目標其實是『內積論證 IPA』；離散對數只是它的安全假設（Pedersen 承諾在離散對數假設下 binding）。不是把問題變成去解一個離散對數實例。原文摘要：relying only on the discrete logarithm assumption。"],
+ ["為什麼不用最小最快的 Groth16？","Groth16 每換一個電路就要重做一次可信設定、gate 是死板的 R1CS、不支援查表；我們要反覆改函數、要範圍檢查查表、要可更新設定，Halo2 才合適。"],
+ ["為什麼 Bulletproofs 驗證線性就不行？","驗證者得自己重算與證明等長的運算；我們的投組電路很大，驗證就慢、也不利上鏈便宜驗證。Halo2/KZG 驗證是固定幾次配對，與電路大小無關。"]
+],
+'原文背書 + 那座橋':[
+ ["你說三者「安全性質是同一套」，依據是什麼？","完備性、知識可靠性、零知識的『定義』是協議無關的標準定義（GMR 那套）；差的是建構與信任模型，不是安全目標本身。"],
+ ["為什麼說原版 Halo2 跟 Bulletproofs 同家族？","原版 Halo2 的多項式承諾用 IPA（Pasta 曲線、離散對數），跟 Bulletproofs 同一個 IPA/離散對數家族；我們用的 PSE 版才換成 KZG/pairing。"]
+],
+'PLONK':[
+ ["PLONK 跟 Groth16 最大的不同？","Groth16 每個電路要專屬可信設定、走 R1CS+QAP；PLONK 是『通用可更新 SRS』一次設定到處用，且是多項式 IOP、支援自訂閘/查表。"],
+ ["「多項式 IOP」是什麼意思？","把電路正確性編碼成多項式恆等式，證明者承諾這些多項式、驗證者在隨機點抽查；取代古典『把問題 reduce 到單一困難問題』的思路。"]
+],
+'輸入什麼 + 形式化':[
+ ["學長說 ZK 要有「形式化定義」，我們有嗎？","有。他指的是把要證的 relation／輸入定義清楚，我們的就是電路誘導的 R_C：所有 (x,w) 使存在 trace 讓全部閘/查表/複製約束成立。demo 是 P(x)=y、PF1 是 Merkle 路徑成立且 |Σ wΔ|≤τ。"],
+ ["輸入一定要是有限域元素嗎？字串、簽章呢？","對，電路只認有限域元素；任何資料（數字、簽章、Merkle 路徑、定點小數）都要先 encode 成 field elements 才進得了電路。"],
+ ["arithmetization soundness 是什麼？為什麼重要？","電路誘導的 R_C 不一定等於你想證的數學 relation（例如定點近似 vs 真實函數）。我們論文用截斷閘、範圍檢查、誤差界證明電路忠實實現目標，這一步才算真的證對。"]
+],
+'zk-SNARK 性質':[
+ ["「可靠性」跟「知識可靠性」差在哪？","可靠性=假敘述無法過關；知識可靠性更強=能過關就表示證明者真的『知道』witness（存在抽取器把它抽出來）。SNARK 通常要知識可靠性。"],
+ ["succinct（簡潔）具體指什麼？","證明長度與驗證時間只跟電路大小成 polylog（甚至常數），不必跟著計算量線性成長。"]
+],
+'兩層架構':[
+ ["為什麼選 KZG 而不是原版 IPA？","BN254 的 pairing 是以太坊內建 precompile，上鏈驗證便宜；KZG 證明大小固定、驗證常數。代價是要一次性可信設定（IPA 免設定但驗證線性）。"],
+ ["換掉承諾層，安全性會變嗎？","上層 PLONKish 算術化不變，只是把『綁定多項式』的方法從離散對數(IPA)換成 pairing(KZG)，安全假設從 DL 換成 pairing 代數假設；協議骨架一樣。"]
+],
+'要證什麼 + 限制':[
+ ["哪些東西塞不進電路？","原生浮點、資料相依的分支/無上界迴圈、超高次約束；要嘛做不到、要嘛要拆成 gadget。浮點正是我們論文要解的。"],
+ ["「固定大小電路」是什麼意思？輸入變長怎麼辦？","電路在 setup 時就固定 2^k 列、有界欄；不同大小輸入要嘛 padding 到上界、要嘛換一個電路。迴圈必須有編譯期上界。"]
+],
+'算術化':[
+ ["為什麼要排成 2^k 列？","證明用到在 2^k 階乘法子群上做 FFT/插值，子群階是 2 的次方才有快速 FFT；vanishing 多項式 X^n−1 也才漂亮。"],
+ ["trace 表跟一般程式執行軌跡一樣嗎？","概念類似（每列一步），但每欄是一條多項式、每列要滿足多項式約束、值都在有限域上 —— 是『可被多項式檢查』的軌跡。"]
+],
+'自訂閘':[
+ ["為什麼閘只能看「相鄰列」？","每欄被插值成一條多項式，『下一列』對應代入 ωX，是固定旋轉；隨機跨列存取沒有對應的多項式平移，所以只能用固定 offset（cur/next/prev）。"],
+ ["閘的次數有限制嗎？","有。次數越高證明越貴（影響商多項式次數與 FFT 大小），實務上自訂閘次數壓在個位數。"]
+],
+'複製約束 / 查表':[
+ ["複製約束怎麼保證兩個 cell 相等？","排列論證：把要相等的 cell 用置換 σ 串成環，建一個連乘 Z，要求原序與 σ 重排後是同一個多重集，Z 從 1 走回 1 才成立。"],
+ ["查表為什麼能做範圍檢查？","範圍 [0,2^b) 就是一張表 {0..2^b−1}；證明『某值在表內』＝範圍檢查。我們把餘數拆成 byte，每 byte 查 0–255 表。"],
+ ["查表比用算術約束做範圍檢查好在哪？","用 bit 拆解做範圍檢查要很多約束；查表用一條 grand-product 攤平成近乎線性、多個查詢還能共用一張表，便宜很多。"]
+],
+'整除性推導':[
+ ["為什麼「整條多項式為 0」只驗一個隨機點就夠？","Schwartz–Zippel：非零、次數 d 的多項式最多 d 個根，隨機點命中根機率 ≤ d/|F|，在 2^254 的體上可忽略 → 隨機點成立幾乎等於處處成立。"],
+ ["商多項式 t 存在，為什麼代表計算正確？","因為『每列滿足約束 ⟺ G 在子群 H 上全為 0 ⟺ Z_H 整除 G ⟺ 存在 t 使 G=t·Z_H』是 if-and-only-if，t 存在就回推每列都對。"]
+],
+'KZG 承諾':[
+ ["toxic waste τ 沒銷毀會怎樣？","知道 τ 的人能偽造任何多項式的開啟證明（打破知識可靠性）。所以用 powers-of-tau 儀式，只要一個參與者誠實銷毀其份額就安全；我們論文如實當成信任假設、不宣稱 trustless。"],
+ ["承諾「只有一個群元素」不會資訊不夠嗎？","它是綁定（binding）而非可解；驗證靠 pairing 等式在秘密點 τ 檢查恆等式，不需要知道多項式本身。要零知識再對多項式加 blinding。"]
+],
+'KZG 完整推導':[
+ ["那條配對等式為什麼等價於 f(z)=v？","用雙線性把指數搬出來，等式變成 f(τ)−v = q(τ)(τ−z)，即恆等式在秘密隨機點 τ 成立；由 Schwartz–Zippel 幾乎保證多項式恆等式成立，而它 ⟺ (X−z)|(f−v) ⟺ f(z)=v。"],
+ ["證明者能不能對 f(z)≠v 偽造 q？","不能。若 f(z)≠v 則 (X−z) 不整除 f−v，合法 q 不存在；要偽造得算出 τ 的相關資訊，歸約到 q-DLOG，機率可忽略。"]
+],
+'SHPLONK':[
+ ["為什麼證明大小幾乎不隨電路長大？","SHPLONK 把『多條多項式、各在不同點開啟』批次成單一開啟證明（2 個群元素、2 次配對）；承諾本身又是常數大小，所以列數翻倍 proof 幾乎不動。我們電路實測 N 不變恆 31,872 bytes。"],
+ ["Fiat–Shamir 安全嗎？","在隨機預言機模型下安全；把互動挑戰換成對 transcript 的雜湊（PSE 預設 Blake2b）。前提是每個挑戰都在相關承諾之後才抽（見下一張）。"]
+],
+'驗證恆等式推導':[
+ ["為什麼挑戰一定要在承諾之後才抽？先抽會怎樣？","若證明者先看到挑戰，就能針對那個點客製假多項式蒙混（grinding）。承諾先把多項式鎖死、再抽隨機點，Schwartz–Zippel 的機率論證才成立。"],
+ ["為什麼商 t 要切成多塊？","t 的次數可能高於子群階 n、超過 SRS 能承諾的次數；切成每塊低於 n 次各自承諾，才放得進 KZG。"],
+ ["linearization 是做什麼的？","把多條需要開啟的多項式線性組合，減少開啟點與開啟證明數量、降低驗證成本，是實作優化。"]
+],
+'為什麼成立':[
+ ["知識可靠性的「抽取器」實際存在嗎？還是只是理論？","是建構性的歸約：在 AGM 下，代數對手每個群元素都得交代線性組合係數，抽取器用這些係數＋倒帶就能解出 witness；存在性即代表『能過關就真的知道』。"],
+ ["為什麼信 AGM / q-DLOG 這些假設？","AGM 是分析 pairing 型 SNARK 的標準模型；q-DLOG 是 DLOG 的多項式推廣，至今無有效攻擊，BN254 約 128-bit 安全。完整論證在論文 ch3。"],
+ ["零知識怎麼證？","構造一個模擬器，不知道 witness 也能產生與真證明同分布的假證明（靠 advice 的隨機 blinding）；模擬得出來代表證明本身不洩漏 witness。"]
+],
+'能 / 不能':[
+ ["k≤28 的上限是硬限制嗎？太小怎麼辦？","是記憶體限制（k=28 約 30GB RAM）；更大電路可用遞迴/拆分聚合，或換更省記憶體的後端。我們的電路在此範圍內。"],
+ ["為什麼浮點這麼難？","有限域沒有小數、沒有捨入語意；浮點的指數/尾數/捨入要全部用整數電路模擬，極貴。我們改用定點 + 多項式逼近繞過。"]
+],
+'超越函數塞進閘':[
+ ["為什麼用 Remez 而不是泰勒展開？","泰勒在展開點附近準、邊緣誤差大；Remez minimax 讓整個區間的最大誤差最小，同次數下精度更穩，適合固定區間的求值。"],
+ ["換一個函數要重做電路嗎？","不用。電路結構（Horner 閘+查表）不變，只換 fixed 欄裡的係數；這個通用性正是來自 Halo2 的 fixed 欄。"]
+],
+'kernel 公式':[
+ ["定點截斷會累積誤差嗎？怎麼保證正確？","會，每步除以 S 取整有截斷誤差；我們用閘強制 acc·R+c = acc′·S + rem 且 rem∈[0,S) 保證『誠實截斷』，再用誤差界證明總誤差在容許範圍（arithmetization soundness 的一部分）。"],
+ ["為什麼要把餘數拆成 byte 查表？","直接證 rem∈[0,S) 需要大範圍檢查；拆成數個 byte、每 byte 查 0–255 小表，攤平成便宜的查表約束。"]
+],
+'用在哪裡':[
+ ["Zcash 不是用 Halo2 嗎？跟我們一樣？","Zcash Orchard 用原版 Halo2 = IPA/Pasta、免設定；我們用 PSE 版 = KZG/BN254。同框架、不同承諾層，別搞混。"],
+ ["PF1 為什麼要零知識？揭露投組不行嗎？","基金不願揭露個別部位（商業機密），但監管要證明淨風險在限額內；ZK 讓你證 |Σ wΔ|≤τ 而不洩漏每個 wᵢ、Δᵢ。"]
+],
+'真實輸出':[
+ ["故意謊報答案會怎樣？","demo 把公開值改成 99，verify 立刻 REJECT —— 沒有合法 witness 能讓電路在錯誤輸出下成立，這就是 soundness 的現場展示。"],
+ ["這支 demo 跟論文的差別？","同一套 stack（KZG/BN254/SHPLONK/同一條 Horner 閘）；論文多了定點截斷、byte 範圍查表、Poseidon Merkle，係數改成 Remez 算出來的。"]
+],
+'demo → 論文':[
+ ["demo proof 864 bytes，論文卻 31,872 bytes，為什麼差這麼多？","demo 是極小電路（一條三次多項式）；論文電路有定點截斷、byte 範圍查表、Poseidon Merkle，欄數與查表多很多。proof 大小由電路結構決定、與資料筆數 N 無關。"]
+]
+  };
+
+  // robust current-slide index: the slide spanning the viewport's vertical centre
+  function currentIdx(){
+    const dr=deck.getBoundingClientRect(), center=dr.top+dr.height/2;
+    for(let k=0;k<slides.length;k++){const r=slides[k].getBoundingClientRect();if(center>=r.top&&center<r.bottom)return k;}
+    return Math.max(0,Math.min(slides.length-1,Math.round(deck.scrollTop/deck.clientHeight)));
   }
-  const isOpen=()=>modal.classList.contains('open');
-  function openNote(i){openIdx=Math.max(0,Math.min(slides.length-1,i));render();modal.classList.add('open');btn.style.display='none';}
-  function closeNote(){modal.classList.remove('open');btn.style.display='';}
 
-  // track current section; while open, the panel follows the slide you scroll to (teleprompter)
-  deck.addEventListener('scroll',()=>{
-    viewIdx=Math.max(0,Math.min(slides.length-1,Math.round(deck.scrollTop/deck.clientHeight)));
-    if(isOpen()&&viewIdx!==openIdx){openIdx=viewIdx;render();}
-  },{passive:true});
-
-  btn.onclick=()=>openNote(viewIdx);
-  document.getElementById('noteClose').onclick=closeNote;
-  document.getElementById('notePrev').onclick=()=>openNote(openIdx-1);
-  document.getElementById('noteNext').onclick=()=>openNote(openIdx+1);
-
-  // drag the panel by its header (so it never permanently blocks the slide)
-  (function(){
+  // ===== reusable sliding panel + drag (powers 講稿 and 問答) =====
+  function makeDraggable(modal){
     const head=modal.querySelector('.note-head'); let dx=0,dy=0,drag=false;
-    head.addEventListener('mousedown',e=>{
-      if(e.target.closest('.note-close'))return;
-      const r=modal.getBoundingClientRect();
-      // switch to absolute left/top positioning from current spot
-      modal.style.left=r.left+'px'; modal.style.top=r.top+'px';
-      modal.style.right='auto'; modal.style.bottom='auto'; modal.style.transform='none';
-      dx=e.clientX-r.left; dy=e.clientY-r.top; drag=true; e.preventDefault();
-    });
-    window.addEventListener('mousemove',e=>{
-      if(!drag)return;
-      let nx=e.clientX-dx, ny=e.clientY-dy;
-      nx=Math.max(4,Math.min(window.innerWidth-modal.offsetWidth-4,nx));
-      ny=Math.max(60,Math.min(window.innerHeight-40,ny));
-      modal.style.left=nx+'px'; modal.style.top=ny+'px';
-    });
+    const begin=(cx,cy)=>{const r=modal.getBoundingClientRect();modal.style.left=r.left+'px';modal.style.top=r.top+'px';modal.style.right='auto';modal.style.bottom='auto';modal.style.transform='none';dx=cx-r.left;dy=cy-r.top;drag=true;};
+    head.addEventListener('mousedown',e=>{if(e.target.closest('.note-close'))return;begin(e.clientX,e.clientY);e.preventDefault();});
+    window.addEventListener('mousemove',e=>{if(!drag)return;const nx=Math.max(4,Math.min(window.innerWidth-modal.offsetWidth-4,e.clientX-dx)),ny=Math.max(60,Math.min(window.innerHeight-40,e.clientY-dy));modal.style.left=nx+'px';modal.style.top=ny+'px';});
     window.addEventListener('mouseup',()=>drag=false);
-    // touch support
-    head.addEventListener('touchstart',e=>{
-      if(e.target.closest('.note-close'))return;
-      const r=modal.getBoundingClientRect(),t=e.touches[0];
-      modal.style.left=r.left+'px'; modal.style.top=r.top+'px';
-      modal.style.right='auto'; modal.style.bottom='auto'; modal.style.transform='none';
-      dx=t.clientX-r.left; dy=t.clientY-r.top; drag=true;
-    },{passive:true});
-    window.addEventListener('touchmove',e=>{
-      if(!drag)return; const t=e.touches[0];
-      modal.style.left=Math.max(4,Math.min(window.innerWidth-modal.offsetWidth-4,t.clientX-dx))+'px';
-      modal.style.top=Math.max(60,t.clientY-dy)+'px';
-    },{passive:true});
+    head.addEventListener('touchstart',e=>{if(e.target.closest('.note-close'))return;const t=e.touches[0];begin(t.clientX,t.clientY);},{passive:true});
+    window.addEventListener('touchmove',e=>{if(!drag)return;const t=e.touches[0];modal.style.left=Math.max(4,Math.min(window.innerWidth-modal.offsetWidth-4,t.clientX-dx))+'px';modal.style.top=Math.max(60,t.clientY-dy)+'px';},{passive:true});
     window.addEventListener('touchend',()=>drag=false);
-  })();
+  }
+  function setupPanel(o){
+    const modal=document.getElementById(o.modal), btn=document.getElementById(o.btn);
+    const bodyEl=document.getElementById(o.body), tagEl=document.getElementById(o.tag), idxEl=document.getElementById(o.idx);
+    let openIdx=0;
+    function render(){
+      const lab=labels[openIdx]||('#'+(openIdx+1));
+      tagEl.textContent='· '+lab;
+      if(o.html){bodyEl.innerHTML=o.get(lab);}else{bodyEl.textContent=o.get(lab);}
+      idxEl.textContent=(openIdx+1)+' / '+slides.length; bodyEl.scrollTop=0;
+    }
+    const isOpen=()=>modal.classList.contains('open');
+    function open(i){openIdx=Math.max(0,Math.min(slides.length-1,i));render();modal.classList.add('open');btn.style.display='none';}
+    function close(){modal.classList.remove('open');btn.style.display='';}
+    btn.onclick=()=>open(currentIdx());
+    document.getElementById(o.close).onclick=close;
+    document.getElementById(o.prev).onclick=()=>open(openIdx-1);
+    document.getElementById(o.next).onclick=()=>open(openIdx+1);
+    makeDraggable(modal);
+    return {open,close,isOpen,toggle:()=>isOpen()?close():open(viewIdx),follow:()=>{if(isOpen()){openIdx=viewIdx;render();}}};
+  }
+  function qaHTML(lab){const a=QA[lab];if(!a)return '<div class="qa-empty">（本節暫無預備問答，可臨場回答）</div>';return a.map(p=>'<div class="qa-item"><div class="qa-q">Q：'+p[0]+'</div><div class="qa-a">'+p[1]+'</div></div>').join('');}
+
+  const notesP=setupPanel({modal:'noteModal',btn:'noteBtn',body:'noteBody',tag:'noteTag',idx:'noteIdx',close:'noteClose',prev:'notePrev',next:'noteNext',get:l=>NOTES[l]||'（本節暫無講稿）',html:false});
+  const qaP=setupPanel({modal:'qaModal',btn:'qaBtn',body:'qaBody',tag:'qaTag',idx:'qaIdx',close:'qaClose',prev:'qaPrev',next:'qaNext',get:qaHTML,html:true});
+
+  // teleprompter: while open, panels follow the slide you scroll to
+  deck.addEventListener('scroll',()=>{viewIdx=currentIdx();notesP.follow();qaP.follow();},{passive:true});
+
   window.addEventListener('keydown',e=>{
-    if(e.key==='n'||e.key==='N'){e.preventDefault(); isOpen()?closeNote():openNote(viewIdx);}
-    else if(e.key==='Escape'&&isOpen()){closeNote();}
-    else if(isOpen()&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();e.stopPropagation();openNote(openIdx+(e.key==='ArrowRight'?1:-1));}
+    if(e.key==='n'||e.key==='N'){e.preventDefault();notesP.toggle();}
+    else if(e.key==='q'||e.key==='Q'){e.preventDefault();qaP.toggle();}
+    else if(e.key==='Escape'){notesP.close();qaP.close();}
+    else if((notesP.isOpen()||qaP.isOpen())&&(e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key==='ArrowUp')){e.preventDefault();e.stopPropagation();const d=(e.key==='ArrowRight'||e.key==='ArrowDown')?1:-1;const ni=Math.max(0,Math.min(slides.length-1,viewIdx+d));slides[ni].scrollIntoView();}
   },true);
 })();
 </script>
