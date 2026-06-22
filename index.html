@@ -162,6 +162,29 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .qa-body .qa-empty{color:var(--text-dim);font-style:italic}
 .qa-body .qa-sec{font-weight:800;color:#92400e;margin:.7rem 0 .5rem;padding-bottom:.18rem;border-bottom:2px solid rgba(217,119,6,.4);font-size:.9rem}
 .qa-body .qa-sec:first-child{margin-top:0}
+/* editable items: edit / mark / delete controls + formal line + export overlay */
+.qa-formal{color:#3730a3;margin-top:.2rem;font-size:.92rem}
+.it-ctl{float:right;display:inline-flex;gap:3px;margin-left:8px}
+.it-ctl button,.it-bar button{background:rgba(255,255,255,.55);border:1px solid var(--border);border-radius:6px;font-size:.78rem;line-height:1;padding:2px 5px;cursor:pointer}
+.it-ctl button:hover,.it-bar button:hover{border-color:var(--accent)}
+.qa-item.marked,.note-item.marked{background:rgba(251,191,36,.32);border-radius:8px;padding:.35rem .45rem;margin:.25rem -.25rem;box-shadow:inset 0 0 0 1px rgba(217,119,6,.4)}
+.note-item{position:relative;margin-bottom:.3rem}
+.note-item .it-bar{text-align:right;margin-bottom:.15rem}
+.note-text{white-space:pre-wrap}
+.it-edit textarea{width:100%;min-height:3.6em;font:inherit;font-size:.9rem;margin:.1rem 0 .35rem;padding:.35rem;border:1px solid var(--border);border-radius:6px;box-sizing:border-box;background:rgba(255,255,255,.9);white-space:pre-wrap;text-shadow:none}
+.it-edit .it-lab{display:block;font-size:.76rem;font-weight:700;color:var(--text-dim);margin-top:.15rem}
+.it-edit .it-btns{display:flex;gap:6px}
+.it-edit .it-btns button{padding:.25rem .8rem;border-radius:6px;border:1px solid var(--border);cursor:pointer;font-weight:700;background:rgba(255,255,255,.8)}
+.it-edit .it-btns button[data-act=save]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.note-export{background:rgba(255,255,255,.6);border:1px solid var(--border);border-radius:7px;font-size:.74rem;font-weight:700;padding:.2rem .5rem;color:var(--text-dim);cursor:pointer;margin-left:auto;margin-right:8px}
+.note-export:hover{border-color:var(--accent);color:var(--accent)}
+#ovExport{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center}
+#ovExport .ov-card{width:min(680px,92vw);max-height:82vh;background:#fff;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+#ovExport .ov-head{display:flex;justify-content:space-between;align-items:center;padding:.6rem .9rem;font-weight:700;border-bottom:1px solid var(--border)}
+#ovExport .ov-head button{background:none;border:none;font-size:1.3rem;cursor:pointer;line-height:1}
+#ovExport textarea{flex:1;min-height:320px;border:none;padding:.8rem;font-family:var(--font-mono);font-size:.78rem;line-height:1.5;resize:none;white-space:pre;color:#111}
+#ovExport .ov-foot{display:flex;gap:10px;padding:.6rem .9rem;border-top:1px solid var(--border)}
+#ovExport .ov-foot button{padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);cursor:pointer;font-weight:700;background:var(--surface)}
 /* formula boxes */
 .fbox{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:.55rem .9rem;margin:.5rem 0}
 .fbox .lbl{font-size:.82rem;font-weight:700;color:var(--accent-light);margin-bottom:.1rem}
@@ -1329,6 +1352,84 @@ Stage 4 VERIFY       verified      1.96 ms
 "The halo2 Book":"Halo2 官方文件（zcash.github.io/halo2）；本報告定義原文出處（MIT/Apache）。",
 "MIT/Apache / CC-BY":"開源/開放授權；本報告引用原文均依其授權標註出處。"
   };
+  // formal / precise definitions — shown as 形式： under 白話 (only terms that have one)
+  const FORMAL = {
+"零知識證明":"系統 (P,V) 對語言 L：完備性 + 可靠性 + 零知識（∃模擬器 S，View_V ≈ S(x)）。",
+"可驗證計算":"對 f,x 產生 (y,π)，使 Verify(x,y,π)=1 ⟺ y=f(x)，且驗證成本 ≪ 重算 f。",
+"算術化":"把語句編碼成有限域 𝔽 上多項式約束 {g_j}，witness 合法 ⟺ ∀j g_j 在 trace 上恆為 0。",
+"KZG":"承諾 C=[f(τ)]₁；開啟 f(z)=v 附 π=[q(τ)]₁，q=(f−v)/(X−z)；驗 e(C−[v]₁,[1]₂)=e(π,[τ]₂−[z]₂)。",
+"BN254":"Barreto–Naehrig 曲線，嵌入次數 12，r、q 約 254-bit；提供 type-3 配對 e:G₁×G₂→G_T。",
+"SHPLONK":"對多項式集 {f_i} 各在點集 S_i 開啟，輸出單一 π（2 個 G₁ 元素），驗證 2 次配對。",
+"IPA (內積論證)":"關係 {(P∈G,c∈𝔽; a,b∈𝔽ⁿ): P=gᵃhᵇ ∧ c=⟨a,b⟩}；遞迴對折，通訊 2⌈log n⌉ 群元素。",
+"pairing (配對)":"雙線性映射 e:G₁×G₂→G_T，e(aP,bQ)=e(P,Q)^(ab)，且非退化。",
+"R1CS":"約束組 {(aᵢ,bᵢ,cᵢ)}：s 合法 ⟺ ∀i ⟨aᵢ,s⟩·⟨bᵢ,s⟩=⟨cᵢ,s⟩。",
+"QAP":"R1CS 轉多項式：∃H 使 A(X)B(X)−C(X)=H(X)Z(X)，Z 為目標點消失多項式。",
+"Schwartz–Zippel":"非零多項式 P、deg P=d、r 均勻取自 S⊆𝔽：Pr[P(r)=0] ≤ d/|S|。",
+"vanishing 多項式 Z_H":"Z_H(X)=∏_{h∈H}(X−h)=Xⁿ−1；∀h∈H, Z_H(h)=0。",
+"商多項式 t (quotient)":"t(X)=G(X)/Z_H(X)，存在 ⟺ Z_H | G ⟺ ∀h∈H, G(h)=0。",
+"整除 (Z_H | G)":"∃ t∈𝔽[X]: G(X)=t(X)·Z_H(X)。",
+"乘法子群 H":"H=⟨ω⟩={1,ω,…,ωⁿ⁻¹} ≤ 𝔽*，|H|=n=2^k，ω 為 n 次本原單位根。",
+"ω (單位根)":"ωⁿ=1 且 ∀ 0<m<n, ωᵐ≠1；H 的生成元。",
+"Lagrange 插值":"由 n 個點 {(ωⁱ,vᵢ)} 唯一還原次數低於 n 的 a(X)，使 a(ωⁱ)=vᵢ。",
+"Fiat–Shamir":"挑戰 c ← Hash(transcript)，把公開擲幣互動證明轉非互動（ROM 下保 soundness）。",
+"排列大乘積 (grand product)":"Z(ωⁱ⁺¹)=Z(ωⁱ)·(分子/分母)，Z(1)=Z(ωⁿ)=1 ⟺ 兩多重集在 σ 下相等。",
+"grand-product Z":"累乘多項式 Z，使 Z(ωX)/Z(X)=目標比值；端點為 1 即論證成立。",
+"雙線性 (bilinearity)":"e(aP,bQ)=e(P,Q)^(ab)；對兩引數各自線性。",
+"配對檢查":"驗證 e(C−[v]₁,[1]₂)=e(π,[τ]₂−[z]₂)（KZG 開啟）。",
+"SRS":"srs=([τⁱ]₁)_(i=0..d), [1]₂, [τ]₂；τ 為設定秘密、用後銷毀。",
+"多項式承諾":"三元組 (gen,com,open)：對 f 輸出簡短 cm，open 證 f(z)=v；具 binding。",
+"gen/com/open":"gen(d)→srs；com(f,srs)→cm；open 為公開擲幣協議證 f(z)=v。",
+"完備性 (completeness)":"∀(x,w)∈R: Pr[V(x,P(x,w))=1]=1。",
+"可靠性 (soundness)":"∀ x∉L_R, ∀ P*: Pr[V(x,P*)=1] ≤ negl(λ)。",
+"知識可靠性 (knowledge soundness)":"∃ PPT 抽取器 E：對任何能讓 V 接受的 P*，E^(P*)(x) 以壓倒機率輸出 w 使 (x,w)∈R。",
+"零知識 (zero knowledge)":"∃ PPT 模擬器 S：∀(x,w)∈R, View_V(P(x,w)) ≈ S(x)（分布不可區分）。",
+"簡潔性 (succinct)":"|π| 與 verify 時間 = poly(λ, log|C|)。",
+"extractor (抽取器)":"PPT 演算法 E，可存取/倒帶 P*，輸出 w 使 (x,w)∈R。",
+"模擬器 (simulator)":"PPT 演算法 S(x)，不知 w 卻產生與真實 view 同分布的輸出。",
+"承諾綁定 (binding)":"無 PPT 對手能對同一 cm 開出兩組相異 (z,v) 皆通過（計算性綁定）。",
+"離散對數假設":"群 G=⟨g⟩，給 h=gᵃ，任何 PPT 求 a 機率 ≤ negl(λ)。",
+"q-DLOG":"給 ([τⁱ]₁)_(i=0..q), ([τⁱ]₂)_(i=0..q)，求 τ 機率 ≤ negl(λ)。",
+"AGM":"對手輸出的每個群元素 Y 必附係數，使 Y=∑ cᵢ·Bᵢ（Bᵢ 為已見元素）。",
+"關係 R":"R ⊆ X×Y；語言 L_R={x: ∃w (x,w)∈R}。",
+"R_C":"R_C={(x,w): ∃ trace M∈𝔽^(n×c), instance=x, advice=w, 且 ∀ Gate/Lookup/Copy 成立}。",
+"NP 關係":"(x,w)∈R 可在 poly(|x|) 時間判定，且 |w| ≤ poly(|x|)。",
+"effective relation":"R ⊆ X×Y，成員 (x,y)∈R 可 poly-time 判定。",
+"L_R (language)":"L_R={ y∈Y : ∃x (x,y)∈R }。",
+"polynomial constraints":"一組 gⱼ∈𝔽[X₀,…]；約束 = ∀列 gⱼ(該列 cells)=0。",
+"Gate (閘)":"多元多項式 g，要求 ∀i∈[n]: g(第 i 列及其 rotation)=0。",
+"Copy constraint (複製約束)":"cell 在置換 σ 下等值：∀i value(i)=value(σ(i))。",
+"Lookup":"要求 {f(ωⁱ)} ⊆ {t(ωⁱ)}（多重集子集）。",
+"selector":"fixed 多項式 s∈{0,1}^H，閘寫成 s(X)·g(X)；s=0 的列關閉該閘。",
+"rotation":"以 ωᵏ 平移取值：偏移 k 列 = a(ωᵏ·X)；next = a(ωX)。",
+"自訂閘 (custom gate)":"∑ᵢ sᵢ(X)·gᵢ(...)=0，gᵢ 為低次多元多項式、可含 rotation。",
+"Horner 閘":"acc_(k+1)=acc_k·x+c_k；閘 s·(acc_k·x+c_k−acc_(k+1))=0，acc_(k+1)=acc@next。",
+"degree (次數)":"deg(g)=多項式最高次；PLONKish 約束次數須 ≤ 系統上限（Halo2 常 ≤ 6）。",
+"餘數 rem":"rem_k=acc_k·R+c_k−acc_(k+1)·S，約束 rem_k∈[0,S) ⟺ acc_(k+1)=⌊(acc_k·R+c_k)/S⌋。",
+"尺度 S=2^pp":"S=2^pp, pp=48；編碼 v̂=⌊v·S⌉。",
+"floor ⌊⌋":"⌊y⌋ = 最大整數 ≤ y。",
+"Remez minimax":"求 P* 使 max_(x∈[a,b]) |P*(x)−f(x)| = min over deg P ≤ d（等漣波解）。",
+"多重集 (multiset)":"允許重複的集合；論證要求 {aᵢ} 與 {σ(a)ᵢ} 多重集相等。",
+"置換 σ (permutation)":"[m] 上的雙射 σ；複製約束以 σ 的環結構表達等值。",
+"𝔽ᵣ (有限域)":"GF(r)=ℤ/rℤ，r 為大質數；電路所有值 ∈ 𝔽ᵣ。",
+"Merkle 樹":"root=H(…H(leaf)…)；成員證明為 O(log n) 條兄弟節點路徑。",
+"Poseidon":"𝔽 上海綿置換雜湊（部分/全 S-box 輪），為算術電路最佳化。",
+"Schnorr":"關係 {(h; a): h=gᵃ}；證明 (R=gʳ, s=r+c·a)，驗 gˢ=R·hᶜ。",
+"Sigma 協議":"三回合 (a,c,z) 公開擲幣證明，具 special soundness + HVZK。",
+"NARK":"非互動知識論證（completeness + knowledge soundness），未必 succinct。",
+"SNARK":"succinct NARK：|π|, verify = poly(λ, log|C|)。",
+"zk-SNARK":"SNARK + 零知識。",
+"logUp / log-derivative":"∑ᵢ 1/(X+fᵢ) = ∑ⱼ mⱼ/(X+tⱼ) ⟺ {fᵢ} ⊆ {tⱼ}（mⱼ=重數）。",
+"ByteTable":"固定表 T={0,…,255}；rem 拆 byte b 後約束 b∈T（lookup）。",
+"多項式 IOP":"證明者送多項式 oracle，驗證者查隨機點；經 PCS+Fiat–Shamir 編譯成 SNARK。",
+"EdDSA":"Edwards 曲線簽章：驗 [S]B = R + [Hash(R,A,M)]·A。",
+"π (proof)":"驗證者輸入 (x,π) 輸出 accept/reject 的證明物件。",
+"τ (toxic waste)":"設定秘密 τ∈𝔽*；srs 僅含 [τⁱ]，τ 本身須銷毀。",
+"G₁ / G₂":"配對來源群（橢圓曲線子群），階為 r；e:G₁×G₂→G_T。",
+"群元素":"橢圓曲線群 G 中的點；|G|=r。",
+"MSM":"∑ᵢ sᵢ·Pᵢ（sᵢ∈𝔽, Pᵢ∈G）；Pippenger 成本約 O(n/log n) 群運算。",
+"超越函數":"不滿足任何非零多項式方程的函數（exp, ln, erf…）；非代數。",
+"多項式逼近":"求 deg ≤ d 的 P，使 P 在 [a,b] 近似 f（誤差以某範數衡量）。"
+  };
   const TERMS = {
 '封面':["零知識證明","Halo2","PLONKish 算術化","KZG","BN254","SHPLONK","PSE","halo2_proofs v0.3.0","prove / verify"],
 '路線圖':["算術化","自訂閘 (custom gate)","多項式承諾","完備性 (completeness)","可靠性 (soundness)","零知識 (zero knowledge)","簡潔性 (succinct)","Horner 閘","超越函數","可信設定 (trusted setup)"],
@@ -1483,10 +1584,10 @@ Stage 4 VERIFY       verified      1.96 ms
   function makeDraggable(modal){
     const head=modal.querySelector('.note-head'); let dx=0,dy=0,drag=false;
     const begin=(cx,cy)=>{const r=modal.getBoundingClientRect();modal.style.left=r.left+'px';modal.style.top=r.top+'px';modal.style.right='auto';modal.style.bottom='auto';modal.style.transform='none';dx=cx-r.left;dy=cy-r.top;drag=true;};
-    head.addEventListener('mousedown',e=>{if(e.target.closest('.note-close'))return;begin(e.clientX,e.clientY);e.preventDefault();});
+    head.addEventListener('mousedown',e=>{if(e.target.closest('button'))return;begin(e.clientX,e.clientY);e.preventDefault();});
     window.addEventListener('mousemove',e=>{if(!drag)return;const nx=Math.max(4,Math.min(window.innerWidth-modal.offsetWidth-4,e.clientX-dx)),ny=Math.max(60,Math.min(window.innerHeight-40,e.clientY-dy));modal.style.left=nx+'px';modal.style.top=ny+'px';});
     window.addEventListener('mouseup',()=>drag=false);
-    head.addEventListener('touchstart',e=>{if(e.target.closest('.note-close'))return;const t=e.touches[0];begin(t.clientX,t.clientY);},{passive:true});
+    head.addEventListener('touchstart',e=>{if(e.target.closest('button'))return;const t=e.touches[0];begin(t.clientX,t.clientY);},{passive:true});
     window.addEventListener('touchmove',e=>{if(!drag)return;const t=e.touches[0];modal.style.left=Math.max(4,Math.min(window.innerWidth-modal.offsetWidth-4,t.clientX-dx))+'px';modal.style.top=Math.max(60,t.clientY-dy)+'px';},{passive:true});
     window.addEventListener('touchend',()=>drag=false);
   }
@@ -1494,11 +1595,12 @@ Stage 4 VERIFY       verified      1.96 ms
     const modal=document.getElementById(o.modal), btn=document.getElementById(o.btn);
     const bodyEl=document.getElementById(o.body), tagEl=document.getElementById(o.tag), idxEl=document.getElementById(o.idx);
     let openIdx=0;
-    function render(){
+    function render(keep){
       const lab=labels[openIdx]||('#'+(openIdx+1));
       tagEl.textContent='· '+lab;
+      const st=bodyEl.scrollTop;
       if(o.html){bodyEl.innerHTML=o.get(lab);}else{bodyEl.textContent=o.get(lab);}
-      idxEl.textContent=(openIdx+1)+' / '+slides.length; bodyEl.scrollTop=0;
+      idxEl.textContent=(openIdx+1)+' / '+slides.length; bodyEl.scrollTop=keep?st:0;
     }
     const isOpen=()=>modal.classList.contains('open');
     function open(i){openIdx=Math.max(0,Math.min(slides.length-1,i));render();modal.classList.add('open');btn.style.display='none';}
@@ -1508,19 +1610,86 @@ Stage 4 VERIFY       verified      1.96 ms
     document.getElementById(o.prev).onclick=()=>open(openIdx-1);
     document.getElementById(o.next).onclick=()=>open(openIdx+1);
     makeDraggable(modal);
-    return {open,close,isOpen,toggle:()=>isOpen()?close():open(viewIdx),follow:()=>{if(isOpen()){openIdx=viewIdx;render();}}};
+    return {open,close,isOpen,toggle:()=>isOpen()?close():open(viewIdx),follow:()=>{if(isOpen()){openIdx=viewIdx;render();}},rerender:()=>render(true),body:bodyEl};
+  }
+  // ===== editable overlay (localStorage): edit / delete / mark + export for Claude to apply =====
+  const OVK='h2deck_ov'; let OV={edit:{},del:{},mark:{}};
+  try{const s=localStorage.getItem(OVK); if(s)OV=Object.assign({edit:{},del:{},mark:{}},JSON.parse(s));}catch(e){}
+  function saveOV(){try{localStorage.setItem(OVK,JSON.stringify(OV));}catch(e){}}
+  let editingId=null;
+  const SEP='~~';
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function ctl(id){return '<span class="it-ctl"><button data-act="edit" data-id="'+id+'" title="編輯">✏️</button><button data-act="mark" data-id="'+id+'" title="標記給 Claude 改">🚩</button><button data-act="del" data-id="'+id+'" title="刪除">🗑️</button></span>';}
+  function editForm(id,fields){let h='<div class="it-edit">';fields.forEach(f=>{h+='<label class="it-lab">'+f[1]+'</label><textarea data-f="'+f[0]+'">'+esc(f[2])+'</textarea>';});return h+'<div class="it-btns"><button data-act="save" data-id="'+id+'">儲存</button><button data-act="cancel" data-id="'+id+'">取消</button></div></div>';}
+  function termHTML(t){
+    const id='t'+SEP+t; if(OV.del[id])return '';
+    const e=OV.edit[id]||{}, p=('p'in e)?e.p:(GLOSS[t]||'（待補）'), f=('f'in e)?e.f:(FORMAL[t]||'');
+    if(editingId===id)return '<div class="qa-item editing" data-id="'+id+'"><div class="qa-q">'+esc(t)+'</div>'+editForm(id,[['p','白話',p],['f','形式（可留空）',f]])+'</div>';
+    let inner='<div class="qa-q">'+esc(t)+ctl(id)+'</div><div class="qa-a"><b>白話：</b>'+esc(p)+'</div>';
+    if(f)inner+='<div class="qa-a qa-formal"><b>形式：</b>'+esc(f)+'</div>';
+    return '<div class="qa-item'+(OV.mark[id]?' marked':'')+'" data-id="'+id+'">'+inner+'</div>';
+  }
+  function qaItemHTML(lab,i,pair){
+    const id='q'+SEP+lab+SEP+i; if(OV.del[id])return '';
+    const e=OV.edit[id]||{}, q=('q'in e)?e.q:pair[0], a=('a'in e)?e.a:pair[1];
+    if(editingId===id)return '<div class="qa-item editing" data-id="'+id+'">'+editForm(id,[['q','問題',q],['a','解答',a]])+'</div>';
+    return '<div class="qa-item'+(OV.mark[id]?' marked':'')+'" data-id="'+id+'"><div class="qa-q">Q：'+esc(q)+ctl(id)+'</div><div class="qa-a">'+esc(a)+'</div></div>';
   }
   function qaHTML(lab){
-    let h='';
-    const ts=TERMS[lab];
-    if(ts&&ts.length){h+='<div class="qa-sec">📖 名詞（本頁出現）</div>'+ts.map(t=>'<div class="qa-item"><div class="qa-q">'+t+'</div><div class="qa-a">'+(GLOSS[t]||'（待補）')+'</div></div>').join('');}
+    let h=''; const ts=TERMS[lab];
+    if(ts&&ts.length){const b=ts.map(termHTML).join(''); if(b)h+='<div class="qa-sec">📖 名詞（白話 + 形式）</div>'+b;}
     const qs=QA[lab];
-    if(qs&&qs.length){h+='<div class="qa-sec">❓ 可能被問</div>'+qs.map(p=>'<div class="qa-item"><div class="qa-q">Q：'+p[0]+'</div><div class="qa-a">'+p[1]+'</div></div>').join('');}
-    return h||'<div class="qa-empty">（本節暫無預備內容）</div>';
+    if(qs&&qs.length){const b=qs.map((p,i)=>qaItemHTML(lab,i,p)).join(''); if(b)h+='<div class="qa-sec">❓ 可能被問</div>'+b;}
+    return h||'<div class="qa-empty">（本節暫無預備內容，或已全部刪除）</div>';
+  }
+  function noteHTML(lab){
+    const id='n'+SEP+lab; if(OV.del[id])return '<div class="qa-empty">（本節講稿已刪除）</div>';
+    const e=OV.edit[id]||{}, txt=('text'in e)?e.text:(NOTES[lab]||'（本節暫無講稿）');
+    if(editingId===id)return '<div class="note-item editing" data-id="'+id+'">'+editForm(id,[['text','講稿',txt]])+'</div>';
+    return '<div class="note-item'+(OV.mark[id]?' marked':'')+'" data-id="'+id+'"><div class="it-bar">'+ctl(id)+'</div><div class="note-text">'+esc(txt)+'</div></div>';
   }
 
-  const notesP=setupPanel({modal:'noteModal',btn:'noteBtn',body:'noteBody',tag:'noteTag',idx:'noteIdx',close:'noteClose',prev:'notePrev',next:'noteNext',get:l=>NOTES[l]||'（本節暫無講稿）',html:false});
+  const notesP=setupPanel({modal:'noteModal',btn:'noteBtn',body:'noteBody',tag:'noteTag',idx:'noteIdx',close:'noteClose',prev:'notePrev',next:'noteNext',get:noteHTML,html:true});
   const qaP=setupPanel({modal:'qaModal',btn:'qaBtn',body:'qaBody',tag:'qaTag',idx:'qaIdx',close:'qaClose',prev:'qaPrev',next:'qaNext',get:qaHTML,html:true});
+
+  // edit / mark / delete via event delegation on each panel body
+  function wire(panel){
+    panel.body.addEventListener('click',e=>{
+      const b=e.target.closest('button[data-act]'); if(!b)return; e.preventDefault();
+      const act=b.dataset.act, id=b.dataset.id;
+      if(act==='edit'){editingId=id;panel.rerender();}
+      else if(act==='cancel'){editingId=null;panel.rerender();}
+      else if(act==='save'){const box=b.closest('.it-edit'),obj=Object.assign({},OV.edit[id]);box.querySelectorAll('textarea[data-f]').forEach(t=>obj[t.dataset.f]=t.value);OV.edit[id]=obj;editingId=null;saveOV();panel.rerender();}
+      else if(act==='del'){OV.del[id]=true;if(editingId===id)editingId=null;saveOV();panel.rerender();}
+      else if(act==='mark'){OV.mark[id]?delete OV.mark[id]:OV.mark[id]=true;saveOV();panel.rerender();}
+    });
+  }
+  wire(notesP); wire(qaP);
+
+  // export the override layer so Claude can bake it into the source
+  function humanId(id){const p=id.split(SEP);if(p[0]==='t')return '名詞「'+p[1]+'」';if(p[0]==='q')return '問答「'+p[1]+'」#'+(parseInt(p[2],10)+1);if(p[0]==='n')return '講稿「'+p[1]+'」';return id;}
+  function buildExport(){
+    const L=['# Halo2 deck — 修改清單（複製貼給 Claude，我會直接改原始檔）'];
+    const mk=Object.keys(OV.mark), ed=Object.keys(OV.edit), dl=Object.keys(OV.del);
+    if(mk.length){L.push('','## 🚩 標記（請改這些）');mk.forEach(k=>L.push('- '+humanId(k)));}
+    if(ed.length){L.push('','## ✏️ 已編輯（新內容）');ed.forEach(k=>L.push('- '+humanId(k)+'：'+JSON.stringify(OV.edit[k])));}
+    if(dl.length){L.push('','## 🗑️ 已刪除');dl.forEach(k=>L.push('- '+humanId(k)));}
+    if(!mk.length&&!ed.length&&!dl.length)L.push('','（目前沒有任何標記 / 編輯 / 刪除）');
+    L.push('','---RAW（給程式解析，勿動）---',JSON.stringify(OV));
+    return L.join('\n');
+  }
+  function showExport(){
+    let ov=document.getElementById('ovExport');
+    if(!ov){ov=document.createElement('div');ov.id='ovExport';
+      ov.innerHTML='<div class="ov-card"><div class="ov-head"><span>修改清單 — 複製後貼給我</span><button id="ovX">×</button></div><textarea id="ovT" readonly></textarea><div class="ov-foot"><button id="ovC">📋 複製</button><button id="ovR">⚠️ 清空全部修改</button></div></div>';
+      document.body.appendChild(ov);
+      ov.querySelector('#ovX').onclick=()=>ov.style.display='none';
+      ov.querySelector('#ovC').onclick=()=>{const t=document.getElementById('ovT');t.select();try{document.execCommand('copy');}catch(e){}};
+      ov.querySelector('#ovR').onclick=()=>{if(confirm('清空所有編輯/刪除/標記？只影響你這台瀏覽器。')){OV={edit:{},del:{},mark:{}};saveOV();notesP.rerender();qaP.rerender();document.getElementById('ovT').value=buildExport();}};
+    }
+    document.getElementById('ovT').value=buildExport(); ov.style.display='flex';
+  }
+  ['noteModal','qaModal'].forEach(mid=>{const head=document.getElementById(mid).querySelector('.note-head');const eb=document.createElement('button');eb.className='note-export';eb.textContent='⤓ 匯出';eb.title='匯出修改清單給 Claude';eb.onclick=showExport;head.insertBefore(eb,head.querySelector('.note-close'));});
 
   // teleprompter: while open, panels follow the slide you scroll to
   deck.addEventListener('scroll',()=>{viewIdx=currentIdx();notesP.follow();qaP.follow();},{passive:true});
