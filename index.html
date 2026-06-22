@@ -391,6 +391,59 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <p class="lead">算術化 → 自訂閘 → 複製約束 / 查表 → KZG 承諾 → SHPLONK + Fiat–Shamir → prove / verify。每一步都有原文定義與圖解。</p></div>
 </section>
 
+<!-- II-0 complete end-to-end pipeline (roadmap, up front) -->
+<section class="slide" data-part="II" data-label="完整流程圖">
+  <div class="slide-meta"><span class="part-label">PART II</span> · 先看全貌</div>
+  <h2>完整流程：<span class="accent">一張圖看完 prove → verify</span></h2>
+  <figure>
+    <svg viewBox="0 0 900 330" role="img" aria-label="Halo2 完整證明流程">
+      <rect x="10" y="8" width="430" height="34" rx="8" fill="#eef2ff" stroke="#c7d2fe"/>
+      <text x="225" y="30" font-size="13" text-anchor="middle" fill="#3730a3">私下準備：電路 R_C ＋ 輸入（x 公開 · w 私密）</text>
+      <rect x="460" y="8" width="430" height="34" rx="8" fill="#f7f8fa" stroke="#d9dce3"/>
+      <text x="675" y="30" font-size="13" text-anchor="middle" fill="#55596b">一次性：Trusted Setup → SRS → keygen → (pk, vk)</text>
+      <g text-anchor="middle">
+        <rect x="10" y="70" width="164" height="64" rx="9" fill="#ffffff" stroke="#a5b4fc" stroke-width="1.5"/>
+        <text x="92" y="92" font-size="12.5" font-weight="700" fill="#4338ca">① 算術化</text>
+        <text x="92" y="110" font-size="11" fill="#55596b">→ 2ᵏ 列 trace table</text>
+        <text x="92" y="125" font-size="9.5" fill="#8b94a3">advice/fixed/instance/sel</text>
+        <rect x="184" y="70" width="164" height="64" rx="9" fill="#ffffff" stroke="#a5b4fc" stroke-width="1.5"/>
+        <text x="266" y="92" font-size="12.5" font-weight="700" fill="#4338ca">② 加約束</text>
+        <text x="266" y="110" font-size="11" fill="#55596b">自訂閘 + 複製約束</text>
+        <text x="266" y="125" font-size="9.5" fill="#8b94a3">+ 查表（皆 = 多項式 = 0）</text>
+        <rect x="358" y="70" width="164" height="64" rx="9" fill="#eef2ff" stroke="#818cf8" stroke-width="1.5"/>
+        <text x="440" y="92" font-size="12.5" font-weight="700" fill="#3730a3">③ 承諾</text>
+        <text x="440" y="110" font-size="11" fill="#55596b">每欄 KZG commit</text>
+        <text x="440" y="125" font-size="9.5" fill="#8b94a3">[fᵢ(τ)]₁（用 SRS）</text>
+        <rect x="532" y="70" width="164" height="64" rx="9" fill="#ffffff" stroke="#a5b4fc" stroke-width="1.5"/>
+        <text x="614" y="92" font-size="12.5" font-weight="700" fill="#4338ca">④ 挑戰</text>
+        <text x="614" y="110" font-size="11" fill="#55596b">Fiat–Shamir</text>
+        <text x="614" y="125" font-size="9.5" fill="#8b94a3">ζ = H(transcript)</text>
+        <rect x="706" y="70" width="164" height="64" rx="9" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="788" y="92" font-size="12.5" font-weight="700" fill="#5b21b6">⑤ 批次開啟</text>
+        <text x="788" y="110" font-size="11" fill="#55596b">SHPLONK</text>
+        <text x="788" y="125" font-size="10" fill="#7c3aed">→ 證明 π (~KB)</text>
+      </g>
+      <g stroke="#94a3b8" stroke-width="1.6" marker-end="url(#a2)">
+        <line x1="176" y1="102" x2="182" y2="102"/><line x1="350" y1="102" x2="356" y2="102"/>
+        <line x1="524" y1="102" x2="530" y2="102"/><line x1="698" y1="102" x2="704" y2="102"/>
+      </g>
+      <line x1="788" y1="134" x2="788" y2="172" stroke="#16a34a" stroke-width="2" marker-end="url(#a3)"/>
+      <text x="800" y="158" font-size="11" fill="#15803d">π + 公開 x ↓</text>
+      <rect x="200" y="180" width="500" height="56" rx="10" fill="#dcfce7" stroke="#86efac"/>
+      <text x="450" y="204" font-size="14" text-anchor="middle" font-weight="700" fill="#15803d">⑥ Verifier：配對檢查 e(·) = e(·)</text>
+      <text x="450" y="223" font-size="11.5" text-anchor="middle" fill="#16a34a">→ 接受 / 拒絕（1 bit）· 常數時間，不重跑計算</text>
+      <rect x="10" y="264" width="880" height="32" rx="8" fill="#fffbeb" stroke="#fde68a"/>
+      <text x="22" y="285" font-size="11.5" fill="#92400e">除錯：MockProver = 只跑 ①②（純軟體查約束，不做承諾 / 配對）→ 精準指出哪條閘、哪個 cell 沒滿足。</text>
+      <defs>
+        <marker id="a2" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#94a3b8"/></marker>
+        <marker id="a3" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#16a34a"/></marker>
+      </defs>
+    </svg>
+    <figcaption>原始圖解（本報告自製）· 後面每一步就是把這張的每個方塊放大講</figcaption>
+  </figure>
+  <p class="muted" style="font-size:.95rem;margin-top:.2rem">先有這張地圖，再看細節：<b>x 公開、w 私密、π 不洩漏 w</b>。①② 是算術化層、③④⑤ 是密碼學層、⑥ 是驗證。</p>
+</section>
+
 <!-- II-1 arithmetization + trace table -->
 <section class="slide" data-part="II" data-label="算術化">
   <div class="slide-meta"><span class="part-label">PART II</span> · 第 1 層</div>
@@ -580,27 +633,6 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   </div>
 </section>
 
-<!-- II-7 pipeline -->
-<section class="slide" data-part="II" data-label="五階段流水線">
-  <div class="slide-meta"><span class="part-label">PART II</span> · 整條流水線</div>
-  <h2>從電路到「接受 / 拒絕」的 <span class="accent">五個階段</span></h2>
-  <figure>
-    <svg viewBox="0 0 900 150" role="img" aria-label="五階段流水線">
-      <g font-size="13" text-anchor="middle">
-        <rect x="20" y="40" width="140" height="56" rx="10" fill="#f7f8fa" stroke="#d9dce3"/><text x="90" y="64" font-weight="700" fill="#4f46e5">SETUP</text><text x="90" y="83" font-size="11" fill="#55596b">SRS · setup(k)</text>
-        <text x="172" y="72" font-size="18" fill="#8b94a3">→</text>
-        <rect x="190" y="40" width="140" height="56" rx="10" fill="#f7f8fa" stroke="#d9dce3"/><text x="260" y="64" font-weight="700" fill="#4f46e5">KEYGEN</text><text x="260" y="83" font-size="11" fill="#55596b">vk / pk</text>
-        <text x="342" y="72" font-size="18" fill="#8b94a3">→</text>
-        <rect x="360" y="40" width="140" height="56" rx="10" fill="#eef2ff" stroke="#c7d2fe"/><text x="430" y="64" font-weight="700" fill="#3730a3">PROVE</text><text x="430" y="83" font-size="11" fill="#6366f1">ProverSHPLONK</text>
-        <text x="512" y="72" font-size="18" fill="#8b94a3">→</text>
-        <rect x="530" y="40" width="140" height="56" rx="10" fill="#dcfce7" stroke="#86efac"/><text x="600" y="64" font-weight="700" fill="#15803d">VERIFY</text><text x="600" y="83" font-size="11" fill="#16a34a">accept?</text>
-        <rect x="710" y="40" width="170" height="56" rx="10" fill="#fffbeb" stroke="#fde68a"/><text x="795" y="62" font-weight="700" fill="#92400e">MockProver</text><text x="795" y="81" font-size="10.5" fill="#b45309">除錯：純軟體查約束</text>
-      </g>
-    </svg>
-    <figcaption>原始圖解（本報告自製）</figcaption>
-  </figure>
-  <div class="card green"><p style="font-size:.95rem"><b>MockProver</b> 不做密碼學，但會精準指出哪一個 cell、哪一條閘沒滿足。除錯先用它，再上真 KZG。</p></div>
-</section>
 
 <!-- ===== PART III OPENER ===== -->
 <section class="slide part-opener" data-part="III" data-label="為什麼能用">
@@ -961,13 +993,13 @@ Stage 4 VERIFY       verified      1.96 ms
 'zk-SNARK 性質':'四個安全性質,一樣引原文。完備性:誠實證明者照規則跑,驗證者一定接受,機率是一。可靠性:證明沒辦法騙過驗證者。知識可靠性:存在一個抽取器,能把證明者的見證抽出來 —— 這比單純可靠性更強。零知識:證明不洩漏見證的任何資訊。最下面那條把簡潔性跟 zk-SNARK 補上:證明長度只跟電路大小成 polylog,這樣的 NARK 叫 SNARK,再加上零知識就是 zk-SNARK。',
 '兩層架構':'這張很關鍵。Halo2 其實是兩層:上層是 PLONKish 算術化,把計算排成一張表加一組多項式;下層才是多項式承諾。重點在下層有兩種選擇 —— 原版用 IPA、跑 Pasta 曲線、免可信設定;我們用的 PSE 分支換成 KZG、跑 BN254。為什麼選後者?因為 BN254 的配對是以太坊內建的,鏈上驗證便宜,而且 KZG 證明大小固定。代價就是需要一次性的可信設定。',
 '怎麼做':'好,知道它在做什麼了,接下來進到最核心的「怎麼做」。我會照這條鏈走一遍:算術化、自訂閘、複製約束跟查表、KZG 承諾、SHPLONK 跟 Fiat–Shamir,最後串成完整流水線。每一步我都會給原文定義跟一張圖。',
+'完整流程圖':'在進細節之前,先給各位一張地圖,看完整條流程怎麼走,後面每一步就是把這張圖的每個方塊放大。最上面有兩件預備:私下準備電路跟輸入,公開的 instance x、私密的見證 w;還有一次性的可信設定,產生 SRS 再 keygen 出 pk、vk。然後 prover 走六步:第一,算術化,把計算填成 2 的 k 次方列的 trace table;第二,加約束,自訂閘、複製約束、查表,全都是等於零的多項式;第三,承諾,把每一欄多項式用 KZG 壓成一個群元素;第四,Fiat–Shamir,對 transcript 雜湊抽一個隨機挑戰點;第五,SHPLONK 批次開啟,產生大約幾 KB 的證明 π;最後把 π 加公開的 x 交給 verifier,第六步做配對檢查,輸出接受或拒絕,就一個 bit、常數時間、不重跑計算。補一句:MockProver 只跑前兩步、純查約束、不做密碼學,是除錯用的。記住三件事:x 公開、w 私密、π 不洩漏 w。',
 '算術化':'第一層,算術化。原文說得很清楚:arithmetization 就是我們用來表達電路的語言,它把電路寫成體上變數的多項式約束;而 PLONKish 電路,就是定義在一個矩形數值矩陣上。右邊這張圖就是個具體例子 —— 待會 demo 要算的那個多項式,攤成四列的表。行是計算的一步,欄是一條多項式。',
 '四種欄':'表有四種欄,我一樣引原文:fixed 欄是電路固定的、advice 欄對應見證值、instance 欄放公開輸入。第四種是 selector,固定欄裡的 0/1 開關,決定某一列哪個閘生效。對應到我們的 demo:acc 跟 x 是 advice、係數是 fixed、輸出的 P(x) 是 instance。',
 '自訂閘':'閘是整個系統的靈魂。原文定義:每條約束是一個多元多項式,在每一列都必須等於零;而且變數可以引用本列、也可以引用相鄰的列。右邊就是我們論文的核心閘 —— 一步 Horner:acc 乘以 x 加係數,等於下一列的 acc。注意它讀「下一列」用的就是 rotation。因為閘只能看固定偏移的列,所以演算法得排成規則的縱向流水線,這直接決定了我們把多項式求值寫成逐列遞推。',
 '複製約束 / 查表':'兩個把 cell 接起來的工具。複製約束,原文:指定兩個 cell 必須相等。在 demo 裡,私密的 x 在每一列都要是同一個值,就靠它綁住,惡意證明者不能每列偷換 x。查表 plookup,原文:檢查一條多項式的值是否落在一張表裡。我們用它做 ByteTable 範圍檢查,保證定點截斷的餘數每個 byte 都合法。',
 'KZG 承諾':'第三層,多項式承諾。先給形式定義 —— 一個承諾方案是 gen、com、open 三件套,這句是 BDFG 論文 Definition 2.3 的原文。KZG 的具體做法:對一條多項式的承諾,就壓成單一個群元素;要證明它在某點的值,用一次配對檢查。SRS 是通用且可更新的,只要設定儀式中有一個人誠實就安全;那個秘密 τ 用完即丟。我們論文如實把這當成一條信任假設,不宣稱 trustless。',
 'SHPLONK':'為什麼證明可以又小、又不隨計算深度成長?關鍵在 SHPLONK。投影片這句是 BDFG 2020/081 的摘要原文:它把「多條多項式、各在不同點開啟」批次成單一開啟證明,他們的第二個方案只要兩個群元素、兩次配對。配合右邊這張圖:列數一直翻倍,proof 幾乎不動。我們論文的電路就是這性質的體現 —— N 不管多大,proof 恆 31,872 bytes。另外 Fiat–Shamir 把互動挑戰換成對 transcript 的雜湊,PSE 預設用 Blake2b。',
-'五階段流水線':'把前面接起來就是完整流水線:setup 產生 SRS、keygen 產生兩把鑰匙、prove 產生證明、verify 驗證。旁邊那個 MockProver 是除錯神器 —— 它不做真的密碼學,但會精準告訴你哪一個 cell、哪一條閘沒滿足。實務上一定先用它跑通,再上真的 KZG。',
 '為什麼能用':'第三部分:為什麼這套東西數學上站得住?我想回答一個直覺上的疑問 —— 為什麼只在一個隨機點檢查,就能相信整條多項式?',
 '為什麼成立':'答案是 Schwartz–Zippel 引理。投影片上是它的正式敘述:一個非零、總次數 d 的多項式,在隨機點等於零的機率,最多 d 除以取樣集合的大小;在 2 的 254 次方那麼大的體上,這機率小到可以忽略。所以只要在 Fiat–Shamir 抽的隨機點上恆等式成立,幾乎就保證它處處成立。配合承諾的綁定性,就撐起可靠性。再加上 advice 加隨機 blinding 給零知識、KZG 加 SHPLONK 給簡潔性,四個性質到齊。BN254 提供大約 128 位元的安全等級。',
 '形式化證明':'有人會問:有沒有形式化證明?有,完整的在論文 ch3,這裡我給定義加證明策略。左邊兩格是原文:知識可靠性在代數群模型 AGM 下的正式定義 —— 存在一個有效率的抽取器,讓任何代數對手贏的機率可忽略;以及它依賴的 q-DLOG 假設。右邊是三個性質的證明策略:完備性靠逐列滿足每條閘;可靠性靠承諾綁定加 Schwartz–Zippel,在 AGM 下用抽取器導矛盾;零知識靠 advice 加 blinding,存在一個模擬器,不靠見證就能產生同分布的證明。',
