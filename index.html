@@ -186,6 +186,20 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 #ovExport .ov-foot{display:flex;gap:10px;padding:.6rem .9rem;border-top:1px solid var(--border)}
 #ovExport .ov-foot button{padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);cursor:pointer;font-weight:700;background:var(--surface)}
 #savedBadge{position:fixed;left:14px;bottom:14px;z-index:70;background:rgba(22,163,74,.94);color:#fff;font-size:.78rem;font-weight:700;padding:.32rem .75rem;border-radius:999px;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 4px 14px rgba(22,163,74,.4)}
+/* pipeline locator rail (you-are-here) on mechanism slides */
+.flowrail{position:fixed;left:8px;top:64px;width:124px;z-index:42;display:none;flex-direction:column;font-family:var(--font-sans)}
+.flowrail.show{display:flex}
+.flowrail .fr-title{font-size:.66rem;font-weight:800;color:var(--text-faint);letter-spacing:.08em;margin-bottom:.35rem;padding-left:.1rem}
+.fr-stage{font-size:.71rem;font-weight:700;color:var(--text-dim);background:rgba(247,248,250,.92);border:1px solid var(--border);border-radius:9px;padding:.3rem .42rem;display:flex;align-items:center;gap:.3rem;line-height:1.12;cursor:pointer}
+.fr-stage:hover{border-color:var(--accent)}
+.fr-stage .fr-n{flex:0 0 auto;display:inline-flex;width:1.1rem;height:1.1rem;border-radius:50%;background:var(--text-faint);color:#fff;font-size:.64rem;align-items:center;justify-content:center}
+.fr-stage.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 3px 12px var(--accent-glow)}
+.fr-stage.active .fr-n{background:#fff;color:var(--accent)}
+.fr-arrow{font-size:.58rem;color:var(--text-faint);text-align:center;padding:.13rem .1rem;line-height:1.1}
+.slide.rail{padding-left:160px}
+.slide.rail .slide-meta{left:160px}
+@media(max-width:1180px){.flowrail{display:none!important}.slide.rail{padding-left:5rem}.slide.rail .slide-meta{left:5rem}}
+@media(max-width:820px){.slide.rail{padding-left:1.6rem}.slide.rail .slide-meta{left:1.6rem}}
 /* formula boxes */
 .fbox{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:.55rem .9rem;margin:.5rem 0}
 .fbox .lbl{font-size:.82rem;font-weight:700;color:var(--accent-light);margin-bottom:.1rem}
@@ -1703,7 +1717,16 @@ Stage 4 VERIFY       verified      1.96 ms
   ['noteModal','qaModal'].forEach(mid=>{const head=document.getElementById(mid).querySelector('.note-head');const eb=document.createElement('button');eb.className='note-export';eb.textContent='⤓ 匯出';eb.title='匯出修改清單給 Claude';eb.onclick=showExport;head.insertBefore(eb,head.querySelector('.note-close'));});
 
   // teleprompter: while open, panels follow the slide you scroll to
-  deck.addEventListener('scroll',()=>{viewIdx=currentIdx();notesP.follow();qaP.follow();},{passive:true});
+  // ===== pipeline locator rail: mark which stage we are on + the connecting action between steps =====
+  const STAGE={'算術化':1,'四種欄':1,'自訂閘':2,'複製約束 / 查表':2,'整除性推導':3,'KZG 承諾':4,'KZG 完整推導':4,'SHPLONK':5,'驗證恆等式推導':6};
+  slides.forEach(s=>{if(STAGE[s.dataset.label])s.classList.add('rail');});
+  const rail=document.createElement('div'); rail.className='flowrail';
+  rail.innerHTML='<div class="fr-title">證明流程 · 你在這</div>'+[[1,'算術化 · 排表','填見證 + 加規則'],[2,'加約束 · 閘/複製/查表','每欄插值成多項式'],[3,'多項式 · 整除 Z_H','承諾每條多項式'],[4,'KZG 承諾','FS 抽隨機點 + 批次'],[5,'SHPLONK 批次開啟','在 ζ 開啟 + 配對'],[6,'隨機點驗證',null]].map(a=>'<div class="fr-stage" data-s="'+a[0]+'"><span class="fr-n">'+a[0]+'</span>'+a[1]+'</div>'+(a[2]?'<div class="fr-arrow">↓ '+a[2]+'</div>':'')).join('');
+  document.body.appendChild(rail);
+  rail.querySelectorAll('.fr-stage').forEach(n=>n.addEventListener('click',()=>{const s=+n.dataset.s;const t=slides.find(sl=>STAGE[sl.dataset.label]===s);if(t)t.scrollIntoView();}));
+  function updateRail(){const s=STAGE[labels[viewIdx]||''];if(s){rail.classList.add('show');rail.querySelectorAll('.fr-stage').forEach(n=>n.classList.toggle('active',+n.dataset.s===s));}else rail.classList.remove('show');}
+  deck.addEventListener('scroll',()=>{viewIdx=currentIdx();notesP.follow();qaP.follow();updateRail();},{passive:true});
+  updateRail();
 
   window.addEventListener('keydown',e=>{
     if(e.key==='n'||e.key==='N'){e.preventDefault();notesP.toggle();}
