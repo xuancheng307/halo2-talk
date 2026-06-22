@@ -221,11 +221,23 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <h2>Halo2 的<span class="accent">家譜</span></h2>
   <div class="grid-2">
     <div>
-      <ul>
-        <li><b>Halo</b>（Bowe·Grigg·Hopwood, 2019）：首個免信任設定的遞迴證明組合。</li>
-        <li><b>Halo2</b>（Electric Coin Company / Zcash）：把想法重建在 <b>PLONKish 算術化</b> 上，成為通用電路框架。</li>
-        <li>我們用的是 <b>PSE fork</b>：換成 <b>KZG / BN254</b>，為了以太坊上鏈驗證效率。</li>
-      </ul>
+      <figure style="margin:0 0 .5rem">
+        <svg viewBox="0 0 420 224" role="img" aria-label="Halo → Halo2 → PSE fork 家譜" style="width:330px;max-width:100%;height:auto;display:block">
+          <defs><marker id="ga" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/></marker></defs>
+          <rect x="40" y="8" width="340" height="52" rx="8" fill="#f7f8fa" stroke="#d9dce3"/>
+          <text x="58" y="30" font-size="14" font-weight="700" fill="#1a1a1f">Halo（2019）</text>
+          <text x="58" y="49" font-size="11.5" fill="#55596b">首個免信任設定遞迴組合 · IPA / 離散對數</text>
+          <line x1="210" y1="60" x2="210" y2="82" stroke="#94a3b8" stroke-width="2" marker-end="url(#ga)"/>
+          <rect x="40" y="84" width="340" height="52" rx="8" fill="#eef2ff" stroke="#c7d2fe"/>
+          <text x="58" y="106" font-size="14" font-weight="700" fill="#3730a3">Halo2（Electric Coin Co. / Zcash）</text>
+          <text x="58" y="125" font-size="11.5" fill="#6366f1">重建於 PLONKish 算術化 · 通用電路框架</text>
+          <line x1="210" y1="136" x2="210" y2="158" stroke="#94a3b8" stroke-width="2" marker-end="url(#ga)"/>
+          <rect x="40" y="160" width="340" height="56" rx="8" fill="#fef3c7" stroke="#fcd34d"/>
+          <text x="58" y="182" font-size="14" font-weight="700" fill="#92400e">PSE fork ←（我們用這個）</text>
+          <text x="58" y="201" font-size="11.5" fill="#b45309">承諾換成 KZG · 跑 BN254 · 以太坊上鏈友善</text>
+        </svg>
+        <figcaption>原始圖解（本報告自製）· 血緣與我們的選擇</figcaption>
+      </figure>
       <div class="defn">
         <span class="dt">原文 · Halo</span>
         <span class="quote">“We obtain and implement Halo, the first practical example of recursive proof composition without a trusted setup, using the discrete log assumption over normal cycles of elliptic curves.”</span>
@@ -522,12 +534,28 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="defn"><span class="dt">原文 · Columns</span>
     <span class="quote">“Fixed columns are fixed by the circuit; advice columns correspond to witness values; and instance columns are normally used for public inputs.”</span>
     <a class="src" href="https://zcash.github.io/halo2/concepts/arithmetization.html" target="_blank" rel="noopener">The halo2 Book — PLONKish Arithmetization ↗</a></div>
-  <div class="grid-2" style="margin-top:.4rem">
-    <div class="card"><h3 style="color:#1d4ed8">Advice <span class="pill-tag t-b">私密</span></h3><p>見證值 — prover 的秘密（如我們的 acc 累加器、x 求值點）。</p></div>
-    <div class="card"><h3 style="color:#92400e">Fixed <span class="pill-tag t-y">常數</span></h3><p>電路固定值（如多項式係數、ByteTable），屬於 verification key。</p></div>
-    <div class="card"><h3 style="color:#15803d">Instance <span class="pill-tag t-g">公開</span></h3><p>公開輸入 / 輸出 — prover 與 verifier 共享（如公開的 P(x)）。</p></div>
-    <div class="card"><h3 style="color:#5b21b6">Selector</h3><p>固定欄裡的 0/1 開關，決定某列哪個閘生效（見下節原文）。</p></div>
-  </div>
+  <figure style="margin:.5rem 0 0">
+    <svg viewBox="0 0 900 220" role="img" aria-label="四種欄對照：誰設定、誰看得到">
+      <g font-size="14" font-weight="700" text-anchor="middle">
+        <rect x="14" y="20" width="210" height="40" rx="7" fill="#dbeafe"/><text x="119" y="45" fill="#1d4ed8">Advice · 私密</text>
+        <rect x="238" y="20" width="210" height="40" rx="7" fill="#fef3c7"/><text x="343" y="45" fill="#92400e">Fixed · 常數</text>
+        <rect x="462" y="20" width="210" height="40" rx="7" fill="#dcfce7"/><text x="567" y="45" fill="#15803d">Instance · 公開</text>
+        <rect x="686" y="20" width="200" height="40" rx="7" fill="#ede9fe"/><text x="786" y="45" fill="#5b21b6">Selector · 開關</text>
+      </g>
+      <g font-size="12.5" text-anchor="middle" fill="#1a1a1f">
+        <text x="119" y="92">見證值（prover 秘密）</text><text x="119" y="112" fill="#55596b">如 acc 累加器、x 求值點</text>
+        <text x="343" y="92">電路固定值</text><text x="343" y="112" fill="#55596b">係數、ByteTable（屬 vk）</text>
+        <text x="567" y="92">公開輸入 / 輸出</text><text x="567" y="112" fill="#55596b">prover、verifier 共享 P(x)</text>
+        <text x="786" y="92">0/1 開關</text><text x="786" y="112" fill="#55596b">決定某列哪個閘生效</text>
+      </g>
+      <line x1="14" y1="138" x2="886" y2="138" stroke="#d9dce3"/>
+      <g font-size="12.5">
+        <text x="14" y="166" fill="#1d4ed8">🔒 只有 prover 知道：</text><text x="170" y="166" fill="#55596b">Advice</text>
+        <text x="14" y="190" fill="#15803d">👁 verifier 也看得到：</text><text x="180" y="190" fill="#55596b">Instance（+ 電路固定的 Fixed / Selector，寫在 vk 裡）</text>
+      </g>
+    </svg>
+    <figcaption>原始圖解（本報告自製）· 四種欄各司其職</figcaption>
+  </figure>
 </section>
 
 <!-- II-3 custom gate -->
@@ -614,7 +642,32 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <li><b>所有約束合成一條</b>（用挑戰 \(\alpha\) 的次方；含閘、複製約束、查表）：\[ G(X)=\sum_{j}\alpha^{\,j}\,g_j\big(a(X),\,a(\omega X),\,q(X),\dots\big) \]</li>
     <li><b>核心等價</b>：每一列都滿足約束 \(\ \Longleftrightarrow\ G\) 在 \(H\) 上恆為 0 \(\ \Longleftrightarrow\ Z_H\mid G\ \Longleftrightarrow\ \exists\,t(X):\) \[ G(X)=t(X)\cdot Z_H(X) \]</li>
   </ol>
-  <p class="muted" style="font-size:.92rem;margin-top:.2rem">→ 「計算正確」就化成「我有一條商多項式 \(t\)，使 \(G=t\cdot Z_H\)」。下一步：承諾這些多項式（KZG），再在隨機點驗這條等式。</p>
+  <figure style="margin:.3rem 0 0">
+    <svg viewBox="0 0 900 158" role="img" aria-label="單位根子群 H 與 vanishing 多項式">
+      <!-- left: roots of unity circle -->
+      <circle cx="130" cy="82" r="60" fill="none" stroke="#c7d2fe" stroke-width="1.5"/>
+      <text x="130" y="86" font-size="11" text-anchor="middle" fill="#8b94a3">H = ⟨ω⟩</text>
+      <g fill="#4f46e5">
+        <circle cx="190" cy="82" r="5"/><circle cx="172" cy="40" r="5"/><circle cx="130" cy="22" r="5"/><circle cx="88" cy="40" r="5"/>
+        <circle cx="70" cy="82" r="5"/><circle cx="88" cy="124" r="5"/><circle cx="130" cy="142" r="5"/><circle cx="172" cy="124" r="5"/>
+      </g>
+      <g font-size="10" fill="#55596b" text-anchor="middle">
+        <text x="206" y="85">ω⁰</text><text x="186" y="32">ω¹</text><text x="130" y="12">ω²</text><text x="74" y="32">ω³</text>
+        <text x="54" y="85">ω⁴</text><text x="74" y="138">ω⁵</text><text x="130" y="156">⋯</text><text x="186" y="138">ωⁿ⁻¹</text>
+      </g>
+      <!-- right: the logic chain -->
+      <g font-size="14" fill="#1a1a1f">
+        <text x="270" y="40">每一列都滿足約束</text>
+        <text x="500" y="40" fill="#4f46e5" font-weight="700">⟺ G(ωⁱ)=0 對所有 i</text>
+        <text x="270" y="74" fill="#16a34a" font-weight="700">⟺ Z_H 整除 G</text>
+        <text x="445" y="74" fill="#55596b" font-size="12">（Z_H(X)=Xⁿ−1，在每個 ωⁱ 為 0）</text>
+        <text x="270" y="108" font-weight="700" fill="#7c3aed">⟺ ∃ 商多項式 t：G(X) = t(X)·Z_H(X)</text>
+      </g>
+      <text x="270" y="138" font-size="11.5" fill="#8b94a3">把「逐列正確」整包換成「我有一條 t 使 G=t·Z_H」—— 之後只在隨機點驗這條等式。</text>
+    </svg>
+    <figcaption>原始圖解（本報告自製）· 單位根 + 整除等價</figcaption>
+  </figure>
+  <p class="muted" style="font-size:.92rem;margin-top:.1rem">→ 下一步：承諾這些多項式（KZG），再在隨機點驗 \(G=t\cdot Z_H\)。</p>
 </section>
 
 <!-- II-5 KZG -->
@@ -705,7 +758,22 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <li><b>FS → \(\zeta\) ；開啟</b>：在 \(\zeta\)（rotation 用 \(\omega\zeta\)）開啟所有多項式 → \(a(\zeta),Z(\zeta),Z(\omega\zeta),t(\zeta),\dots\)，附 KZG 開啟證明。</li>
     <li><b>驗證 + 為何夠</b>：代入檢查 \(G(\zeta)\overset{?}{=}t(\zeta)\,(\zeta^{n}-1)\)；Schwartz–Zippel → 在隨機 \(\zeta\) 成立 \(\Rightarrow\) 在 \(H\) 上處處成立。</li>
   </ol>
-  <p class="muted" style="font-size:.9rem;margin-top:.2rem">所有開啟 → <b>SHPLONK 批次</b>（linearization 減開啟數）。<b>整條 Halo2 = 算術化 → 整除 Z_H → 回合式承諾↔挑戰 → ζ 一條等式 + 配對。</b></p>
+  <figure style="margin:.3rem 0 0">
+    <svg viewBox="0 0 900 132" role="img" aria-label="Fiat–Shamir 承諾與挑戰交錯回合">
+      <defs><marker id="fa" markerWidth="9" markerHeight="9" refX="5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#16a34a"/></marker></defs>
+      <g font-size="12.5" text-anchor="middle">
+        <rect x="14" y="34" width="150" height="46" rx="7" fill="#eef2ff" stroke="#c7d2fe"/><text x="89" y="54" fill="#3730a3" font-weight="700">Round 1</text><text x="89" y="71" fill="#6366f1" font-size="11">承諾 advice（+blinding）</text>
+        <rect x="248" y="34" width="150" height="46" rx="7" fill="#eef2ff" stroke="#c7d2fe"/><text x="323" y="54" fill="#3730a3" font-weight="700">Round 2</text><text x="323" y="71" fill="#6366f1" font-size="11">承諾 grand-product Z</text>
+        <rect x="482" y="34" width="150" height="46" rx="7" fill="#eef2ff" stroke="#c7d2fe"/><text x="557" y="54" fill="#3730a3" font-weight="700">Round 3</text><text x="557" y="71" fill="#6366f1" font-size="11">算商 t，切塊 t₀,t₁,…</text>
+        <rect x="716" y="34" width="170" height="46" rx="7" fill="#dcfce7" stroke="#86efac"/><text x="801" y="54" fill="#15803d" font-weight="700">開啟 + 驗</text><text x="801" y="71" fill="#16a34a" font-size="11">G(ζ)=t(ζ)(ζⁿ−1)</text>
+      </g>
+      <g stroke="#16a34a" stroke-width="2" marker-end="url(#fa)"><line x1="166" y1="57" x2="244" y2="57"/><line x1="400" y1="57" x2="478" y2="57"/><line x1="634" y1="57" x2="712" y2="57"/></g>
+      <g font-size="11.5" text-anchor="middle" fill="#15803d" font-weight="700"><text x="205" y="30">FS→ β,γ</text><text x="439" y="30">FS→ α</text><text x="673" y="30">FS→ ζ</text></g>
+      <text x="14" y="118" font-size="11.5" fill="#8b94a3">關鍵：每個挑戰都在「相關承諾送出之後」才抽 —— 承諾在前、挑戰在後，攻擊者無法預先針對挑戰造假（soundness）。</text>
+    </svg>
+    <figcaption>原始圖解（本報告自製）· 承諾 ↔ 挑戰交錯回合</figcaption>
+  </figure>
+  <p class="muted" style="font-size:.88rem;margin-top:.1rem">所有開啟 → <b>SHPLONK 批次</b>。<b>整條 Halo2 = 算術化 → 整除 Z_H → 回合式承諾↔挑戰 → ζ 一條等式 + 配對。</b></p>
 </section>
 
 
@@ -719,7 +787,17 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="III" data-label="為什麼成立">
   <div class="slide-meta"><span class="part-label">PART III</span> · 為什麼能用 / 形式化</div>
   <h2>四個性質 — <span class="accent">各自怎麼成立</span>（含形式化背書）</h2>
-  <p class="muted" style="margin:0 0 .45rem;font-size:.93rem">可靠性的數學核心 <b>Schwartz–Zippel</b>（\(\Pr[P(r)=0]\le d/|\mathbb F|\)，隨機點成立 \(\Rightarrow\) 幾乎處處成立）已在 Part II「驗證恆等式推導」用過。</p>
+  <div style="display:flex;gap:14px;align-items:center;margin:0 0 .35rem">
+    <svg viewBox="0 0 300 92" role="img" aria-label="Schwartz–Zippel 隨機點幾乎打不中根" style="flex:0 0 252px;height:62px">
+      <line x1="12" y1="62" x2="290" y2="62" stroke="#d9dce3"/>
+      <path d="M16,30 C60,80 90,18 130,46 C168,72 200,20 240,40 C262,52 278,34 290,30" fill="none" stroke="#4f46e5" stroke-width="2"/>
+      <g fill="#dc2626"><circle cx="74" cy="62" r="4"/><circle cx="150" cy="62" r="4"/><circle cx="222" cy="62" r="4"/></g>
+      <text x="150" y="84" font-size="10.5" text-anchor="middle" fill="#b91c1c">只有 ≤ d 個根（紅點）</text>
+      <line x1="262" y1="20" x2="262" y2="62" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="3 2"/><circle cx="262" cy="46" r="4" fill="#16a34a"/>
+      <text x="262" y="16" font-size="10.5" text-anchor="middle" fill="#15803d">隨機 r</text>
+    </svg>
+    <p class="muted" style="margin:0;font-size:.88rem;flex:1">可靠性的核心 <b>Schwartz–Zippel</b>：非零、次數 \(d\) 的多項式只在 \(\le d\) 個點為 0 → 隨機 \(r\) 命中機率 \(\Pr[P(r)=0]\le d/|\mathbb F|\)，在 \(|\mathbb F|\approx 2^{254}\) 可忽略。<b>驗一個隨機點 ≈ 處處成立</b>。</p>
+  </div>
   <div class="grid-2" style="margin-top:.2rem">
     <table>
       <tr><th>性質</th><th>怎麼成立（機制 + 證明策略）</th></tr>
@@ -736,7 +814,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <a class="src" href="https://eprint.iacr.org/2020/081" target="_blank" rel="noopener">BDFG — ePrint 2020/081, Def. 2.1 ↗</a></div>
     </div>
   </div>
-  <p class="muted" style="margin-top:.5rem;font-size:.9rem">KZG 知識可靠性立基於配對友善曲線的代數假設（AGM + q-DLOG / ROM），BN254 約 <b>128-bit</b> 安全；完整形式化論證見論文 <b>ch3</b>。</p>
+  <p class="muted" style="margin-top:.35rem;font-size:.86rem">KZG 知識可靠性立基於 AGM + q-DLOG（BN254 約 <b>128-bit</b> 安全）；完整形式化論證見論文 <b>ch3</b>。</p>
 </section>
 
 <!-- III-2 capabilities / limits -->
