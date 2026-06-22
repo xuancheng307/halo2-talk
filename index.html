@@ -286,6 +286,22 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   </div>
 </section>
 
+<!-- I-1c what you input + formal definition (the two most-asked) -->
+<section class="slide" data-part="I" data-label="輸入什麼 + 形式化">
+  <div class="slide-meta"><span class="part-label">PART I</span> · 最常被問的兩題</div>
+  <h2>你到底「輸入」什麼？<span class="accent">形式化定義</span></h2>
+  <div class="defn"><span class="dt">形式化 · 電路定義的 NP 關係</span>
+    <span class="quote">R_C = { (x, w) : 存在 trace M ∈ 𝔽ᵣ^(n×c)，其中 instance = x、advice = w、fixed = 預處理，同時滿足 (i) 所有 Gate (ii) 所有 Lookup (iii) 所有 Copy constraint }</span>
+    <span class="gloss">證明系統 = 對 R_C 的 SNARK = (Setup, Prove, Verify)。Prove(x, w) → π；Verify(x, π) → 接受 / 拒絕。x 公開、w 私密、π 不洩漏 w。</span></div>
+  <table>
+    <tr><th>你給的三種「輸入」</th><th>形式</th><th>demo 例</th><th>誰看得到</th></tr>
+    <tr><td><b>公開輸入 instance x</b></td><td>𝔽ᵣ 元素</td><td>P(x) = 98</td><td>verifier 看得到</td></tr>
+    <tr class="hl"><td><b>私密見證 witness w</b></td><td>𝔽ᵣ 元素（advice）</td><td>x = 3</td><td><b>永不洩漏</b></td></tr>
+    <tr><td>電路 / 關係 R_C</td><td>fixed 欄 + 閘</td><td>Horner 閘</td><td>公開、setup 時固定</td></tr>
+  </table>
+  <p style="margin-top:.55rem"><b>最常見的盲點：</b>「輸入」不是任意 byte，是 <b>有限域 𝔽ᵣ 的元素</b>（BN254，~2²⁵⁴）。任何東西 — 數字、簽章、Merkle 路徑、甚至我們的定點小數 — 都要先<b>編碼成 field elements</b> 才進得了電路。</p>
+</section>
+
 <!-- I-2b zk-SNARK properties (verbatim) -->
 <section class="slide" data-part="I" data-label="zk-SNARK 性質">
   <div class="slide-meta"><span class="part-label">PART I</span> · 關鍵定義（原文）</div>
@@ -767,6 +783,20 @@ Stage 4 VERIFY       verified      1.96 ms
   <div class="card green" style="margin-top:.7rem"><p style="font-size:.95rem">這支 demo 證明論文方法不是紙上談兵：同一條 Horner 閘、同一套 pipeline，現場就能 prove + verify。論文只是把「整數」換成「定點 + 範圍檢查」把精度做到位。</p></div>
 </section>
 
+<!-- ===== FAQ / misconceptions (appendix) ===== -->
+<section class="slide" data-part="收尾" data-label="常見疑問">
+  <div class="slide-meta"><span class="part-label">附錄</span> · 常見先入為主的疑問</div>
+  <h2>「其實不是那樣」 — <span class="accent">六個常見誤解</span></h2>
+  <div class="grid-3">
+    <div class="card"><h3>ZK = 加密？</h3><p>不是。加密把資料藏起來；ZK 是<b>證明一段計算正確、卻不洩漏輸入</b>。proof 不是密文。</p></div>
+    <div class="card"><h3>ZK 只用在區塊鏈？</h3><p>不是。ZK 是通用工具（合規 / 身分 / 外包計算）；區塊鏈只是其中一個應用。</p></div>
+    <div class="card"><h3>要互動、來回挑戰？</h3><p>不用。Fiat–Shamir 把挑戰換成雜湊 → <b>單一份非互動證明</b>，寄出去就好。</p></div>
+    <div class="card"><h3>驗證要信任第三方？</h3><p>驗證不用。只有 KZG 的<b>一次性通用設定</b>需要儀式（一人誠實即安全）— 跟「信任驗證者」是兩回事。</p></div>
+    <div class="card"><h3>能跑任意程式（像 CPU）？</h3><p>不能。必須能寫成<b>有限域算術電路</b>、trace 大小固定、不能資料相依分支、迴圈要有上界。</p></div>
+    <div class="card"><h3>後量子安全？</h3><p>否。基於 pairing / 離散對數 → <b>非後量子</b>（STARK/FRI 才是）。誠實講清楚。</p></div>
+  </div>
+</section>
+
 <!-- ===== RECAP ===== -->
 <section class="slide" data-part="收尾" data-label="一頁帶走">
   <div class="slide-meta"><span class="part-label">收尾</span></div>
@@ -852,6 +882,7 @@ Stage 4 VERIFY       verified      1.96 ms
 '原文背書 + 那座橋':'我知道各位不會因為我講就信,所以這張直接給原文。左邊是 Bulletproofs 的摘要原文:免設定、離散對數假設、驗證線性。右邊是 Groth16 的原文:三個群元素、三次配對。最重要的是下面這座橋:三者的安全性質其實是同一套 —— 完備、知識可靠、零知識,定義不變,差的只是建構跟信任模型。而且有個漂亮的接點:原版 Halo2 的承諾用的就是 IPA,跟 Bulletproofs 同一個離散對數家族,各位其實認得;我們用的 PSE 版,只是把這一層換成 KZG 的 pairing 承諾,換來通用設定跟快驗證。所以這不是憑空冒出來的新東西,是各位熟的那條線長出來的。',
 '家譜':'先看它從哪來。2019 年的 Halo,是第一個不需要可信設定的遞迴證明組合;投影片上這句就是它論文摘要的原文。後來 Electric Coin Company,也就是 Zcash 團隊,把這個想法重建在 PLONKish 算術化之上,變成通用的電路框架,就是 Halo2。我們用的是社群的 PSE 分支,把承諾換成 KZG、跑在 BN254 曲線上 —— 為什麼這樣選,下一張說。',
 '基礎定義':'在講性質之前,先把三個詞定下來,而且都引 The halo2 Book 的原文。關係 R:它規定哪些「公開輸入加私密輸入」的組合算合法。電路:就是把這個關係實作成證明系統能跑的東西。見證:私密輸入加上中間的 advice 值,合起來叫見證。對到我們的 demo:關係就是「P(x) 等於 98 嗎」,電路是那條 Horner 閘,見證是私密的 x 等於 3。',
+'輸入什麼 + 形式化':'學長教授最愛問的兩題,我直接放前面回答。形式上,一個電路就定義了一個 NP 關係 R_C:所有「公開輸入 x、私密見證 w」的合法組合 —— 合法的意思是,存在一張 trace,讓所有閘、查表、複製約束同時成立。整個證明系統,就是對這個 R_C 的 SNARK:Setup、Prove、Verify 三件套。你實際「輸入」的有三種:公開的 instance(驗證者看得到,例如 P(x)=98)、私密的 witness(永不洩漏,例如 x=3)、還有電路本身(setup 時固定)。最關鍵、最常被忽略的一點:你輸入的不是任意 byte,是有限域的元素;任何資料 —— 數字、簽章、Merkle 路徑、甚至我們的定點小數 —— 都要先編碼成 field elements,才進得了電路。',
 'zk-SNARK 性質':'四個安全性質,一樣引原文。完備性:誠實證明者照規則跑,驗證者一定接受,機率是一。可靠性:證明沒辦法騙過驗證者。知識可靠性:存在一個抽取器,能把證明者的見證抽出來 —— 這比單純可靠性更強。零知識:證明不洩漏見證的任何資訊。最下面那條把簡潔性跟 zk-SNARK 補上:證明長度只跟電路大小成 polylog,這樣的 NARK 叫 SNARK,再加上零知識就是 zk-SNARK。',
 '兩層架構':'這張很關鍵。Halo2 其實是兩層:上層是 PLONKish 算術化,把計算排成一張表加一組多項式;下層才是多項式承諾。重點在下層有兩種選擇 —— 原版用 IPA、跑 Pasta 曲線、免可信設定;我們用的 PSE 分支換成 KZG、跑 BN254。為什麼選後者?因為 BN254 的配對是以太坊內建的,鏈上驗證便宜,而且 KZG 證明大小固定。代價就是需要一次性的可信設定。',
 '怎麼做':'好,知道它在做什麼了,接下來進到最核心的「怎麼做」。我會照這條鏈走一遍:算術化、自訂閘、複製約束跟查表、KZG 承諾、SHPLONK 跟 Fiat–Shamir,最後串成完整流水線。每一步我都會給原文定義跟一張圖。',
@@ -874,6 +905,7 @@ Stage 4 VERIFY       verified      1.96 ms
 '程式碼 2':'左邊是填表 —— 把 Horner 階梯一列一列填進去,中間那個 constrain_equal 就是把每列的 x 綁成同一個值。右邊是真正的流水線:setup、keygen、create_proof、verify_proof。注意泛型參數 ProverSHPLONK 跟 VerifierSHPLONK —— 跟前面講的承諾方案完全對得上。這套 API、這個版本,跟論文的 PF1、PF2 用的一模一樣。',
 '真實輸出':'這是現場真的跑出來的輸出。MockProver 先過,然後 setup、keygen、prove、verify 一路下來:證明 11.6 毫秒產生、864 bytes、1.96 毫秒驗完。最後驗證者接受 —— 它相信 P(x) 等於 98,但從頭到尾沒看過 x。我還故意謊報答案是 99,系統立刻拒絕。這就是一個可靠的零知識證明該有的樣子。',
 'demo → 論文':'把 demo 跟論文接起來。同一條閘,論文多了定點截斷跟餘數的 byte 拆解、加上查表;多項式從固定係數換成 Remez 算出來的;但承諾、曲線、SHPLONK、transcript,整套 stack 完全相同。所以這支 demo 不是玩具 —— 它證明我們的方法用同一條閘、同一套 pipeline,現場就能 prove 跟 verify;論文只是把整數換成定點,把精度做到位。',
+'常見疑問':'這張是備援,Q&A 被問到先入為主的問題時翻出來。六個最常見的誤解:一,ZK 不是加密,是證明計算正確而不洩漏輸入,proof 不是密文。二,ZK 不只用在區塊鏈,是通用工具,區塊鏈只是其中一個應用。三,不需要來回互動,Fiat–Shamir 之後是單一份非互動證明。四,驗證不需要信任第三方,只有 KZG 的一次性設定需要儀式,跟信任驗證者是兩回事。五,不能跑任意程式,必須寫成有限域算術電路、大小固定、不能資料相依分支。六,不是後量子安全,基於 pairing 跟離散對數。誠實講清楚這六點,比含糊帶過更得信任。',
 '一頁帶走':'如果今天只記得五件事:第一,Halo2 是算術化加多項式承諾,我們用 KZG/BN254 版;第二,電路就是一張表加一組等於零的多項式閘;第三,KZG 加 SHPLONK 讓證明又小又快驗;第四,它沒有浮點,所以我們用定點加 Horner 重建超越函數,這是論文貢獻;第五,同一條閘從 demo 一路長到真實電路,已經實作、已經驗證。',
 '出處':'最後是出處。投影片上所有定義,都來自這幾個來源:The halo2 Book,還有 Halo、PLONK、plookup、SHPLONK、KZG、Poseidon 這幾篇論文,全部附了連結,大家可以自己核對。謝謝大家,接下來是問答時間。'
   };
