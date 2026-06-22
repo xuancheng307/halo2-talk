@@ -797,20 +797,6 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <p class="lead">業界部署、我們論文的兩個真實電路，以及一支會跑完整 prove / verify 的最小 Rust demo。</p></div>
 </section>
 
-<!-- V-0 recent ZK applications landscape -->
-<section class="slide" data-part="V" data-label="最近的 ZK 應用">
-  <div class="slide-meta"><span class="part-label">PART V</span> · 最近的零知識應用</div>
-  <h2>ZK 現在<span class="accent">用在哪</span>（這幾年的 landscape）</h2>
-  <div class="grid-3">
-    <div class="card"><h3>zkRollup / zkEVM</h3><p>以太坊擴容：把一批交易壓成一個證明上鏈。Scroll、zkSync、Taiko、Polygon zkEVM。</p></div>
-    <div class="card"><h3>zkML</h3><p>證明「我用某模型對某輸入推論出此結果」，而不洩漏模型或輸入（如 ezkl）。</p></div>
-    <div class="card"><h3>隱私身分 / 憑證</h3><p>zk passport、proof of personhood、選擇性揭露（只證「我成年」不洩漏生日）。</p></div>
-    <div class="card"><h3>償付能力 / 合規證明</h3><p>交易所 proof of solvency；<b>基金 / 投組合規（我們的 PF1）</b> — 證明風險在限額內而不洩漏部位。</p></div>
-    <div class="card"><h3>遞迴 / 聚合證明</h3><p>把多個證明併成一個（Halo 的起點），支撐近乎無限的擴展。</p></div>
-    <div class="card accent"><h3>我們站在哪</h3><p>這些應用常要算<b>非線性函數</b>（金融 Greeks、ML 激活、科學模型）。我們讓 ZK 電路<b>算得動超越函數</b> — 補上缺的那塊。</p></div>
-  </div>
-</section>
-
 <!-- V-1 deployments + numbers -->
 <section class="slide" data-part="V" data-label="用在哪裡">
   <div class="slide-meta"><span class="part-label">PART V</span> · 用在哪裡</div>
@@ -1061,7 +1047,6 @@ Stage 4 VERIFY       verified      1.96 ms
 '超越函數塞進閘':'方法四步:第一,定點,每個數用 2 的 48 次方縮放,用整數模擬小數;第二,用 Remez minimax 找一條多項式,讓區間內最大誤差最小;第三,用剛剛那個逐步 Horner 閘求值;第四,用 ByteTable 查表做範圍檢查。最漂亮的一點:換不同的函數,只要換那幾個係數,電路完全不用重設計 —— 這個通用性,就是來自 Halo2 的 fixed 欄。等一下 demo 的閘,加上截斷跟範圍檢查,就是論文完整的 kernel。',
 'kernel 公式':'這張把剛剛四步寫成精確公式。第一,定點:取尺度 S 等於 2 的 48 次方,任何實數 v 都先編碼成最接近的整數 v 乘 S。第二,用 Remez 求出多項式係數,定點化後放進 fixed 欄。第三,逐步截斷 Horner:初值是最高次係數,每一步把 acc 乘上輸入 R、加當步係數,再除以 S 取下整,得到下一個 acc;走完 d 步就是 P(x) 的定點值。第四,這條閘強制誠實截斷:acc 乘 R 加 c,等於下一個 acc 乘 S 加餘數,而且餘數必須落在 0 到 S 之間。第五,餘數的範圍用查表保證:把餘數拆成 6 個 byte,每個 byte 查 ByteTable 確認落在 0 到 255。重點:第四、第五條,就是 demo 那條乾淨的閘多出來的截斷與範圍檢查;換一個函數,只換係數,電路一行都不動。',
 '用在哪 + 範例':'最後一部分,落地:業界把它用在哪、我們論文的兩個真實電路,以及一支現場會跑完的 demo。',
-'最近的 ZK 應用':'各位對 ZK 的應用印象可能停在隱私貨幣,我快速更新一下這幾年的 landscape。第一,zkRollup 跟 zkEVM:把一批以太坊交易壓成一個證明上鏈,Scroll、zkSync、Taiko 都是。第二,zkML:證明我用某個模型對某輸入推論出這個結果,卻不洩漏模型或輸入。第三,隱私身分:zk passport、選擇性揭露,只證我成年不洩漏生日。第四,償付能力跟合規證明:交易所證明有足額儲備,而我們的 PF1 就是這一類 —— 證明投組風險在限額內卻不洩漏部位。第五,遞迴跟聚合證明,把多個證明併成一個,這正是 Halo 的起點。最後一格是我們站的位置:這些應用常常要算非線性函數,金融的 Greeks、ML 的激活函數、科學模型,而 ZK 電路本來算不動超越函數 —— 我們補上的就是這塊。',
 '用在哪裡':'業界:Zcash 的 Orchard 用的是原版 IPA,不是 KZG,這點別搞混;Scroll、Taiko 這些 zkEVM 走的才是 PSE 的 KZG 路線。我們自己有兩個已經用 Rust 實作的電路:PF1 證明投組的淨 delta 在風險限額內,但不洩漏個別部位;PF2 處理狀態轉移。實測 proof 是 31,872 bytes、驗證約 8 毫秒。下面那句 Poseidon 的原文,是我們 Merkle 樹用的雜湊。',
 '程式碼 1':'進到 code。這張是電路的骨架:宣告四種欄,然後 create_gate 裡那一條 —— 就是整個電路唯一的約束:selector 乘以,acc 乘 x 加係數減下一列的 acc,等於零。注意 acc 用 Rotation::next 讀下一列。敘述很簡單:我知道一個秘密 x,讓這個三次多項式 P(x) 等於某個公開值;我們取 x 等於 3,P(3) 等於 98。',
 '程式碼 2':'左邊是填表 —— 把 Horner 階梯一列一列填進去,中間那個 constrain_equal 就是把每列的 x 綁成同一個值。右邊是真正的流水線:setup、keygen、create_proof、verify_proof。注意泛型參數 ProverSHPLONK 跟 VerifierSHPLONK —— 跟前面講的承諾方案完全對得上。這套 API、這個版本,跟論文的 PF1、PF2 用的一模一樣。',
