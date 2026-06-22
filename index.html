@@ -720,9 +720,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <li><b>所有約束合成一條</b>（用挑戰 \(\alpha\) 的次方；含閘、複製約束、查表）：\[ G(X)=\sum_{j}\alpha^{\,j}\,g_j\big(a(X),\,a(\omega X),\,q(X),\dots\big) \]</li>
     <li><b>核心等價</b>：每一列都滿足約束 \(\ \Longleftrightarrow\ G\) 在 \(H\) 上恆為 0 \(\ \Longleftrightarrow\ Z_H\mid G\ \Longleftrightarrow\ \exists\,t(X):\) \[ G(X)=t(X)\cdot Z_H(X) \]</li>
   </ol>
-  <div class="grid-2" style="align-items:center;margin-top:.3rem">
-    <figure style="margin:0">
-      <svg viewBox="0 0 320 224" role="img" aria-label="n 次單位根子群 H" style="width:100%;max-width:296px;height:auto;display:block;margin:0 auto">
+  <figure style="margin:.2rem 0 0">
+      <svg viewBox="0 0 320 224" role="img" aria-label="n 次單位根子群 H" style="width:100%;max-width:288px;height:auto;display:block;margin:0 auto">
         <circle cx="160" cy="104" r="82" fill="none" stroke="#c7d2fe" stroke-width="2"/>
         <g fill="#4f46e5">
           <circle cx="242" cy="104" r="6"/><circle cx="218" cy="46" r="6"/><circle cx="160" cy="22" r="6"/><circle cx="102" cy="46" r="6"/>
@@ -735,11 +734,43 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <text x="160" y="100" font-size="14" text-anchor="middle" font-weight="700" fill="#1a1a1f">H = ⟨ω⟩</text>
         <text x="160" y="121" font-size="11.5" text-anchor="middle" fill="#16a34a">Z_H 在每點 = 0</text>
       </svg>
-      <figcaption>原始圖解（本報告自製）· n 次單位根 H</figcaption>
+      <figcaption>原始圖解（本報告自製）· n 次單位根 H（Z_H 在每點為 0）</figcaption>
     </figure>
-    <div class="fbox" style="margin:0"><div class="lbl">具體：欄 → 多項式、閘 → 多項式（demo, n=4）</div>
-      <div class="cmt">acc 欄 \([2,9,31,98]\) 插值成 \(a(X)\)（\(a(\omega^i)=\)該列值）；x→\(x(X)\)、coeff→\(c(X)\)、sel→\(s(X)\)。閘整條換成一條多項式 \(g(X)=s(X)\big(a(X)x(X)+c(X)-a(\omega X)\big)\)（「下一列」\(=a(\omega X)\)）。「閘逐列成立」\(\Leftrightarrow g(\omega^i)=0\ \forall i \Leftrightarrow Z_H\mid g\)。多條約束用隨機 \(\alpha\) 疊成一條 \(G\)，再化成「∃ 商多項式 \(t\)：\(G=t\cdot Z_H\)」。</div></div>
+</section>
+
+<!-- II-4c worked example: run the demo through 算術化→多項式→整除 -->
+<section class="slide" data-part="II" data-label="整除性範例">
+  <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導 · 範例</div>
+  <h2>把 demo 跑一遍：<span class="accent">表 → 多項式 → 整除</span></h2>
+  <p class="muted" style="margin:0 0 .5rem;font-size:.96rem">用我們的例子 \(P(x)=2x^3+3x^2+4x+5,\ x=3\)（逐步 Horner，<b>acc</b> 一路填到 98）。</p>
+  <div class="grid-2">
+    <div>
+      <div class="fbox" style="margin:0"><div class="lbl">① 算術化 → trace（4 列）</div></div>
+      <table style="margin-top:.35rem">
+        <tr><th>列</th><th>acc</th><th>x</th><th>coeff</th><th>sel</th></tr>
+        <tr><td>ω⁰</td><td><b>2</b></td><td>3</td><td>3</td><td>1</td></tr>
+        <tr><td>ω¹</td><td>9</td><td>3</td><td>4</td><td>1</td></tr>
+        <tr><td>ω²</td><td>31</td><td>3</td><td>5</td><td>1</td></tr>
+        <tr><td>ω³</td><td><b style="color:#16a34a">98</b></td><td>3</td><td>·</td><td>0</td></tr>
+      </table>
+      <div class="fbox" style="margin-top:.5rem"><div class="lbl">② 每欄 → 一條多項式</div>
+        <div class="cmt">\(a(\omega^i)=[2,9,31,98]\)、\(x(X)\equiv 3\)、\(c(\omega^i)=[3,4,5,\cdot]\)、\(s(\omega^i)=[1,1,1,0]\)。「下一列」\(=a(\omega X)\)。</div></div>
+    </div>
+    <div>
+      <div class="fbox" style="margin:0"><div class="lbl">③ 閘 → 一條多項式 g</div>
+        \[ g(X)=s(X)\big(a(X)\,x(X)+c(X)-a(\omega X)\big) \]</div>
+      <div class="lbl" style="font-weight:700;color:var(--accent-light);font-size:.88rem;margin:.5rem 0 .2rem">④ 逐列檢查 \(g(\omega^i)=0\)（acc·x + coeff − acc下一列）</div>
+      <table>
+        <tr><th>列</th><th>算式</th><th></th></tr>
+        <tr><td>ω⁰</td><td>2·3 + 3 − 9 = 0</td><td style="color:#16a34a">✓</td></tr>
+        <tr><td>ω¹</td><td>9·3 + 4 − 31 = 0</td><td style="color:#16a34a">✓</td></tr>
+        <tr><td>ω²</td><td>31·3 + 5 − 98 = 0</td><td style="color:#16a34a">✓</td></tr>
+        <tr><td>ω³</td><td>sel = 0 → 整列關閉</td><td style="color:#16a34a">✓</td></tr>
+      </table>
+    </div>
   </div>
+  <div class="fbox" style="border-left-color:#16a34a;margin-top:.5rem"><div class="lbl" style="color:#15803d">⑤ 整除收尾</div>
+    <div class="cmt">\(g\) 在整個 \(H\) 上為 0 \(\;\Leftrightarrow\; Z_H\mid g \;\Leftrightarrow\; \exists\,t:\ g(X)=t(X)\,Z_H(X)\)（\(Z_H=X^4-1\)）。「計算正確」就兌現成「我有一條 \(t\)」—— 下一步承諾、在隨機點驗。</div></div>
 </section>
 
 <!-- II-5 KZG -->
@@ -1191,6 +1222,7 @@ Stage 4 VERIFY       verified      1.96 ms
 '自訂閘':"閘是整個系統的靈魂。\n原文定義:每條約束是一個多元多項式,在每一列都必須等於零;變數可以引用本列、也可以引用相鄰的列。\n\n【公式逐項】\n核心閘就一條:sel · ( acc·x + coeff − acc_next ) = 0。\n· sel 是 selector,只有設 1 的那列這條閘才生效,設 0 的列整條乘成 0、自動跳過;\n· acc 是本列的累積值,acc_next 是「下一列」的累積值,用 rotation(Rotation::next)去讀;\n· 移項就是 acc_next = acc·x + coeff —— 正好是 Horner 的一步。\n所以每一列都強制「上一層結果乘 x 加這層係數等於下一層」,一路逼到最後一列就是 P(x)。\n\n【最關鍵直覺:閘是「檢查」不是「計算」——一定要講清楚,否則聽不懂】\n分成兩件事。\n① prover 先「算」:照順序把每列填好 —— 第0列 acc=2、第1列 2·3+3=9、第2列 9·3+4=31、第3列 31·3+5=98。整張表算完、寫死了。\n② 閘只「查」:表填好後,閘在每一列同時檢查相鄰兩列對不對 —— 第0列查 2·3+3−9=0 ✓、第1列查 9·3+4−31=0 ✓、第2列查 31·3+5−98=0 ✓。\n所以 acc 不是被「帶回來」,它早就填在表裡了;閘讀的是兩個不同格子(本列 acc、下一列 acc),寫的關係是「下一列 acc = 本列 acc·x + 係數」,不是「acc 等於它自己」,所以沒有自指。\n一句話:算,是 prover 先做好的;閘,只是事後一次把整張表「前後一致」驗過。\n關鍵限制:閘只能看固定偏移的列(本列、下一列),不能隨機跳,所以演算法必須排成規則的縱向流水線 —— 這直接決定了我們把多項式求值寫成逐列遞推。",
 '複製約束 / 查表':"兩個把 cell 接起來的工具,各自背後有一條 grand-product(連乘)公式,我講原理就好,細節投影片有。\n\n【複製約束】原文:指定兩個 cell 必須相等。\n背後是一個排列論證:把所有要相等的 cell 用一個置換 σ 串成環,建一條連乘 Z,要求「原始值配位置」跟「σ 重排後配位置」兩串乘積相等,Z 才能從 1 走一圈回到 1。\n在 demo 裡就是把私密 x 在每一列綁成同一個值,惡意證明者不能每列偷換 x。\n\n【查表 plookup】原文:檢查一條多項式的值是否落在一張表裡。\n原理一樣是連乘式:要求「被查值的多重集合」是「表的多重集合」的子集,用一條 grand-product 在隨機挑戰下檢查。\n我們用它做 ByteTable 範圍檢查:把定點截斷的餘數拆成 byte,每個 byte 查 0–255 這張表,保證餘數真的落在合法範圍 —— 這就是範圍檢查在電路裡的作法。\n到這裡「規則」講完了 —— 閘、複製約束、查表。下一張回答最關鍵的一步:這些規則怎麼變成一條多項式、又怎麼一次驗完。",
 '整除性推導':"這張是整條 Halo2 的數學心臟,每一步都完整列出,可以照著推。\n【形式推導 4 步】\n① 選一個 2 的 k 次方階的乘法子群 H,它的 vanishing 多項式就是 X 的 n 次方減 1,在 H 上恆為零。\n② 把每一欄插值成一個多項式,讓它在 ω 的 i 次方那點等於第 i 列的值;要讀下一列,就代入 ω 乘 X。\n③ 把所有約束 —— 閘、複製約束、查表 —— 用一個挑戰 α 的次方合成成一條大多項式 G。\n④ 也是關鍵的等價:每一列都滿足約束,等價於 G 在 H 上恆為零,又等價於 Z_H 整除 G,也就是存在一條商多項式 t 使 G 等於 t 乘 Z_H。\n\n【最常被跳過:一張表到底怎麼變多項式?用 demo 走一遍】\n關鍵觀念:不是把約束「貼」到多項式上,是「閘那條等式本身」直接變成一條多項式。\n· 第一步,每一欄插值成一條多項式:acc 欄 [2,9,31,98] 變成 a(X),使 a(ω⁰)=2、a(ω¹)=9、a(ω²)=31、a(ω³)=98;x 欄全是 3 變成 x(X);coeff 變 c(X)、sel 變 s(X)。整張表 = 一欄一條多項式。\n· 第二步,「下一列」= 把輸入乘以 ω:a(ωX) 在 ωⁱ 的值就是 a(ωⁱ⁺¹),也就是下一列的 acc。\n· 第三步,把閘 sel·(acc·x+coeff−acc下一列) 裡每個格子換成欄多項式,整條閘就變成一條 g(X)=s(X)·(a(X)x(X)+c(X)−a(ωX))。\n· 第四步,「閘在每列成立」就是 g 在每個 ωⁱ 為 0,也就是 g 在整個 H 上為 0,等價於 Z_H 整除 g。\n· 第五步,閘/複製/查表各一條 gⱼ,用隨機 α 疊成 G=g₀+αg₁+α²g₂+…,檢查一條 G 就等於檢查全部。\n所以「計算正確」就被化成「我有一條 t 使 G 等於 t 乘 Z_H」—— 下一步就是承諾這些多項式、在隨機點驗這條等式。",
+'整除性範例':"承接上一張的抽象推導，這張直接拿我們的 demo 跑一遍，讓抽象變具體。\n例子：P(x)=2x³+3x²+4x+5，取 x=3，逐步 Horner 把 acc 從 2 一路算到 98。\n【五步走查】\n① 算術化：填成 4 列 trace —— acc=[2,9,31,98]、x 都是 3、coeff=[3,4,5]、sel=[1,1,1,0]。\n② 每欄插值成一條多項式：a(X) 在 ωⁱ 取 [2,9,31,98]、x(X) 恆 3、c(X)、s(X) 同理；讀「下一列」就是 a(ωX)。\n③ 整條閘變成一條多項式 g(X)=s(X)(a(X)x(X)+c(X)−a(ωX))。\n④ 逐列檢查 g 在每個 ωⁱ 是不是 0：ω⁰ 是 2·3+3−9=0、ω¹ 是 9·3+4−31=0、ω² 是 31·3+5−98=0、ω³ 那列 sel=0 整條關掉 —— 全是 0。\n⑤ g 在整個 H 上為 0，就等價於 Z_H 整除 g，也就是存在一條商多項式 t 使 g=t·Z_H（這裡 Z_H=X⁴−1）。\n一句話：上一張抽象的『計算正確 ⟺ ∃t 使 G=t·Z_H』，這張用我們的例子真的兌現了一次。",
 'KZG 承諾':"第三層,多項式承諾。\n先給形式定義 —— 一個承諾方案是 gen、com、open 三件套,這句是 BDFG 論文 Definition 2.3 的原文。\nKZG 的具體做法:對一條多項式的承諾,就壓成單一個群元素;要證明它在某點的值,用一次配對檢查。\nSRS 是通用且可更新的,只要設定儀式中有一個人誠實就安全;那個秘密 τ 用完即丟。\n我們論文如實把這當成一條信任假設,不宣稱 trustless。",
 'KZG 完整推導':"這張把 KZG 每一步完整列出,各位可以照著推。\n【KZG 逐步推導】\n先講記號:中括號 x 下標 1 表示 x 乘上群 G1 的生成元,SRS 就是 τ 的各次方藏在指數裡,τ 本人銷毀。\n承諾就是把 f 在 τ 的值算在指數裡,得到單一個群元素 C。\n再來是整個 KZG 的靈魂那條恆等式:f 在 z 等於 v,等價於 X 減 z 整除 f 減 v,也就是存在商多項式 q 使 f 減 v 等於 q 乘 X 減 z。\n開啟就是送 q 在 τ 的承諾 π。\n驗證是一條配對等式。\n為什麼這條配對等式就驗證了那條恆等式?用雙線性:e 把指數裡的乘法搬出來,左邊變成 f(τ) 減 v、右邊變成 q(τ) 乘 τ 減 z,兩邊相等就等於恆等式在 τ 這個秘密點成立。\n如果證明者說謊,X 減 z 不整除,根本沒有合法的 q,偽造機率可忽略。\n最後:承諾跟證明都只有一個群元素、驗證兩次配對,跟多項式次數無關 —— 純 KZG 只綁定,要零知識得加 blinding。",
 'SHPLONK':"為什麼證明可以又小、又不隨計算深度成長?關鍵在 SHPLONK。\n投影片這句是 BDFG 2020/081 的摘要原文:它把「多條多項式、各在不同點開啟」批次成單一開啟證明,他們的第二個方案只要兩個群元素、兩次配對。\n配合右邊這張圖:列數一直翻倍,proof 幾乎不動。\n我們論文的電路就是這性質的體現 —— N 不管多大,proof 恆 31,872 bytes。\n另外 Fiat–Shamir 把互動挑戰換成對 transcript 的雜湊,PSE 預設用 Blake2b。\n下一張就把這些隨機挑戰按正確順序串起來,收尾整條協議。",
@@ -1748,7 +1780,7 @@ Stage 4 VERIFY       verified      1.96 ms
 
   // teleprompter: while open, panels follow the slide you scroll to
   // ===== pipeline locator rail: mark which stage we are on + the connecting action between steps =====
-  const STAGE={'算術化':1,'四種欄':1,'自訂閘':2,'複製約束 / 查表':2,'整除性推導':3,'KZG 承諾':4,'KZG 完整推導':4,'SHPLONK':5,'驗證恆等式推導':6};
+  const STAGE={'算術化':1,'四種欄':1,'自訂閘':2,'複製約束 / 查表':2,'整除性推導':3,'整除性範例':3,'KZG 承諾':4,'KZG 完整推導':4,'SHPLONK':5,'驗證恆等式推導':6};
   slides.forEach(s=>{if(STAGE[s.dataset.label])s.classList.add('rail');});
   const rail=document.createElement('div'); rail.className='flowrail';
   rail.innerHTML='<div class="fr-title">證明流程 · 你在這</div>'+[[1,'算術化 · 排表','填見證 + 加規則'],[2,'加約束 · 閘/複製/查表','每欄插值成多項式'],[3,'多項式 · 整除 Z_H','承諾每條多項式'],[4,'KZG 承諾','FS 抽隨機點 + 批次'],[5,'SHPLONK 批次開啟','在 ζ 開啟 + 配對'],[6,'隨機點驗證',null]].map(a=>'<div class="fr-stage" data-s="'+a[0]+'"><span class="fr-n">'+a[0]+'</span>'+a[1]+'</div>'+(a[2]?'<div class="fr-arrow">↓ '+a[2]+'</div>':'')).join('');
