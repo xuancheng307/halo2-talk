@@ -297,10 +297,9 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="I" data-label="家譜">
   <div class="slide-meta"><span class="part-label">PART I</span> · 在做什麼</div>
   <h2>Halo2 的<span class="accent">家譜</span></h2>
-  <div class="grid-2">
-    <div>
-      <figure style="margin:0 0 .5rem">
-        <svg viewBox="0 0 420 224" role="img" aria-label="Halo → Halo2 → PSE fork 家譜" style="width:330px;max-width:100%;height:auto;display:block">
+  <div class="grid-2" style="align-items:center">
+      <figure style="margin:0">
+        <svg viewBox="0 0 420 224" role="img" aria-label="Halo → Halo2 → PSE fork 家譜" style="width:100%;max-width:480px;height:auto;display:block;margin:0 auto">
           <defs><marker id="ga" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/></marker></defs>
           <rect x="40" y="8" width="340" height="52" rx="8" fill="#f7f8fa" stroke="#d9dce3"/>
           <text x="58" y="30" font-size="14" font-weight="700" fill="#1a1a1f">Halo（2019）</text>
@@ -316,17 +315,18 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         </svg>
         <figcaption>原始圖解（本報告自製）· 血緣與我們的選擇</figcaption>
       </figure>
+    <div>
       <div class="defn">
         <span class="dt">原文 · Halo</span>
         <span class="quote">“We obtain and implement Halo, the first practical example of recursive proof composition without a trusted setup, using the discrete log assumption over normal cycles of elliptic curves.”</span>
         <span class="gloss">— 首個「免信任設定」的實用遞迴證明組合，建立在橢圓曲線離散對數假設上。</span>
         <a class="src" href="https://eprint.iacr.org/2019/1021" target="_blank" rel="noopener">Bowe, Grigg, Hopwood — IACR ePrint 2019/1021 ↗</a>
       </div>
-    </div>
-    <div class="card amber">
+      <div class="card amber" style="margin-top:.6rem">
       <h3>一句話定位</h3>
       <p>Halo2 不是「一個」協議，而是 <b>「算術化層 + 多項式承諾層」</b> 的組合框架 — 你描述電路，它負責產生／驗證證明。</p>
       <p class="muted" style="margin-top:.5rem;font-size:.9rem">下一節：它跟既有技術（Bulletproofs / Groth16）差在哪。</p>
+    </div>
     </div>
   </div>
 </section>
@@ -720,33 +720,26 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <li><b>所有約束合成一條</b>（用挑戰 \(\alpha\) 的次方；含閘、複製約束、查表）：\[ G(X)=\sum_{j}\alpha^{\,j}\,g_j\big(a(X),\,a(\omega X),\,q(X),\dots\big) \]</li>
     <li><b>核心等價</b>：每一列都滿足約束 \(\ \Longleftrightarrow\ G\) 在 \(H\) 上恆為 0 \(\ \Longleftrightarrow\ Z_H\mid G\ \Longleftrightarrow\ \exists\,t(X):\) \[ G(X)=t(X)\cdot Z_H(X) \]</li>
   </ol>
-  <div class="fbox"><div class="lbl">具體：欄 → 多項式、閘 → 多項式（demo, n=4）</div>
-    <div class="cmt">acc 欄 \([2,9,31,98]\) 插值成 \(a(X)\)（\(a(\omega^i)=\)該列值）；x→\(x(X)\)、coeff→\(c(X)\)、sel→\(s(X)\)。閘整條換成一條多項式 \(g(X)=s(X)\big(a(X)x(X)+c(X)-a(\omega X)\big)\)（「下一列」\(=a(\omega X)\)）。「閘逐列成立」\(\Leftrightarrow g(\omega^i)=0\ \forall i \Leftrightarrow Z_H\mid g\)。多條約束用隨機 \(\alpha\) 疊成一條 \(G\)。</div></div>
-  <figure style="margin:.3rem 0 0">
-    <svg viewBox="0 0 900 158" role="img" aria-label="單位根子群 H 與 vanishing 多項式" style="width:100%;max-width:620px;height:auto;display:block">
-      <!-- left: roots of unity circle -->
-      <circle cx="130" cy="82" r="60" fill="none" stroke="#c7d2fe" stroke-width="1.5"/>
-      <text x="130" y="86" font-size="11" text-anchor="middle" fill="#8b94a3">H = ⟨ω⟩</text>
-      <g fill="#4f46e5">
-        <circle cx="190" cy="82" r="5"/><circle cx="172" cy="40" r="5"/><circle cx="130" cy="22" r="5"/><circle cx="88" cy="40" r="5"/>
-        <circle cx="70" cy="82" r="5"/><circle cx="88" cy="124" r="5"/><circle cx="130" cy="142" r="5"/><circle cx="172" cy="124" r="5"/>
-      </g>
-      <g font-size="10" fill="#55596b" text-anchor="middle">
-        <text x="206" y="85">ω⁰</text><text x="186" y="32">ω¹</text><text x="130" y="12">ω²</text><text x="74" y="32">ω³</text>
-        <text x="54" y="85">ω⁴</text><text x="74" y="138">ω⁵</text><text x="130" y="156">⋯</text><text x="186" y="138">ωⁿ⁻¹</text>
-      </g>
-      <!-- right: the logic chain -->
-      <g font-size="14" fill="#1a1a1f">
-        <text x="270" y="40">每一列都滿足約束</text>
-        <text x="500" y="40" fill="#4f46e5" font-weight="700">⟺ G(ωⁱ)=0 對所有 i</text>
-        <text x="270" y="74" fill="#16a34a" font-weight="700">⟺ Z_H 整除 G</text>
-        <text x="445" y="74" fill="#55596b" font-size="12">（Z_H(X)=Xⁿ−1，在每個 ωⁱ 為 0）</text>
-        <text x="270" y="108" font-weight="700" fill="#7c3aed">⟺ ∃ 商多項式 t：G(X) = t(X)·Z_H(X)</text>
-      </g>
-      <text x="270" y="138" font-size="11.5" fill="#8b94a3">把「逐列正確」整包換成「我有一條 t 使 G=t·Z_H」—— 之後只在隨機點驗這條等式。</text>
-    </svg>
-    <figcaption>原始圖解（本報告自製）· 單位根 + 整除等價 ｜ 下一步：承諾後在隨機點驗 \(G=t\cdot Z_H\)</figcaption>
-  </figure>
+  <div class="grid-2" style="align-items:center;margin-top:.3rem">
+    <figure style="margin:0">
+      <svg viewBox="0 0 320 224" role="img" aria-label="n 次單位根子群 H" style="width:100%;max-width:296px;height:auto;display:block;margin:0 auto">
+        <circle cx="160" cy="104" r="82" fill="none" stroke="#c7d2fe" stroke-width="2"/>
+        <g fill="#4f46e5">
+          <circle cx="242" cy="104" r="6"/><circle cx="218" cy="46" r="6"/><circle cx="160" cy="22" r="6"/><circle cx="102" cy="46" r="6"/>
+          <circle cx="78" cy="104" r="6"/><circle cx="102" cy="162" r="6"/><circle cx="160" cy="186" r="6"/><circle cx="218" cy="162" r="6"/>
+        </g>
+        <g font-size="12" fill="#55596b" text-anchor="middle">
+          <text x="264" y="108">ω⁰</text><text x="236" y="38">ω¹</text><text x="160" y="14">ω²</text><text x="84" y="38">ω³</text>
+          <text x="56" y="108">ω⁴</text><text x="84" y="180">ω⁵</text><text x="160" y="208">⋯</text><text x="236" y="180">ωⁿ⁻¹</text>
+        </g>
+        <text x="160" y="100" font-size="14" text-anchor="middle" font-weight="700" fill="#1a1a1f">H = ⟨ω⟩</text>
+        <text x="160" y="121" font-size="11.5" text-anchor="middle" fill="#16a34a">Z_H 在每點 = 0</text>
+      </svg>
+      <figcaption>原始圖解（本報告自製）· n 次單位根 H</figcaption>
+    </figure>
+    <div class="fbox" style="margin:0"><div class="lbl">具體：欄 → 多項式、閘 → 多項式（demo, n=4）</div>
+      <div class="cmt">acc 欄 \([2,9,31,98]\) 插值成 \(a(X)\)（\(a(\omega^i)=\)該列值）；x→\(x(X)\)、coeff→\(c(X)\)、sel→\(s(X)\)。閘整條換成一條多項式 \(g(X)=s(X)\big(a(X)x(X)+c(X)-a(\omega X)\big)\)（「下一列」\(=a(\omega X)\)）。「閘逐列成立」\(\Leftrightarrow g(\omega^i)=0\ \forall i \Leftrightarrow Z_H\mid g\)。多條約束用隨機 \(\alpha\) 疊成一條 \(G\)，再化成「∃ 商多項式 \(t\)：\(G=t\cdot Z_H\)」。</div></div>
+  </div>
 </section>
 
 <!-- II-5 KZG -->
