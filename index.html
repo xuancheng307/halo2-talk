@@ -133,7 +133,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .note-mask{display:none !important}
 /* teleprompter — docked bottom-right, semi-transparent, follows current section */
 .note-modal{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:61;display:none;
-  width:min(680px,80vw);max-height:46vh;background:rgba(255,255,255,.62);backdrop-filter:blur(14px);
+  width:min(680px,80vw);max-height:46vh;background:rgba(255,255,255,.28);backdrop-filter:blur(1px);
   border:1px solid rgba(124,58,237,.35);border-radius:14px;
   box-shadow:0 14px 40px rgba(0,0,0,.22);flex-direction:column;overflow:hidden}
 .note-modal.open{display:flex}
@@ -142,7 +142,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .note-head h3{font-size:.88rem;font-weight:800;color:var(--accent-light);margin:0}
 .note-head .tag{font-size:.74rem;color:var(--text-dim);font-weight:600}
 .note-close{background:none;border:none;font-size:1.4rem;color:var(--text-dim);cursor:pointer;line-height:1}
-.note-body{padding:.75rem 1rem;overflow-y:auto;font-size:1.02rem;line-height:1.85;color:var(--text);white-space:pre-wrap}
+.note-body{padding:.75rem 1rem;overflow-y:auto;font-size:1.02rem;line-height:1.85;color:#111;font-weight:500;white-space:pre-wrap;
+  text-shadow:0 0 4px #fff,0 0 4px #fff,0 0 8px #fff,0 1px 2px #fff}
 .note-foot{display:flex;align-items:center;justify-content:space-between;padding:.45rem .85rem;border-top:1px solid rgba(124,58,237,.18)}
 .note-nav{background:rgba(255,255,255,.7);border:1px solid var(--border);border-radius:8px;padding:.28rem .7rem;font-size:.78rem;font-weight:600;color:var(--text-dim);cursor:pointer}
 .note-nav:hover{border-color:var(--accent);color:var(--accent)}
