@@ -6,6 +6,11 @@
 <title>Halo2 技術專題 — 我們的論文站在什麼證明系統上</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- KaTeX for clear formulas (vendor locally for the offline USB build) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false})"></script>
 <style>
 :root{
   --bg:#ffffff; --surface:#f7f8fa; --surface-2:#eef0f4; --border:#d9dce3;
@@ -141,6 +146,17 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .note-nav{background:rgba(255,255,255,.7);border:1px solid var(--border);border-radius:8px;padding:.28rem .7rem;font-size:.78rem;font-weight:600;color:var(--text-dim);cursor:pointer}
 .note-nav:hover{border-color:var(--accent);color:var(--accent)}
 .note-idx{font-size:.76rem;color:var(--text-faint);font-family:var(--font-mono)}
+/* formula boxes */
+.fbox{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:.55rem .9rem;margin:.5rem 0}
+.fbox .lbl{font-size:.82rem;font-weight:700;color:var(--accent-light);margin-bottom:.1rem}
+.fbox .cmt{font-size:.86rem;color:var(--text-dim);margin-top:.15rem}
+.katex{font-size:1.06em}
+.katex-display{margin:.35rem 0}
+.steps{counter-reset:st;list-style:none;padding-left:0}
+.steps li{padding-left:2rem;position:relative;margin:.5rem 0}
+.steps li::before{counter-increment:st;content:counter(st);position:absolute;left:0;top:.05rem;
+  width:1.4rem;height:1.4rem;border-radius:50%;background:var(--accent);color:#fff;font-size:.8rem;
+  font-weight:700;display:flex;align-items:center;justify-content:center}
 </style>
 </head>
 <body>
@@ -457,7 +473,9 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <figcaption>原始圖解（本報告自製）</figcaption>
     </figure>
   </div>
-  <p style="margin-top:.4rem;font-size:.95rem"><b>關鍵：</b>閘只能看固定偏移的列（cur / next / prev），所以演算法要排成規則的縱向流水線 — 這就是我們把 Horner 寫成「逐列遞推」的原因。</p>
+  <div class="fbox"><div class="lbl">這條閘的多項式形式（demo）</div>
+    \[ s\cdot\big(\mathrm{acc}\cdot x + c - \mathrm{acc}'\big)=0,\qquad \mathrm{acc}'=\mathrm{acc}\ @\ \texttt{Rotation::next} \]
+    <div class="cmt"><b>關鍵：</b>閘只能引用固定偏移的列（cur / next / prev），所以演算法要排成規則的縱向流水線 —— 這就是我們把 Horner 寫成「逐列遞推」的原因。一般地，一個閘是 \(\textstyle\sum_i s_i\,g_i(\text{cells})=0\)，每個 \(g_i\) 是多元多項式、每列須為 0。</div></div>
 </section>
 
 <!-- II-4 copy + lookup -->
@@ -469,13 +487,17 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <div class="defn"><span class="dt">原文 · Equality (copy) constraints</span>
         <span class="quote">“A sequence of equality constraints, which specify that two given cells must have equal values.”</span>
         <a class="src" href="https://zcash.github.io/halo2/concepts/arithmetization.html" target="_blank" rel="noopener">The halo2 Book ↗</a></div>
-      <p style="font-size:.95rem">例：demo 裡私密 <code class="inl">x</code> 在每一 Horner 列都要是同一個值 → 複製約束把它們綁住，惡意 prover 不能每列換 x。</p>
+      <div class="fbox"><div class="lbl">作法：排列大乘積（PLONK permutation）</div>
+        \[ Z_{i+1}=Z_i\cdot\frac{a_i+\beta\,\mathrm{id}(i)+\gamma}{a_i+\beta\,\sigma(i)+\gamma},\quad Z_0=Z_n=1 \]
+        <div class="cmt">\(Z_n=1\) ⟺ \(\{a_i\}\) 在 \(\mathrm{id}\) 與置換 \(\sigma\) 下是同一個多重集 → 被 \(\sigma\) 串在一起的 cell 必相等。\(\beta,\gamma\) 為 Fiat–Shamir 挑戰。</div></div>
     </div>
     <div>
       <div class="defn"><span class="dt">原文 · plookup</span>
         <span class="quote">“We present a protocol for checking the values of a committed polynomial … over a multiplicative subgroup … are contained in the values of a table.”</span>
         <a class="src" href="https://eprint.iacr.org/2020/315" target="_blank" rel="noopener">Gabizon & Williamson — ePrint 2020/315 ↗</a></div>
-      <p style="font-size:.95rem">用途：範圍檢查、S-box、位元運算。我們用它做 <b>ByteTable[0..255]</b> 範圍檢查，保證定點截斷餘數每個 byte 合法。</p>
+      <div class="fbox"><div class="lbl">作法：對數導數（log-derivative / logUp）</div>
+        \[ \sum_{i}\frac{1}{X+f_i}=\sum_{j}\frac{m_j}{X+t_j} \]
+        <div class="cmt">成立 ⟺ 每個查值 \(f_i\) 都落在表 \(\{t_j\}\) 內（\(m_j\)=重數）。我們的表 \(t_j=\{0,\dots,255\}\)（ByteTable），做定點截斷餘數的逐 byte 範圍檢查。</div></div>
     </div>
   </div>
   <figure>
@@ -511,6 +533,9 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <span class="quote">“Constant-Size Commitments to Polynomials and Their Applications.”</span>
         <span class="gloss"><code>com(f) = [f(τ)]₁</code> 單一 G₁ 群元素；某點開啟用一次配對檢查。SRS = <code>{[τⁱ]₁}, [τ]₂</code>，通用、可更新（一人誠實即安全）、τ 用完即丟。</span>
         <a class="src" href="https://www.iacr.org/archive/asiacrypt2010/6477178/6477178.pdf" target="_blank" rel="noopener">Kate, Zaverucha, Goldberg — ASIACRYPT 2010 ↗</a></div>
+      <div class="fbox"><div class="lbl">KZG 三步公式（\([x]_1:=x\cdot g_1\)）</div>
+        \[ \underbrace{C=[f(\tau)]_1}_{\text{承諾}}\qquad \underbrace{q(X)=\tfrac{f(X)-v}{X-z},\ \ \pi=[q(\tau)]_1}_{\text{開啟 } f(z)=v} \]
+        \[ \underbrace{e\big(C-[v]_1,\,[1]_2\big)=e\big(\pi,\,[\tau]_2-[z]_2\big)}_{\text{驗證：一次配對檢查}} \]</div>
     </div>
     <figure>
       <svg viewBox="0 0 440 230" role="img" aria-label="KZG 承諾流程">
@@ -668,6 +693,20 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <div class="card accent"><h3>關鍵洞見</h3><p style="font-size:.95rem">一套電路、共用 256 條目 ByteTable，<b>換函數只換 d 個係數</b>，不重設計電路 — 通用性來自 fixed 欄。</p></div>
     <div class="card amber"><h3>demo 閘 → 論文 kernel</h3><p style="font-size:.95rem">demo 的 <code class="inl">acc·x+c=acc_next</code>，論文多了 <b>÷S 截斷 + 餘數 byte 拆解 + lookup</b>，即完整定點 Horner kernel。</p></div>
   </div>
+</section>
+
+<!-- IV-1b detailed kernel formulas -->
+<section class="slide" data-part="IV" data-label="kernel 公式">
+  <div class="slide-meta"><span class="part-label">PART IV</span> · 詳細作法（公式）</div>
+  <h2>定點 Horner kernel — <span class="accent">逐步公式</span></h2>
+  <ol class="steps">
+    <li><b>定點表示</b>：取尺度 \(S = 2^{pp},\ pp=48\)。實數 \(v\) 編碼成整數 \(\hat v = \lfloor v\cdot S\rceil\)（所有輸入都先這樣進電路）。</li>
+    <li><b>多項式逼近</b>：用 Remez minimax 求係數，\( \; P(x)=\sum_{i=0}^{d} c_i\,x^{i}\; \)（係數定點化後存進 fixed 欄）。</li>
+    <li><b>逐步截斷 Horner</b>（輸入 \(R=\hat x\)，初值 \(\mathrm{acc}_0=c_d\)）：\[ \mathrm{acc}_{k+1}=\Big\lfloor \tfrac{\mathrm{acc}_k\cdot R + c_k}{S}\Big\rfloor,\quad k=0,\dots,d-1,\qquad \mathrm{acc}_d=\widehat{P(x)} \]</li>
+    <li><b>閘 — 強制誠實截斷</b>（\(\mathrm{rem}_k=\mathrm{acc}_kR+c_k-\mathrm{acc}_{k+1}S\)）：\[ q\cdot\big(\mathrm{acc}_k\!\cdot\! R + c_k-\mathrm{acc}_{k+1}\!\cdot\! S-\mathrm{rem}_k\big)=0,\quad \mathrm{rem}_k\in[0,S) \]</li>
+    <li><b>範圍檢查 — lookup</b>（\(S=2^{48}=256^{6}\)）：\[ q\cdot\Big(\mathrm{rem}_k-\sum_{j=0}^{5} b_{k,j}\,256^{\,j}\Big)=0,\quad b_{k,j}\in\{0,\dots,255\}\ \text{（查 ByteTable）} \]</li>
+  </ol>
+  <p class="muted" style="font-size:.92rem;margin-top:.3rem">第 4、5 條就是 demo 那條閘 \(q\,(\mathrm{acc}\cdot x+c-\mathrm{acc}')\) 多出來的部分 —— \(\div S\) 截斷 + 餘數 byte 拆解。換一個函數只換 \(\{c_i\}\)，電路不動。</p>
 </section>
 
 <!-- ===== PART V OPENER ===== -->
@@ -935,6 +974,7 @@ Stage 4 VERIFY       verified      1.96 ms
 '能 / 不能':'也要誠實講它的邊界。左邊綠的是直接能做的:體上的加乘、有限次數的自訂閘、查表、複製約束。右邊紅的是有代價或做不到的:電路規模 k 有上限,大概到 28;位元運算很貴;除法要證明者額外提供商當見證;最關鍵的 —— 它沒有原生浮點。最後這一條,正是我們整篇論文存在的理由,接下來就講。',
 '我們怎麼用它':'第四部分,把 Halo2 接回我們自己的工作。一句話:Halo2 沒有浮點、沒有 exp、ln、erf 這些超越函數,我們得自己在它的閘上把它們重建出來。',
 '超越函數塞進閘':'方法四步:第一,定點,每個數用 2 的 48 次方縮放,用整數模擬小數;第二,用 Remez minimax 找一條多項式,讓區間內最大誤差最小;第三,用剛剛那個逐步 Horner 閘求值;第四,用 ByteTable 查表做範圍檢查。最漂亮的一點:換不同的函數,只要換那幾個係數,電路完全不用重設計 —— 這個通用性,就是來自 Halo2 的 fixed 欄。等一下 demo 的閘,加上截斷跟範圍檢查,就是論文完整的 kernel。',
+'kernel 公式':'這張把剛剛四步寫成精確公式。第一,定點:取尺度 S 等於 2 的 48 次方,任何實數 v 都先編碼成最接近的整數 v 乘 S。第二,用 Remez 求出多項式係數,定點化後放進 fixed 欄。第三,逐步截斷 Horner:初值是最高次係數,每一步把 acc 乘上輸入 R、加當步係數,再除以 S 取下整,得到下一個 acc;走完 d 步就是 P(x) 的定點值。第四,這條閘強制誠實截斷:acc 乘 R 加 c,等於下一個 acc 乘 S 加餘數,而且餘數必須落在 0 到 S 之間。第五,餘數的範圍用查表保證:把餘數拆成 6 個 byte,每個 byte 查 ByteTable 確認落在 0 到 255。重點:第四、第五條,就是 demo 那條乾淨的閘多出來的截斷與範圍檢查;換一個函數,只換係數,電路一行都不動。',
 '用在哪 + 範例':'最後一部分,落地:業界把它用在哪、我們論文的兩個真實電路,以及一支現場會跑完的 demo。',
 '最近的 ZK 應用':'各位對 ZK 的應用印象可能停在隱私貨幣,我快速更新一下這幾年的 landscape。第一,zkRollup 跟 zkEVM:把一批以太坊交易壓成一個證明上鏈,Scroll、zkSync、Taiko 都是。第二,zkML:證明我用某個模型對某輸入推論出這個結果,卻不洩漏模型或輸入。第三,隱私身分:zk passport、選擇性揭露,只證我成年不洩漏生日。第四,償付能力跟合規證明:交易所證明有足額儲備,而我們的 PF1 就是這一類 —— 證明投組風險在限額內卻不洩漏部位。第五,遞迴跟聚合證明,把多個證明併成一個,這正是 Halo 的起點。最後一格是我們站的位置:這些應用常常要算非線性函數,金融的 Greeks、ML 的激活函數、科學模型,而 ZK 電路本來算不動超越函數 —— 我們補上的就是這塊。',
 '用在哪裡':'業界:Zcash 的 Orchard 用的是原版 IPA,不是 KZG,這點別搞混;Scroll、Taiko 這些 zkEVM 走的才是 PSE 的 KZG 路線。我們自己有兩個已經用 Rust 實作的電路:PF1 證明投組的淨 delta 在風險限額內,但不洩漏個別部位;PF2 處理狀態轉移。實測 proof 是 31,872 bytes、驗證約 8 毫秒。下面那句 Poseidon 的原文,是我們 Merkle 樹用的雜湊。',
