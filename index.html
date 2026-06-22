@@ -979,7 +979,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <!-- ===== PART V OPENER ===== -->
 <section class="slide part-opener" data-part="V" data-label="用在哪 + 範例">
   <div><div class="pnum">PART V</div><h1>用在哪 · 舉例 · 跑一次</h1>
-  <p class="lead">業界部署、我們論文的兩個真實電路，以及一支會跑完整 prove / verify 的最小 Rust demo。</p></div>
+  <p class="lead">前面 Part II 我們把例子在<b>符號層</b>（數字／表格／圖）走完了；這一部分，<b>同一個 \(P(x)=2x^3+3x^2+4x+5\)</b> 現場用 Rust <b>真的跑一次 prove / verify</b>。外加業界部署與我們論文的兩個真實電路。</p></div>
 </section>
 
 <!-- V-1 deployments + numbers -->
@@ -1232,7 +1232,7 @@ Stage 4 VERIFY       verified      1.96 ms
 '我們怎麼用它':"第四部分,把 Halo2 接回我們自己的工作。\n一句話:Halo2 沒有浮點、沒有 exp、ln、erf 這些超越函數,我們得自己在它的閘上把它們重建出來。",
 '超越函數塞進閘':"方法四步:\n① 定點,每個數用 2 的 48 次方縮放,用整數模擬小數;\n② 用 Remez minimax 找一條多項式,讓區間內最大誤差最小;\n③ 用剛剛那個逐步 Horner 閘求值;\n④ 用 ByteTable 查表做範圍檢查。\n最漂亮的一點:換不同的函數,只要換那幾個係數,電路完全不用重設計 —— 這個通用性,就是來自 Halo2 的 fixed 欄。\n等一下 demo 的閘,加上截斷跟範圍檢查,就是論文完整的 kernel。",
 'kernel 公式':"這張把剛剛四步寫成精確公式。\n【定點 Horner kernel 公式（5 步）】\n① 定點:取尺度 S 等於 2 的 48 次方,任何實數 v 都先編碼成最接近的整數 v 乘 S。\n② 用 Remez 求出多項式係數,定點化後放進 fixed 欄。\n③ 逐步截斷 Horner:初值是最高次係數,每一步把 acc 乘上輸入 R、加當步係數,再除以 S 取下整,得到下一個 acc;走完 d 步就是 P(x) 的定點值。\n④ 這條閘強制誠實截斷:acc 乘 R 加 c,等於下一個 acc 乘 S 加餘數,而且餘數必須落在 0 到 S 之間。\n⑤ 餘數的範圍用查表保證:把餘數拆成 6 個 byte,每個 byte 查 ByteTable 確認落在 0 到 255。\n重點:第四、第五條,就是 demo 那條乾淨的閘多出來的截斷與範圍檢查;換一個函數,只換係數,電路一行都不動。",
-'用在哪 + 範例':"· 最後一部分,落地:業界把它用在哪、我們論文的兩個真實電路,以及一支現場會跑完的 demo。",
+'用在哪 + 範例':"最後一部分,落地。\n這裡點出整份報告的骨架:前面 Part II 我們用數字、表格、圖,把同一個例子在『符號層』走完(算術化→多項式→整除→承諾→開啟→驗證);這一段,同一個 P(x)=2x³+3x²+4x+5,現場用 Rust 真的跑一次 —— 從符號變成會動的程式,prove + verify 當場給大家看。\n再加上業界把 Halo2 用在哪、我們論文的兩個真實電路 PF1/PF2。",
 '用在哪裡':"業界:Zcash 的 Orchard 用的是原版 IPA,不是 KZG,這點別搞混;Scroll、Taiko 這些 zkEVM 走的才是 PSE 的 KZG 路線。\n我們自己有兩個已經用 Rust 實作的電路:PF1 證明投組的淨 delta 在風險限額內,但不洩漏個別部位;PF2 處理狀態轉移。\n實測 proof 是 31,872 bytes、驗證約 8 毫秒。\n下面那句 Poseidon 的原文,是我們 Merkle 樹用的雜湊。\n接下來直接看 code,把這套方法搬上螢幕跑。",
 '程式碼 1':"進到 code。\n這張是電路的骨架:宣告四種欄,然後 create_gate 裡那一條 —— 就是整個電路唯一的約束:selector 乘上 acc 乘 x 加係數減下一列的 acc,等於零。\n注意 acc 用 Rotation::next 讀下一列。\n敘述很簡單:我知道一個秘密 x,讓這個三次多項式 P(x) 等於某個公開值;我們取 x 等於 3,P(3) 等於 98。",
 '程式碼 2':"左邊是填表 —— 把 Horner 階梯一列一列填進去,中間那個 constrain_equal 就是把每列的 x 綁成同一個值。\n右邊是真正的流水線:setup、keygen、create_proof、verify_proof。\n注意泛型參數 ProverSHPLONK 跟 VerifierSHPLONK —— 跟前面講的承諾方案完全對得上。\n這套 API、這個版本,跟論文的 PF1、PF2 用的一模一樣。",
