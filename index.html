@@ -398,6 +398,29 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <p class="lead">算術化 → 自訂閘 → 複製約束 / 查表 → KZG 承諾 → SHPLONK + Fiat–Shamir → prove / verify。每一步都有原文定義與圖解。</p></div>
 </section>
 
+<!-- II-0a what are we proving + statement constraints (before the pipeline) -->
+<section class="slide" data-part="II" data-label="要證什麼 + 限制">
+  <div class="slide-meta"><span class="part-label">PART II</span> · 先講清楚：在證什麼</div>
+  <h2>整條流程在證什麼？ — <span class="accent">一個 statement，以及它的限制</span></h2>
+  <div class="grid-2">
+    <div class="card accent">
+      <h3>① 我們有一個想證的 statement</h3>
+      <p>形式上就是某關係的成員：\((x,w)\in R\)（即 Part I 的 R_C）。命題是：<b>「我知道一個私密 \(w\)，使公開 \(x\) 與 \(w\) 滿足 \(R\)」</b> —— \(x\) 公開、\(w\) 私密。</p>
+      <p class="muted" style="font-size:.92rem">demo：「我知道 \(x\) 使 \(P(x)=98\)」；PF1：「我知道一個投組使 \(|\sum_i w_i\Delta_i|\le\tau\)」。</p>
+    </div>
+    <div class="card">
+      <h3>② 這個 statement 的限制（能進 Halo2 的條件）</h3>
+      <ul>
+        <li>\(R\) 必須能寫成 <b>𝔽ᵣ 上的算術電路</b>（無原生浮點 / 位元）</li>
+        <li><b>固定大小</b>：\(2^k\) 列、有界欄；無資料相依分支、迴圈要有上界</li>
+        <li>約束是<b>低次多項式</b>（degree ≤ 小常數）</li>
+        <li>本質 = 任何「給 \(w\) 就能 poly-time 驗證」的 <b>NP 關係</b></li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:.6rem"><b>③ 接下來：</b>把這個 statement <b>算術化</b> —— 編成 \(2^k\) 列 trace table + 約束，就是下一張「完整流程」的第一步。</p>
+</section>
+
 <!-- II-0 complete end-to-end pipeline (roadmap, up front) -->
 <section class="slide" data-part="II" data-label="完整流程圖">
   <div class="slide-meta"><span class="part-label">PART II</span> · 先看全貌</div>
@@ -1029,6 +1052,7 @@ Stage 4 VERIFY       verified      1.96 ms
 'zk-SNARK 性質':'四個安全性質,一樣引原文。完備性:誠實證明者照規則跑,驗證者一定接受,機率是一。可靠性:證明沒辦法騙過驗證者。知識可靠性:存在一個抽取器,能把證明者的見證抽出來 —— 這比單純可靠性更強。零知識:證明不洩漏見證的任何資訊。最下面那條把簡潔性跟 zk-SNARK 補上:證明長度只跟電路大小成 polylog,這樣的 NARK 叫 SNARK,再加上零知識就是 zk-SNARK。',
 '兩層架構':'這張很關鍵。Halo2 其實是兩層:上層是 PLONKish 算術化,把計算排成一張表加一組多項式;下層才是多項式承諾。重點在下層有兩種選擇 —— 原版用 IPA、跑 Pasta 曲線、免可信設定;我們用的 PSE 分支換成 KZG、跑 BN254。為什麼選後者?因為 BN254 的配對是以太坊內建的,鏈上驗證便宜,而且 KZG 證明大小固定。代價就是需要一次性的可信設定。',
 '怎麼做':'好,知道它在做什麼了,接下來進到最核心的「怎麼做」。我會照這條鏈走一遍:算術化、自訂閘、複製約束跟查表、KZG 承諾、SHPLONK 跟 Fiat–Shamir,最後串成完整流水線。每一步我都會給原文定義跟一張圖。',
+'要證什麼 + 限制':'在看流程圖之前,先講清楚整條流程到底在證什麼。第一,我們有一個想證的 statement,形式上就是某個關係的成員 (x,w) 屬於 R,也就是 Part I 講的 R_C。命題是:我知道一個私密的 w,使公開的 x 跟 w 一起滿足這個關係 R,x 公開、w 私密。對到例子,demo 就是我知道 x 使 P(x) 等於 98;PF1 就是我知道一個投組,使淨加權 delta 的絕對值小於等於 τ。第二,這個 statement 不是什麼都能塞,它有限制:R 必須能寫成有限域上的算術電路,沒有原生浮點;電路是固定大小的,2 的 k 次方列、有界欄,不能有資料相依的分支、迴圈要有上界;約束是低次多項式。本質上,任何「給了見證就能多項式時間驗證」的 NP 關係都行。第三,接下來就是把這個 statement 算術化,編成 trace table 加約束 —— 那正是下一張完整流程圖的第一步。',
 '完整流程圖':'在進細節之前,先給各位一張地圖,看完整條流程怎麼走,後面每一步就是把這張圖的每個方塊放大。最上面有兩件預備:私下準備電路跟輸入,公開的 instance x、私密的見證 w;還有一次性的可信設定,產生 SRS 再 keygen 出 pk、vk。然後 prover 走六步:第一,算術化,把計算填成 2 的 k 次方列的 trace table;第二,加約束,自訂閘、複製約束、查表,全都是等於零的多項式;第三,承諾,把每一欄多項式用 KZG 壓成一個群元素;第四,Fiat–Shamir,對 transcript 雜湊抽一個隨機挑戰點;第五,SHPLONK 批次開啟,產生大約幾 KB 的證明 π;最後把 π 加公開的 x 交給 verifier,第六步做配對檢查,輸出接受或拒絕,就一個 bit、常數時間、不重跑計算。補一句:MockProver 只跑前兩步、純查約束、不做密碼學,是除錯用的。記住三件事:x 公開、w 私密、π 不洩漏 w。',
 '算術化':'第一層,算術化。原文說得很清楚:arithmetization 就是我們用來表達電路的語言,它把電路寫成體上變數的多項式約束;而 PLONKish 電路,就是定義在一個矩形數值矩陣上。右邊這張圖就是個具體例子 —— 待會 demo 要算的那個多項式,攤成四列的表。行是計算的一步,欄是一條多項式。',
 '四種欄':'表有四種欄,我一樣引原文:fixed 欄是電路固定的、advice 欄對應見證值、instance 欄放公開輸入。第四種是 selector,固定欄裡的 0/1 開關,決定某一列哪個閘生效。對應到我們的 demo:acc 跟 x 是 advice、係數是 fixed、輸出的 P(x) 是 instance。',
