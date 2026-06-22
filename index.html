@@ -215,6 +215,32 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <p class="lead">Halo2 是一台「可驗證計算」引擎：證明你正確執行了某段計算，卻不洩漏私密輸入，且證明又小又快驗。</p></div>
 </section>
 
+<!-- I-0 lineage (moved up: what it is -> where it came from) -->
+<section class="slide" data-part="I" data-label="家譜">
+  <div class="slide-meta"><span class="part-label">PART I</span> · 在做什麼</div>
+  <h2>Halo2 的<span class="accent">家譜</span></h2>
+  <div class="grid-2">
+    <div>
+      <ul>
+        <li><b>Halo</b>（Bowe·Grigg·Hopwood, 2019）：首個免信任設定的遞迴證明組合。</li>
+        <li><b>Halo2</b>（Electric Coin Company / Zcash）：把想法重建在 <b>PLONKish 算術化</b> 上，成為通用電路框架。</li>
+        <li>我們用的是 <b>PSE fork</b>：換成 <b>KZG / BN254</b>，為了以太坊上鏈驗證效率。</li>
+      </ul>
+      <div class="defn">
+        <span class="dt">原文 · Halo</span>
+        <span class="quote">“We obtain and implement Halo, the first practical example of recursive proof composition without a trusted setup, using the discrete log assumption over normal cycles of elliptic curves.”</span>
+        <span class="gloss">— 首個「免信任設定」的實用遞迴證明組合，建立在橢圓曲線離散對數假設上。</span>
+        <a class="src" href="https://eprint.iacr.org/2019/1021" target="_blank" rel="noopener">Bowe, Grigg, Hopwood — IACR ePrint 2019/1021 ↗</a>
+      </div>
+    </div>
+    <div class="card amber">
+      <h3>一句話定位</h3>
+      <p>Halo2 不是「一個」協議，而是 <b>「算術化層 + 多項式承諾層」</b> 的組合框架 — 你描述電路，它負責產生／驗證證明。</p>
+      <p class="muted" style="margin-top:.5rem;font-size:.9rem">下一節：它跟既有技術（Bulletproofs / Groth16）差在哪。</p>
+    </div>
+  </div>
+</section>
+
 <!-- I-0a why halo2 — vs old tech (3-way) -->
 <section class="slide" data-part="I" data-label="為什麼要有 Halo2">
   <div class="slide-meta"><span class="part-label">PART I</span> · 為什麼要有 Halo2</div>
@@ -267,32 +293,6 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <li><b>自訂閘 + 查表</b>（UltraPLONK / Plonkish）：表達複雜運算。</li>
       </ul>
       <p class="muted" style="margin-top:.4rem">Halo2 = <b>PLONKish 算術化 + KZG 承諾</b>。你今天要懂的「新東西」就是這個 PLONK 家族。</p>
-    </div>
-  </div>
-</section>
-
-<!-- I-1 What is Halo2 -->
-<section class="slide" data-part="I" data-label="家譜">
-  <div class="slide-meta"><span class="part-label">PART I</span> · 在做什麼</div>
-  <h2>Halo2 的<span class="accent">家譜</span></h2>
-  <div class="grid-2">
-    <div>
-      <ul>
-        <li><b>Halo</b>（Bowe·Grigg·Hopwood, 2019）：首個免信任設定的遞迴證明組合。</li>
-        <li><b>Halo2</b>（Electric Coin Company / Zcash）：把想法重建在 <b>PLONKish 算術化</b> 上，成為通用電路框架。</li>
-        <li>我們用的是 <b>PSE fork</b>：換成 <b>KZG / BN254</b>，為了以太坊上鏈驗證效率。</li>
-      </ul>
-      <div class="defn">
-        <span class="dt">原文 · Halo</span>
-        <span class="quote">“We obtain and implement Halo, the first practical example of recursive proof composition without a trusted setup, using the discrete log assumption over normal cycles of elliptic curves.”</span>
-        <span class="gloss">— 首個「免信任設定」的實用遞迴證明組合，建立在橢圓曲線離散對數假設上。</span>
-        <a class="src" href="https://eprint.iacr.org/2019/1021" target="_blank" rel="noopener">Bowe, Grigg, Hopwood — IACR ePrint 2019/1021 ↗</a>
-      </div>
-    </div>
-    <div class="card amber">
-      <h3>一句話定位</h3>
-      <p>Halo2 不是「一個」協議，而是 <b>「算術化層 + 多項式承諾層」</b> 的組合框架 — 你描述電路，它負責產生／驗證證明。</p>
-      <p class="muted" style="margin-top:.5rem;font-size:.9rem">下一節用原文定義 zk-SNARK 的每個性質。</p>
     </div>
   </div>
 </section>
@@ -718,11 +718,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <!-- III-1 schwartz-zippel + properties -->
 <section class="slide" data-part="III" data-label="為什麼成立">
   <div class="slide-meta"><span class="part-label">PART III</span> · 為什麼能用</div>
-  <h2>核心：<span class="accent">Schwartz–Zippel</span> + 承諾綁定</h2>
-  <div class="defn"><span class="dt">Schwartz–Zippel Lemma（正式敘述）</span>
-    <span class="quote">Let P ∈ F[x₁,…,xₙ] be a non-zero polynomial of total degree d ≥ 0 over a field F. Let S be a finite subset of F and r₁,…,rₙ be chosen independently and uniformly at random from S. Then  Pr[ P(r₁,…,rₙ) = 0 ] ≤ d / |S|.</span>
-    <span class="gloss">在 |𝔽| ≈ 2²⁵⁴ 的體上 d/|𝔽| 可忽略 → 「隨機點上恆等式成立」⇒ 幾乎必然處處成立。這是 PLONK 系列可靠性的根。</span>
-    <a class="src" href="https://en.wikipedia.org/wiki/Schwartz%E2%80%93Zippel_lemma" target="_blank" rel="noopener">Schwartz (J. ACM, 1980) · Zippel (1979) ↗</a></div>
+  <h2>四個性質 — <span class="accent">各自怎麼成立</span></h2>
+  <p class="muted" style="margin:0 0 .5rem;font-size:.96rem">可靠性的數學核心 <b>Schwartz–Zippel</b>（\(\Pr[P(r)=0]\le d/|\mathbb F|\)，隨機點成立 \(\Rightarrow\) 處處成立）已在 Part II「驗證恆等式推導」用過 —— 這裡彙整四性質各自如何到位。</p>
   <div class="grid-2" style="margin-top:.3rem">
     <table>
       <tr><th>性質</th><th>機制</th></tr>
@@ -1044,11 +1041,11 @@ Stage 4 VERIFY       verified      1.96 ms
   const NOTES = {
 '封面':"大家好。\n今天這場分享的主題是 Halo2 —— 也就是我們整篇論文底層所站的那套零知識證明系統。\n我會用六個問題把它講清楚:它在做什麼、怎麼做、為什麼能用、用在哪裡、我們怎麼用它,最後直接跑一支真的會產生並驗證證明的 Rust demo 給大家看。\n所有關鍵定義我都引原文,投影片上也附了出處連結,方便事後查證。\n我們開始。",
 '路線圖':"先給大家一張地圖。\n這份報告就是回答六個問題。\n前三個談 Halo2 本身:在做什麼、怎麼做、為什麼數學上成立;後三個把它接回我們的工作:業界用在哪、我們怎麼把超越函數塞進它的閘、最後實際跑一次。\n特別強調:所有密碼學定義我都不自己改寫,一律引 The halo2 Book 或 IACR 論文的原文。",
-'在做什麼':"先談第一件事 —— Halo2 到底在做什麼。\n一句話:它是一台「可驗證計算」的引擎。\n你能向別人證明「我正確執行了某段計算」,但不洩漏私密輸入,而且產生的證明又小、又能很快驗證。\n接下來幾張我把這句話拆開。",
+'在做什麼':"先談第一件事 —— Halo2 到底在做什麼。\n一句話:它是一台「可驗證計算」的引擎。\n你能向別人證明「我正確執行了某段計算」,但不洩漏私密輸入,而且產生的證明又小、又能很快驗證。\n接下來先看它的家譜:它從哪來。",
 '為什麼要有 Halo2':"這張最重要,我先把它接到各位熟的東西。\n你們做證明,習慣的是兩條路。\n第一條 Bulletproofs:把問題 reduce 到離散對數,用內積論證,好處是不需要可信設定、證明只有對數大小;但它的死穴是「驗證時間是線性的」—— 電路一大,驗證就慢。\n第二條 Groth16:走 pairing,證明只有三個群元素、驗證三次配對、最小最快;但它每換一個電路就要重做一次可信設定,而且 gate 是死板的 R1CS。\nHalo2 走第三條:先把計算算術化成多項式約束,再用多項式承諾。\n它用的是「通用又可更新」的設定 —— 做一次,所有電路共用,不像 Groth16 每個電路一次;而且支援自訂閘跟查表。\n最後這點請記住:自訂閘跟查表,正是我等一下能把超越函數塞進電路的前提。",
 '原文背書 + 那座橋':"我知道各位不會因為我講就信,所以這張直接給原文。\n左邊是 Bulletproofs 的摘要原文:免設定、離散對數假設、驗證線性。\n右邊是 Groth16 的原文:三個群元素、三次配對。\n最重要的是下面這座橋:三者的安全性質其實是同一套 —— 完備、知識可靠、零知識,定義不變,差的只是建構跟信任模型。\n而且有個漂亮的接點:原版 Halo2 的承諾用的就是 IPA,跟 Bulletproofs 同一個離散對數家族,各位其實認得;我們用的 PSE 版,只是把這一層換成 KZG 的 pairing 承諾,換來通用設定跟快驗證。\n所以這不是憑空冒出來的新東西,是各位熟的那條線長出來的。",
 'PLONK':"這條第三路有個名字,叫 PLONK,2019 年出來的。\n各位如果對 ZK 的印象停在 Sigma、Schnorr,或停在 Groth16,PLONK 就是中間那個範式轉移,而 Halo2 就是它的一個實作。\n它帶來三個新東西:\n① 通用又可更新的 SRS —— 一次設定,任意電路共用,不像 Groth16 每個電路都要重做。\n② 它是個多項式 IOP:把電路變成多項式約束,用承諾加隨機點檢查,取代「把問題 reduce 到單一困難問題」的老思路。\n③ 它支援自訂閘跟查表,所以能表達複雜運算。\n投影片左邊是 PLONK 的摘要原文。\n一句話:各位今天要更新的「新東西」,就是這個 PLONK 家族。",
-'家譜':"先看它從哪來。\n2019 年的 Halo,是第一個不需要可信設定的遞迴證明組合;投影片上這句就是它論文摘要的原文。\n後來 Electric Coin Company,也就是 Zcash 團隊,把這個想法重建在 PLONKish 算術化之上,變成通用的電路框架,就是 Halo2。\n我們用的是社群的 PSE 分支,把承諾換成 KZG、跑在 BN254 曲線上 —— 為什麼這樣選,下一張說。",
+'家譜':"先看它從哪來。\n2019 年的 Halo,是第一個不需要可信設定的遞迴證明組合;投影片上這句就是它論文摘要的原文。\n後來 Electric Coin Company,也就是 Zcash 團隊,把這個想法重建在 PLONKish 算術化之上,變成通用的電路框架,就是 Halo2。\n我們用的是社群的 PSE 分支,把承諾換成 KZG、跑在 BN254 曲線上。\n為什麼選 KZG,接下來這張把它跟既有技術擺一起對照就清楚了。",
 '基礎定義':"在講性質之前,先把三個詞定下來,而且都引 The halo2 Book 的原文。\n關係 R:它規定哪些「公開輸入加私密輸入」的組合算合法。\n電路:就是把這個關係實作成證明系統能跑的東西。\n見證:私密輸入加上中間的 advice 值,合起來叫見證。\n對到我們的 demo:關係就是「P(x) 等於 98 嗎」,電路是那條 Horner 閘,見證是私密的 x 等於 3。",
 '輸入什麼 + 形式化':"學長教授最愛問的兩題,我直接放前面回答。\n形式上,一個電路就定義了一個 NP 關係 R_C:所有「公開輸入 x、私密見證 w」的合法組合 —— 合法的意思是,存在一張 trace,讓所有閘、查表、複製約束同時成立。\n整個證明系統,就是對這個 R_C 的 SNARK:Setup、Prove、Verify 三件套。\n你實際「輸入」的有三種:公開的 instance(驗證者看得到,例如 P(x)=98)、私密的 witness(永不洩漏,例如 x=3)、還有電路本身(setup 時固定)。\n最關鍵、最常被忽略的一點:你輸入的不是任意 byte,是有限域的元素;任何資料 —— 數字、簽章、Merkle 路徑、甚至我們的定點小數 —— 都要先編碼成 field elements,才進得了電路。\n先講清楚一件事:有人說的「形式化定義」指的是「把要證的 relation、也就是輸入,定義清楚」—— 這我們完全有。\n古典是手寫一條謂詞,像 v 等於 g 的 β 次方;我們的 relation 是由電路誘導的,你描述一個計算,那些約束就定義出 R_C。\n被問就直接寫具體的:demo 是 P(x) 等於 y;PF1 是「Merkle 路徑成立,而且 Σ w 乘 Δ 的絕對值小於等於 τ」,跟古典同一個格式。\n最後留一個更深的點:電路誘導的 R_C 到底等不等於你想證的那個數學 relation?這叫 arithmetization soundness,正是我們論文用截斷閘、範圍檢查、誤差界去補的 —— 我們不只定義了輸入,還證明了電路忠實實現它。",
 'zk-SNARK 性質':"四個安全性質,一樣引原文。\n完備性:誠實證明者照規則跑,驗證者一定接受,機率是一。\n可靠性:證明沒辦法騙過驗證者。\n知識可靠性:存在一個抽取器,能把證明者的見證抽出來 —— 這比單純可靠性更強。\n零知識:證明不洩漏見證的任何資訊。\n最下面那條把簡潔性跟 zk-SNARK 補上:證明長度只跟電路大小成 polylog,這樣的 NARK 叫 SNARK,再加上零知識就是 zk-SNARK。",
@@ -1066,7 +1063,7 @@ Stage 4 VERIFY       verified      1.96 ms
 'SHPLONK':"為什麼證明可以又小、又不隨計算深度成長?關鍵在 SHPLONK。\n投影片這句是 BDFG 2020/081 的摘要原文:它把「多條多項式、各在不同點開啟」批次成單一開啟證明,他們的第二個方案只要兩個群元素、兩次配對。\n配合右邊這張圖:列數一直翻倍,proof 幾乎不動。\n我們論文的電路就是這性質的體現 —— N 不管多大,proof 恆 31,872 bytes。\n另外 Fiat–Shamir 把互動挑戰換成對 transcript 的雜湊,PSE 預設用 Blake2b。",
 '驗證恆等式推導':"這張把整條協議收尾。先強調一個 soundness 關鍵:Fiat–Shamir 的每個挑戰,都必須在相關承諾送出之後才抽,所以這是承諾跟挑戰交錯的回合,不是一次全送、一次全抽。\n① 第一回合,承諾各個 advice 欄,先加 blinding 隨機項給零知識。\n② 對 transcript 雜湊抽出 β、γ,第二回合用它們建排列跟查表的 grand-product Z 並承諾。\n③ 再抽 α,第三回合算商 t 等於 G 除以 Z_H;因為 t 次數高,要切成多塊小於 n 次的 t0、t1 各自承諾。\n④ 最後抽求值點 ζ,在 ζ 開啟所有多項式,需要讀下一列的就在 ω 乘 ζ 也開一次,每個都附 KZG 開啟證明。\n⑤ 驗證者把開啟值代進去,檢查 G 在 ζ 等於 t 在 ζ 乘上 ζ 的 n 次方減 1;Schwartz–Zippel 保證在隨機 ζ 成立就幾乎處處成立。\n所有開啟用 SHPLONK 批次,實作再用 linearization 減少開啟數。",
 '為什麼能用':"第三部分:為什麼這套東西數學上站得住?我想回答一個直覺上的疑問 —— 為什麼只在一個隨機點檢查,就能相信整條多項式?",
-'為什麼成立':"答案是 Schwartz–Zippel 引理。\n投影片上是它的正式敘述:一個非零、總次數 d 的多項式,在隨機點等於零的機率,最多 d 除以取樣集合的大小;在 2 的 254 次方那麼大的體上,這機率小到可以忽略。\n所以只要在 Fiat–Shamir 抽的隨機點上恆等式成立,幾乎就保證它處處成立。\n配合承諾的綁定性,就撐起可靠性。\n再加上 advice 加隨機 blinding 給零知識、KZG 加 SHPLONK 給簡潔性,四個性質到齊。\nBN254 提供大約 128 位元的安全等級。",
+'為什麼成立':"這張把四個安全性質各自怎麼成立彙整一次。\n可靠性的數學核心是 Schwartz–Zippel:非零多項式在隨機點等於零的機率,最多次數除以體大小,在 2 的 254 次方的體上可忽略 —— 這條我們在 Part II 驗證恆等式那張已經用過,這裡就不重推。\n所以四性質:完備性靠合法 witness 滿足所有閘;可靠性靠承諾綁定加 Schwartz–Zippel 加抽取器;零知識靠 advice 加隨機 blinding;簡潔性靠 KZG 加 SHPLONK 的常數配對。\nKZG 的知識可靠性建立在配對友善曲線的代數假設,AGM 加 q-type;BN254 提供大約 128 位元安全。\n完整的形式化論證在論文 ch3。",
 '形式化證明':"有人會問:有沒有形式化證明?有,完整的在論文 ch3,這裡我給定義加證明策略。\n左邊兩格是原文:知識可靠性在代數群模型 AGM 下的正式定義 —— 存在一個有效率的抽取器,讓任何代數對手贏的機率可忽略;以及它依賴的 q-DLOG 假設。\n右邊是三個性質的證明策略:完備性靠逐列滿足每條閘;可靠性靠承諾綁定加 Schwartz–Zippel,在 AGM 下用抽取器導矛盾;零知識靠 advice 加 blinding,存在一個模擬器,不靠見證就能產生同分布的證明。",
 '能 / 不能':"也要誠實講它的邊界。\n左邊綠的是直接能做的:體上的加乘、有限次數的自訂閘、查表、複製約束。\n右邊紅的是有代價或做不到的:電路規模 k 有上限,大概到 28;位元運算很貴;除法要證明者額外提供商當見證;最關鍵的 —— 它沒有原生浮點。\n最後這一條,正是我們整篇論文存在的理由,接下來就講。",
 '我們怎麼用它':"第四部分,把 Halo2 接回我們自己的工作。\n一句話:Halo2 沒有浮點、沒有 exp、ln、erf 這些超越函數,我們得自己在它的閘上把它們重建出來。",
