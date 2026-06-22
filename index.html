@@ -132,8 +132,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .note-btn:hover{background:var(--accent-light)}
 .note-mask{display:none !important}
 /* teleprompter — docked bottom-right, semi-transparent, follows current section */
-.note-modal{position:fixed;right:18px;bottom:18px;z-index:61;display:none;
-  width:min(460px,42vw);max-height:46vh;background:rgba(255,255,255,.88);backdrop-filter:blur(9px);
+.note-modal{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:61;display:none;
+  width:min(680px,80vw);max-height:46vh;background:rgba(255,255,255,.9);backdrop-filter:blur(9px);
   border:1px solid rgba(124,58,237,.35);border-radius:14px;
   box-shadow:0 14px 40px rgba(0,0,0,.22);flex-direction:column;overflow:hidden}
 .note-modal.open{display:flex}
