@@ -259,6 +259,15 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
     其中 \(f_i\)＝被查的值、\(t_j\)＝表的值、\(m_j\)＝\(t_j\) 被查到的<b>次數（重數）</b>。這條<b>有理函數</b>等式成立 \(\iff\) 多重集合 \(\{f_i\}\subseteq\{t_j\}\)（即每個查值都在表裡）。
     <br><b>為什麼？看「極點」：</b>左邊在 \(X=-f_i\) 各有一個極點、右邊在 \(X=-t_j\) 有重數 \(m_j\) 的極點；兩個有理函數相等 \(\iff\) 極點位置與重數<b>完全對上</b> \(\iff\) 每個 \(f_i\) 都剛好等於某個 \(t_j\)。原文一句講透：<span style="color:#15803d">「logarithmic derivatives translate products of linear factors into sums of their reciprocals, turning zeroes into simple poles of same multiplicity.」</span></div>
 
+  <div class="cc" style="background:#fffbeb;border-color:#fcd34d">
+    <b>最容易卡的點：「表 T 比被查的 F 多很多，兩邊怎麼會相等？」</b> —— 關鍵在 \(m_j\)：<b>沒被查到的表值，\(m_j=0\)，那一整項變 0、消失</b>。大表根本不會整個加進來。把表縮成 \(\{0,1,2,3,4,5\}\) 看清楚，假設你查了 3 次：值 <b>3、3、0</b>（3 查兩次、0 查一次）：
+    <br>· <b>左邊</b>（每個查值一項）：\(\dfrac{1}{X+3}+\dfrac{1}{X+3}+\dfrac{1}{X+0}=\dfrac{2}{X+3}+\dfrac{1}{X+0}\)
+    <br>· <b>重數</b>：\(m_0=1,\ m_3=2\)，其餘 \(m_1=m_2=m_4=m_5=0\)
+    <br>· <b>右邊</b>：\(\dfrac{1}{X+0}+\dfrac{2}{X+3}+\big(\tfrac{0}{X+1}+\tfrac{0}{X+2}+\tfrac{0}{X+4}+\tfrac{0}{X+5}\big)\) —— 後面那串全是 0、<b>消失</b>
+    <br>→ 兩邊都剩 \(\dfrac{1}{X+0}+\dfrac{2}{X+3}\)，<b>當然相等</b>。表多大都沒差，沒查到的項自動歸零；兩邊最後都化簡成「<b>每個用到的值：被查幾次 ∕ (X＋值)</b>」。
+    <br><b>那它怎麼抓出「不在表裡的值」？</b>假設你偷查一個表裡沒有的 <b>9</b>：左邊多一項 \(\dfrac{1}{X+9}\) → 在 \(X=-9\) 有個極點；但右邊只有表值 \(\{0..5\}\) 的極點，<b>湊不出 \(X=-9\)</b>（9 不是任何 \(t_j\)，沒有 \(m_j\) 能掛上去）→ 兩邊不相等 → 作弊被抓。<b>所以「等式成立 ⟺ 每個查值都在表裡」。</b>
+  </div>
+
   <div class="gitem" style="max-width:none;margin:.4rem 0 .2rem">
     <svg viewBox="0 0 680 130" role="img" aria-label="極點對齊：查值的極點落在表的極點上" style="width:100%;max-width:700px;height:auto;display:block;margin:0 auto">
       <text x="20" y="22" font-size="12.5" fill="#7c3aed" font-weight="700">表的極點 {−tⱼ}</text>
