@@ -581,7 +581,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <div class="defn"><span class="dt">原文 · PLONKish</span>
         <span class="quote">“PLONKish circuits are defined in terms of a rectangular matrix of values.”</span>
         <a class="src" href="https://zcash.github.io/halo2/concepts/arithmetization.html" target="_blank" rel="noopener">The halo2 Book — PLONKish Arithmetization ↗</a></div>
-      <div class="fbox" style="border-left-color:#7c3aed;margin-top:.45rem"><div class="lbl" style="color:#5b21b6">PLONKish 有多自由？ — 一條閘就能很複雜</div>
+      <div class="fbox" style="border-left-color:#7c3aed;margin-top:.45rem"><div class="lbl" style="color:#5b21b6">PLONKish 有多自由？ — 一條閘就能很複雜 <a href="gates.html" target="_blank" rel="noopener" style="font-size:.82rem;color:#4f46e5;font-weight:700;text-decoration:none">▸ 更多種閘的例子（另開）</a></div>
         <div class="cmt">不像 R1CS 只能 \(a\cdot b=c\)（次數 2）；PLONKish 一條閘可<b>多元、跨鄰列、高次</b>（degree ≤ ~6）：
           <div style="display:flex;gap:.7rem;align-items:center;margin:.2rem 0 .1rem">
             <div style="flex:1"><b>高次 · 單列</b>：閘 \(q\cdot(y-x^{5})=0\) 是 <b>degree-5 約束</b> —— prover 填 \(y{=}32\)，閘只<b>驗</b> \(32{-}2^5{=}0\)（檢查、不計算）；R1CS 得拆 3 條乘。（Poseidon S-box，PF2 用）</div>

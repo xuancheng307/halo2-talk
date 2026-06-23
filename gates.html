@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PLONKish 閘的例子集 — Halo2 技術專題</title>
+<!-- same local assets as the deck → offline (file://) OK -->
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<script defer src="assets/katex/katex.min.js"></script>
+<script defer src="assets/katex/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false})"></script>
+<style>
+:root{
+  --bg:#ffffff;--surface:#f7f8fa;--border:#d9dce3;--text:#1a1a1f;--text-dim:#55596b;--text-faint:#8b94a3;
+  --accent:#4f46e5;--accent-light:#4338ca;--green:#16a34a;--amber:#d97706;--violet:#7c3aed;
+  --font-sans:'Noto Sans TC','Inter',-apple-system,sans-serif;--font-mono:'JetBrains Mono','Fira Code',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;padding:0 0 4rem}
+.wrap{max-width:1180px;margin:0 auto;padding:0 1.5rem}
+header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--border);padding:.7rem 0;margin-bottom:1.4rem}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+header h1{font-size:1.15rem;font-weight:800}
+header h1 .sub{color:var(--accent-light)}
+.back{font-size:.9rem;font-weight:700;color:var(--accent);text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:.35rem .8rem;white-space:nowrap}
+.back:hover{border-color:var(--accent);background:var(--accent);color:#fff}
+.intro{background:#f5f3ff;border:1px solid rgba(124,58,237,.25);border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.6rem;font-size:.98rem;color:var(--text-dim)}
+.intro b{color:var(--text)}
+.legend{display:flex;gap:1.4rem;flex-wrap:wrap;margin-top:.6rem;font-size:.9rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:1.1rem}
+.card{border:1px solid var(--border);border-radius:14px;padding:1rem 1.1rem;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.03);display:flex;flex-direction:column;gap:.5rem}
+.card h2{font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.badge{font-size:.72rem;font-weight:700;padding:.1rem .55rem;border-radius:999px;background:#eef2ff;color:var(--accent-light)}
+.badge.deg{background:#ede9fe;color:var(--violet)}
+.badge.rot{background:#dcfce7;color:#15803d}
+.badge.lk{background:#fffbeb;color:#92400e}
+.badge.us{background:#fee2e2;color:#b91c1c}
+.eq{background:var(--surface);border-radius:8px;padding:.45rem .6rem;overflow-x:auto}
+.body{display:flex;gap:.9rem;align-items:flex-start;flex-wrap:wrap}
+.body .desc{flex:1;min-width:160px;font-size:.92rem;color:var(--text-dim)}
+.body .desc b{color:var(--text)}
+.minitab{border-collapse:collapse;font-size:.74rem;flex:0 0 auto}
+.minitab th,.minitab td{border:1px solid var(--border);padding:1px 8px;text-align:center;min-width:1.5em}
+.minitab th{background:#f3f0ff;font-weight:700;color:var(--violet)}
+.minitab tr.gate td{background:#ede9fe;font-weight:700}
+.foot{margin-top:1.8rem;padding-top:1.1rem;border-top:1px solid var(--border);color:var(--text-faint);font-size:.85rem}
+code{font-family:var(--font-mono);background:var(--surface);padding:.05rem .3rem;border-radius:4px;font-size:.88em}
+.katex{font-size:1.02em;color:var(--text)}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>PLONKish <span class="sub">閘的例子集</span> — 七種閘 ＋ 複製約束，同一張表並存</h1>
+  <a class="back" href="index.html">← 回報告</a>
+</div></header>
+
+<div class="wrap">
+  <div class="intro">
+    一條<b>閘（gate）= 一條「在每一列都必須 = 0」的多項式約束</b>，被套用到整張表的每一列（由 <code>selector</code> 決定哪些列開）。同一張表上可以<b>很多種閘並存</b>。關鍵兩件事：
+    <div class="legend">
+      <span>① <b>degree（次數）</b>＝最高項<b>幾個變數相乘</b>，不是引用幾格；越高 prove 越貴，<b>Halo2 約 ≤ 6</b>。</span>
+      <span>② <b>rotation</b> 引用<b>相鄰列</b>（近）；<b>複製約束</b>把<b>任意兩格</b>綁相等（遠）。</span>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- 1 addition -->
+    <div class="card">
+      <h2>① 加法閘 <span class="badge deg">degree 1</span></h2>
+      <div class="eq">\[ q\cdot(a+b-c)=0 \]</div>
+      <div class="body">
+        <div class="desc"><b>最低次</b>：純加法，沒有任何相乘。檢查 \(c\) 是不是 \(a,b\) 的和。</div>
+        <table class="minitab"><tr><th>a</th><th>b</th><th>c</th></tr><tr class="gate"><td>2</td><td>3</td><td>5</td></tr></table>
+      </div>
+    </div>
+
+    <!-- 2 multiplication -->
+    <div class="card">
+      <h2>② 乘法閘 <span class="badge deg">degree 2</span></h2>
+      <div class="eq">\[ q\cdot(a\cdot b-c)=0 \]</div>
+      <div class="body">
+        <div class="desc">兩格相乘。<b>R1CS 就停在這裡</b>（只能 \(a\times b=c\)）—— PLONKish 的下限正是 R1CS 的上限。</div>
+        <table class="minitab"><tr><th>a</th><th>b</th><th>c</th></tr><tr class="gate"><td>3</td><td>4</td><td>12</td></tr></table>
+      </div>
+    </div>
+
+    <!-- 3 high degree -->
+    <div class="card">
+      <h2>③ 高次閘 <span class="badge deg">degree 5</span></h2>
+      <div class="eq">\[ q\cdot(y-x^{5})=0 \]</div>
+      <div class="body">
+        <div class="desc"><b>一條約束做五次方</b>（Poseidon 的 S-box，我們 PF2 用到）。R1CS 得拆 \(x^2,x^4,x^5\) 三條乘法。prover 填 \(y{=}32\)，閘只<b>驗</b> \(32{-}2^5{=}0\)。</div>
+        <table class="minitab"><tr><th>x</th><th>y=x⁵</th></tr><tr class="gate"><td>2</td><td>32</td></tr></table>
+      </div>
+    </div>
+
+    <!-- 4 cross-row -->
+    <div class="card">
+      <h2>④ 跨列閘 <span class="badge rot">rotation · 跨 3 列</span></h2>
+      <div class="eq">\[ q\cdot\big(a(X)+a(\omega X)+a(\omega^{2}X)-s\big)=0 \]</div>
+      <div class="body">
+        <div class="desc">閘在<b>高亮列</b>，<b>往下讀 a 三格</b>加起來 \(=s\)：\(2{+}3{+}4{=}9\)。次數只有 1（全加法），特殊的是<b>引用相鄰列</b>。</div>
+        <table class="minitab"><tr><th>a</th><th>s</th><th>sel</th></tr><tr class="gate"><td>2</td><td>9</td><td>1</td></tr><tr><td>3</td><td></td><td></td></tr><tr><td>4</td><td></td><td></td></tr></table>
+      </div>
+    </div>
+
+    <!-- 5 boolean / MUX -->
+    <div class="card">
+      <h2>⑤ 布林 / 選擇閘 <span class="badge deg">degree 2</span></h2>
+      <div class="eq">\[ q\cdot b\,(b-1)=0 \qquad \text{(強制 } b\in\{0,1\}) \]</div>
+      <div class="body">
+        <div class="desc"><b>把一格逼成 0 或 1</b>。再配一條 \(out=b\,x+(1-b)\,y\) 就是 <b>2-路 MUX</b>（\(b{=}1\) 取 \(x\)、\(b{=}0\) 取 \(y\)）—— 分支就這樣做。</div>
+        <table class="minitab"><tr><th>b</th><th>x</th><th>y</th><th>out</th></tr><tr class="gate"><td>1</td><td>7</td><td>9</td><td>7</td></tr></table>
+      </div>
+    </div>
+
+    <!-- 6 lookup -->
+    <div class="card">
+      <h2>⑥ 查表閘 <span class="badge lk">lookup</span></h2>
+      <div class="eq">\[ \mathrm{rem}\ \in\ \texttt{ByteTable}[0..255] \]</div>
+      <div class="body">
+        <div class="desc"><b>不是等式，是「值要在預定義表裡」</b>。最常見＝<b>範圍檢查</b>（把數拆 byte，每 byte ∈ 0–255）。SHA/Keccak、位元運算、我們的定點截斷餘數都靠它。</div>
+        <table class="minitab"><tr><th>rem</th><th>查表</th></tr><tr class="gate"><td>200</td><td>∈[0,255] ✓</td></tr><tr><td>300</td><td>✗ fail</td></tr></table>
+      </div>
+    </div>
+
+    <!-- 7 our Horner gate -->
+    <div class="card">
+      <h2>⑦ 我們的 Horner 閘 <span class="badge us">PF1 核心 · deg 2 跨列</span></h2>
+      <div class="eq">\[ s\cdot(\mathrm{acc}\cdot x + c - \mathrm{acc}')=0,\quad \mathrm{acc}'=\text{下一列} \]</div>
+      <div class="body">
+        <div class="desc"><b>乘加 + 引用下一列</b>，一列一步把多項式 Horner 算下去：\(2\cdot3+3=9=\mathrm{acc}'\)。論文再加 \(\div S\) 截斷 + byte 查表＝完整定點 kernel。</div>
+        <table class="minitab"><tr><th>acc</th><th>x</th><th>c</th><th>sel</th></tr><tr class="gate"><td>2</td><td>3</td><td>3</td><td>1</td></tr><tr><td>9</td><td>3</td><td>4</td><td>1</td></tr></table>
+      </div>
+    </div>
+
+    <!-- 8 copy constraint -->
+    <div class="card">
+      <h2>⑧ 複製約束 <span class="badge">permutation · 任意距離</span></h2>
+      <div class="eq">\[ \text{cell}_A \;=\; \text{cell}_B \quad(\text{不管隔多遠}) \]</div>
+      <div class="body">
+        <div class="desc"><b>不是閘，是「長程接線」</b>。rotation 只搆相鄰列；要把<b>任意兩格</b>綁成相等（例如把某步的輸出接到很遠的另一步輸入），就用複製約束（排列論證）。</div>
+        <table class="minitab"><tr><th>列</th><th>x</th></tr><tr class="gate"><td>0</td><td>3</td></tr><tr><td>⋯</td><td>⋯</td></tr><tr class="gate"><td>9</td><td>3</td></tr></table>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    一句話：<b>閘是「跑遍每一列的方程式」</b>；要更高次就拆成多列、要連很遠的格子就用複製約束。所有閘並存於同一張 2ᵏ 列的表上，各由 selector 控制在哪些列生效。 ·
+    <a href="index.html" style="color:var(--accent);font-weight:700;text-decoration:none">← 回報告</a>
+  </div>
+</div>
+</body>
+</html>
