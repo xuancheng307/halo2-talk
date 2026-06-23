@@ -77,6 +77,49 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
     </div>
   </div>
 
+  <h2 class="sec">先搞懂：閘不是「某幾列」，是「蓋在<span style="border-bottom:2.5px solid var(--accent)">每一列</span>的一條規則」</h2>
+  <div class="tablecap">你可能以為一個閘＝表格裡<b>某幾列</b>。其實相反：<b>閘是一條方程式</b>，它<b>往下蓋在每一列</b>，每列各代入<b>自己那列的數字</b>、都必須 = 0。<code>sel</code> 只決定<b>哪幾列這條規則生效</b>。</div>
+  <div class="gitem" style="max-width:none;margin-bottom:.8rem">
+    <svg viewBox="0 0 720 250" role="img" aria-label="一條閘方程式蓋在每一列" style="width:100%;max-width:740px;height:auto;display:block;margin:0 auto">
+      <rect x="150" y="6" width="420" height="36" rx="8" fill="#eef2ff" stroke="#c7d2fe"/>
+      <text x="360" y="30" font-size="15" text-anchor="middle" fill="#3730a3" font-weight="700">閘 = sel · ( acc·x + coeff − acc↓ ) = 0</text>
+      <text x="200" y="60" font-size="12" text-anchor="middle" fill="#8b94a3">↓ 同一條式子，往下每列代入該列數字 ↓</text>
+      <g font-size="12" text-anchor="middle" fill="#55596b"><text x="70" y="78">acc</text><text x="135" y="78">x</text><text x="200" y="78">coeff</text><text x="265" y="78">sel</text></g>
+      <g text-anchor="middle" font-size="13">
+        <rect x="40" y="84" width="60" height="26" rx="4" fill="#dbeafe"/><text x="70" y="102" fill="#1d4ed8">2</text>
+        <rect x="110" y="84" width="50" height="26" rx="4" fill="#dbeafe"/><text x="135" y="102" fill="#1d4ed8">3</text>
+        <rect x="170" y="84" width="60" height="26" rx="4" fill="#fef3c7"/><text x="200" y="102" fill="#92400e">3</text>
+        <rect x="240" y="84" width="50" height="26" rx="4" fill="#dcfce7" stroke="#86efac"/><text x="265" y="102" fill="#15803d" font-weight="700">1</text>
+        <rect x="40" y="116" width="60" height="26" rx="4" fill="#dbeafe"/><text x="70" y="134" fill="#1d4ed8">9</text>
+        <rect x="110" y="116" width="50" height="26" rx="4" fill="#dbeafe"/><text x="135" y="134" fill="#1d4ed8">3</text>
+        <rect x="170" y="116" width="60" height="26" rx="4" fill="#fef3c7"/><text x="200" y="134" fill="#92400e">4</text>
+        <rect x="240" y="116" width="50" height="26" rx="4" fill="#dcfce7" stroke="#86efac"/><text x="265" y="134" fill="#15803d" font-weight="700">1</text>
+        <rect x="40" y="148" width="60" height="26" rx="4" fill="#dbeafe"/><text x="70" y="166" fill="#1d4ed8">31</text>
+        <rect x="110" y="148" width="50" height="26" rx="4" fill="#dbeafe"/><text x="135" y="166" fill="#1d4ed8">3</text>
+        <rect x="170" y="148" width="60" height="26" rx="4" fill="#fef3c7"/><text x="200" y="166" fill="#92400e">5</text>
+        <rect x="240" y="148" width="50" height="26" rx="4" fill="#dcfce7" stroke="#86efac"/><text x="265" y="166" fill="#15803d" font-weight="700">1</text>
+        <rect x="40" y="180" width="60" height="26" rx="4" fill="#dbeafe"/><text x="70" y="198" fill="#1d4ed8">98</text>
+        <rect x="110" y="180" width="50" height="26" rx="4" fill="#f3f4f6"/><text x="135" y="198" fill="#cbd0da">·</text>
+        <rect x="170" y="180" width="60" height="26" rx="4" fill="#f3f4f6"/><text x="200" y="198" fill="#cbd0da">·</text>
+        <rect x="240" y="180" width="50" height="26" rx="4" fill="#f3f4f6"/><text x="265" y="198" fill="#9ca3af" font-weight="700">0</text>
+      </g>
+      <g font-size="13" font-family="monospace">
+        <text x="328" y="102" fill="#15803d">→ 1·(2·3+3−9) = 0 ✓</text>
+        <text x="328" y="134" fill="#15803d">→ 1·(9·3+4−31) = 0 ✓</text>
+        <text x="328" y="166" fill="#15803d">→ 1·(31·3+5−98) = 0 ✓</text>
+        <text x="328" y="198" fill="#9ca3af">→ sel=0，整條 ×0 = 0 ✓（不檢查）</text>
+      </g>
+      <text x="360" y="234" font-size="12.5" text-anchor="middle" fill="#55596b">閘不是「某幾列」，是<tspan font-weight="700" fill="#1a1a1f">一條規則被檢查 n 次（每列一次）</tspan>；sel 決定哪幾列生效。</text>
+    </svg>
+  </div>
+  <div class="cc">
+    <b>那「填數字」怎麼變成「檢查約束」？</b><br>
+    prover 在<b>外面算好</b>、把結果<b>填進格子</b>（這就是 witness）。<b>閘不負責算、負責「檢查」</b> —— 它要求你填的數字讓那條方程式<b>每列 = 0</b>；填錯一個 → 某列 ≠ 0 → 整除壞掉、證不出來。把「每列 = 0」變成<b>一條多項式整除</b>（Halo2 的關鍵一步）：
+    \[ \underbrace{g(\omega^i)=0\ \ \forall i}_{\text{每列都滿足}}\iff \underbrace{Z_H \mid g}_{Z_H(X)=X^{n}-1}\iff \exists\,t(X):\ g(X)=t(X)\,Z_H(X) \]
+    驗證者<b>不重算你的計算</b>，只在<b>一個隨機點 \(\zeta\)</b> 檢查 \(g(\zeta)=t(\zeta)\,Z_H(\zeta)\) 就信 —— 一個點，換來對整條多項式的信任。
+  </div>
+  <div class="note"><b>同一格、三種鏡頭（回答你的洞察）：</b>同一個格子（例如 <code>x</code> 在第 1 列）<b>可以同時</b>被<b>閘</b>用（出現在方程式裡）、被<b>複製約束</b>綁（跟別列的 x 相等）、被<b>查表</b>範圍檢查（值 ∈ 表）。三種約束<b>不是各佔不同列</b>，是<b>對同一批數字的三種不同檢查</b> —— 閘看「本列＋鄰列」、複製看「任意兩格相等」、查表看「值在不在表裡」。</div>
+
   <h2 class="sec">一張通用表，多種閘靠 selector 切換</h2>
   <div class="tablecap"><b>同一組欄</b> <code>a b c</code>（advice）＋ 每種閘一個 <code>q*</code>（selector）。每列只有一個 <code>q*</code>=1（綠色），那條閘就在該列生效、讀同一組 <code>a b c</code>；<code>·</code>＝該列用不到的格子。</div>
   <div class="utab-wrap"><table class="utab">
