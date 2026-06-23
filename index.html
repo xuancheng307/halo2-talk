@@ -729,7 +729,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- II-4b arithmetization+gates -> divisibility (self-derivable) -->
 <section class="slide" data-part="II" data-label="整除性推導">
-  <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導</div>
+  <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導（聽不懂可跳過，不影響主線）</div>
   <h2>算術化 → 多項式 → <span class="accent">整除 Z_H</span></h2>
   <ol class="steps">
     <li><b>求值域</b>：取 \(n=2^k\) 階乘法子群 \(H=\langle\omega\rangle=\{1,\omega,\dots,\omega^{\,n-1}\}\)；vanishing 多項式 \(Z_H(X)=X^{n}-1\)（在 \(H\) 上恆為 0，因為 \((\omega^i)^n=1\)）。</li>
@@ -823,7 +823,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- II-5b KZG full derivation (self-derivable) -->
 <section class="slide" data-part="II" data-label="KZG 完整推導">
-  <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導</div>
+  <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導（聽不懂可跳過，不影響主線）</div>
   <h2>KZG：<span class="accent">逐步形式推導</span></h2>
   <ol class="steps">
     <li><b>記號 &amp; SRS</b>：\([x]_1:=x\,g_1,\ [x]_2:=x\,g_2\)；\(\ \mathrm{srs}=\big([\tau^i]_1\big)_{i=0}^{d},\,[1]_2,[\tau]_2\)。秘密 \(\tau\) 用完即銷毀。<span class="muted" style="font-size:.86em">（加法記號，即乘法群的 \(g_1^{\,x}\)）</span></li>
@@ -933,7 +933,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- II-6b protocol -> verify identity (self-derivable) -->
 <section class="slide" data-part="II" data-label="驗證恆等式推導">
-  <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導</div>
+  <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導（聽不懂可跳過，不影響主線）</div>
   <h2>協議 → <span class="accent">在隨機點 ζ 驗一條等式</span></h2>
   <p class="muted" style="margin:0 0 .3rem;font-size:.92rem">Fiat–Shamir 的順序是 soundness 關鍵：<b>每個挑戰都必須在「相關承諾送出後」才抽</b>，所以是<b>承諾 ↔ 挑戰交錯的回合</b>，不是一次全送、一次全抽。</p>
   <ol class="steps">
@@ -1048,7 +1048,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- IV-1b detailed kernel formulas -->
 <section class="slide" data-part="IV" data-label="kernel 公式">
-  <div class="slide-meta"><span class="part-label">PART IV</span> · 詳細作法（公式）</div>
+  <div class="slide-meta"><span class="part-label">PART IV</span> · 詳細作法（公式 · 聽不懂可跳過，不影響主線）</div>
   <h2>定點 Horner kernel — <span class="accent">逐步公式</span></h2>
   <ol class="steps">
     <li><b>定點表示</b>：取尺度 \(S = 2^{pp},\ pp=48\)。實數 \(v\) 編碼成整數 \(\hat v = \lfloor v\cdot S\rceil\)（所有輸入都先這樣進電路）。</li>
@@ -1196,16 +1196,16 @@ Stage 4 VERIFY       verified      1.96 ms
 
 <!-- ===== appendix: classical ZK -> modern ZK updates ===== -->
 <section class="slide" data-part="收尾" data-label="現代 ZK 更新">
-  <div class="slide-meta"><span class="part-label">附錄</span> · 經典 ZK → 現代 ZK</div>
-  <h2>從<span class="accent">經典 ZK</span> 到<span class="accent">現代 ZK</span>：更新了什麼</h2>
-  <div class="grid-3">
-    <div class="card"><h3>不只 reduce 到離散對數</h3><p>經典：針對某 statement 設計 Sigma / Schnorr 協議。現代：<b>算術化 + 多項式承諾</b>（PLONK 範式）。</p></div>
-    <div class="card"><h3>不用每個 statement 設計協議</h3><p>PLONK 給<b>通用電路框架</b> — 一套框架描述任意計算，不用為每個問題重新設計。</p></div>
-    <div class="card"><h3>不用每電路重做 setup</h3><p>Groth16 每電路一次可信設定；PLONK/KZG 用<b>通用 + 可更新 SRS</b>，一次到處用。</p></div>
-    <div class="card"><h3>證明不再大又慢</h3><p>Bulletproofs 驗證線性；KZG <b>小證明 + 常數驗證</b>（~ms），且不隨計算深度成長。</p></div>
-    <div class="card"><h3>不只理論 / 隱私貨幣</h3><p>已大規模部署：<b>zkEVM / zkRollup / zkML</b>、償付能力與合規證明。</p></div>
-    <div class="card accent"><h3>仍有的硬限制</h3><p><b>沒有原生浮點</b>、非後量子。前者正是我們論文在解的。</p></div>
+  <div class="slide-meta"><span class="part-label">附錄</span> · 現代 ZK 在哪裡用</div>
+  <h2>現代 ZK <span class="accent">已經大規模落地</span> —— 我們的論文就在這個 landscape</h2>
+  <p class="muted" style="margin:.2rem 0 .8rem;font-size:.97rem">一句話收：經典 ZK 為單一 statement 設計協議；現代 ＝ <b>算術化 + 多項式承諾</b>（PLONK 範式：通用設定、自訂閘、小證明常數驗證 —— 前面都講過）。重點是它<b>已經到處在用</b>：</p>
+  <div class="grid-2">
+    <div class="card"><h3>zkEVM / zkRollup</h3><p>以太坊擴容 —— Scroll、Taiko、zkSync 把大量交易鏈下證明、鏈上只驗一個。</p></div>
+    <div class="card"><h3>zkML</h3><p>證明「這個機器學習推論真的跑對」，不洩漏模型 / 輸入。</p></div>
+    <div class="card"><h3>償付能力（proof-of-solvency）</h3><p>交易所證明「準備金足額」，不公開個別帳戶。</p></div>
+    <div class="card accent"><h3>合規證明 ← 我們的 PF1</h3><p>投組風險限額：證明 \(|\sum_i w_i\Delta_i|\le\tau\)，不洩漏個別部位。<b>我們的論文就坐在這格。</b></p></div>
   </div>
+  <p class="muted" style="margin-top:.7rem;font-size:.95rem">仍有的硬限制：<b>沒有原生浮點</b>（正是我們論文在解的）、非後量子。</p>
 </section>
 
 <!-- ===== RECAP ===== -->
@@ -1324,7 +1324,7 @@ Stage 4 VERIFY       verified      1.96 ms
 '程式碼 2':"左邊是填表 —— 把 Horner 階梯一列一列填進去,中間那個 constrain_equal 就是把每列的 x 綁成同一個值。\n右邊是真正的流水線:setup、keygen、create_proof、verify_proof。\n注意泛型參數 ProverSHPLONK 跟 VerifierSHPLONK —— 跟前面講的承諾方案完全對得上。\n這套 API、這個版本,跟論文的 PF1、PF2 用的一模一樣。",
 '真實輸出':"這是現場真的跑出來的輸出。\nMockProver 先過,然後 setup、keygen、prove、verify 一路下來:證明 11.6 毫秒產生、864 bytes、1.96 毫秒驗完。\n最後驗證者接受 —— 它相信 P(x) 等於 98,但從頭到尾沒看過 x。\n我還故意謊報答案是 99,系統立刻拒絕。\n這就是一個可靠的零知識證明該有的樣子。",
 'demo → 論文':"把 demo 跟論文接起來。\n同一條閘,論文多了定點截斷跟餘數的 byte 拆解、加上查表;多項式從固定係數換成 Remez 算出來的;但承諾、曲線、SHPLONK、transcript,整套 stack 完全相同。\n所以這支 demo 不是玩具 —— 它證明我們的方法用同一條閘、同一套 pipeline,現場就能 prove 跟 verify;論文只是把整數換成定點,把精度做到位。",
-'現代 ZK 更新':"這張是備援,補充從經典 ZK 到現代變了哪幾件事。\n① 證明不再只能 reduce 到離散對數那種 Sigma 協議,現代是算術化加多項式承諾,也就是 PLONK 範式。\n② 不用再為每個 statement 設計專屬協議,PLONK 給的是通用電路框架,一套描述任意計算。\n③ 不用每個電路都重做可信設定,KZG 用的是通用又可更新的 SRS,做一次到處用。\n④ 證明不再又大又慢,Bulletproofs 驗證是線性的,KZG 是小證明加常數驗證,而且不隨深度成長。\n⑤ ZK 已經不只是理論或隱私貨幣,zkEVM、zkRollup、zkML 都已大規模部署。\n· 最後：仍有的硬限制是沒有原生浮點、非後量子,而前者正是我們論文在解的。",
+'現代 ZK 更新':"這張是備援,講現代 ZK 已經在哪裡用,順便把我們的論文擺進去。\n一句話收:經典 ZK 是為單一 statement 設計專屬協議;現代就是算術化加多項式承諾的 PLONK 範式 —— 通用設定、自訂閘、小證明常數驗證,這些前面都講過了。重點是它已經到處在用。\nzkEVM、zkRollup 在做以太坊擴容,把大量交易鏈下證明、鏈上只驗一個;zkML 證明機器學習推論真的跑對;proof-of-solvency 讓交易所證明準備金足額、不公開個別帳戶;而合規證明,就是我們的 PF1 —— 證明投組風險在限額內、不洩漏個別部位。我們的論文就坐在這個 landscape 裡。\n仍有的硬限制:沒有原生浮點,正是我們論文在解的;以及非後量子。",
 '一頁帶走':"如果今天只記得五件事:\n① Halo2 是算術化加多項式承諾,我們用 KZG/BN254 版;\n② 電路就是一張表加一組等於零的多項式閘;\n③ KZG 加 SHPLONK 讓證明又小又快驗;\n④ 它沒有浮點,所以我們用定點加 Horner 重建超越函數,這是論文貢獻;\n⑤ 同一條閘從 demo 一路長到真實電路,已經實作、已經驗證。",
 '出處':"最後是出處。\n投影片上所有定義,都來自這幾個來源:The halo2 Book,還有 Halo、PLONK、plookup、SHPLONK、KZG、Poseidon 這幾篇論文,全部附了連結,大家可以自己核對。\n謝謝大家,接下來是問答時間。",
   };
