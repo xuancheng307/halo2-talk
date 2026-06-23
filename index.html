@@ -530,11 +530,13 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="slide-meta"><span class="part-label">PART II</span> · 先看全貌</div>
   <h2>完整流程：<span class="accent">一張圖看完 prove → verify</span></h2>
   <figure>
-    <svg viewBox="0 0 900 330" role="img" aria-label="Halo2 完整證明流程">
+    <svg viewBox="0 0 900 330" role="img" aria-label="Halo2 完整證明流程" style="max-width:860px;width:100%;display:block;margin:0 auto">
       <rect x="10" y="8" width="430" height="34" rx="8" fill="#eef2ff" stroke="#c7d2fe"/>
       <text x="225" y="30" font-size="13" text-anchor="middle" fill="#3730a3">私下準備：電路 R_C ＋ 輸入（x 公開 · w 私密）</text>
-      <rect x="460" y="8" width="430" height="34" rx="8" fill="#f7f8fa" stroke="#d9dce3"/>
-      <text x="675" y="30" font-size="13" text-anchor="middle" fill="#55596b">一次性：Trusted Setup → SRS → keygen → (pk, vk)</text>
+      <rect x="460" y="8" width="430" height="34" rx="8" fill="#f7f8fa" stroke="#d9dce3" stroke-dasharray="5 3"/>
+      <text x="675" y="30" font-size="12.5" text-anchor="middle" fill="#55596b">一次性<b>前置</b>（不在 ①–⑥ 內）：Trusted Setup → SRS → keygen → (pk, vk)</text>
+      <path d="M470,42 C455,55 450,58 446,68" fill="none" stroke="#6366f1" stroke-width="1.6" marker-end="url(#a2)"/>
+      <text x="498" y="60" font-size="9.5" fill="#6366f1">SRS ↘ 從「承諾」起才用到</text>
       <g text-anchor="middle">
         <rect x="10" y="70" width="164" height="64" rx="9" fill="#ffffff" stroke="#a5b4fc" stroke-width="1.5"/>
         <text x="92" y="92" font-size="12.5" font-weight="700" fill="#4338ca">① 算術化</text>
@@ -575,7 +577,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     </svg>
     <figcaption>原始圖解（本報告自製）· 後面每一步就是把這張的每個方塊放大講</figcaption>
   </figure>
-  <p class="muted" style="font-size:.95rem;margin-top:.2rem">先有這張地圖，再看細節：<b>x 公開、w 私密、π 不洩漏 w</b>。①② 是算術化層、③④⑤ 是密碼學層、⑥ 是驗證。</p>
+  <p class="muted" style="font-size:.95rem;margin-top:.2rem">先有這張地圖，再看細節：<b>x 公開、w 私密、π 不洩漏 w</b>。①② 算術化層、③④⑤ 密碼學層、⑥ 驗證。<b>虛線框 setup/keygen 是一次性前置</b>（不在 ①–⑥ 內），SRS 從「承諾」起才用到。</p>
 </section>
 
 <!-- II-1 arithmetization + trace table -->
@@ -853,16 +855,16 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="II" data-label="Setup → Keygen">
   <div class="slide-meta"><span class="part-label">PART II</span> · 第 3 層（續）· 金鑰怎麼來</div>
   <h2>Setup → Keygen：<span class="accent">pk / vk 裡到底有什麼</span></h2>
-  <p class="muted" style="margin:0 0 .5rem;font-size:.95rem">承諾學會了，但「承諾誰」？電路裡<b>固定不變的部分</b>（閘係數、selector、wiring）要<b>先預處理、先承諾好</b> —— 這一步叫 <b>keygen</b>，分兩段：</p>
-  <div class="grid-2" style="gap:.7rem;margin-bottom:.55rem">
+  <p class="muted" style="margin:0 0 .3rem;font-size:.95rem">承諾學會了，但「承諾誰」？電路裡<b>固定不變的部分</b>（閘係數、selector、wiring）要<b>先預處理、先承諾好</b> —— 這一步叫 <b>keygen</b>，分兩段：</p>
+  <div class="grid-2" style="gap:.6rem;margin-bottom:.35rem">
     <div class="fbox"><div class="lbl">① setup —— 與電路<b>無關</b>、一次性</div>
       <div class="cmt">產生通用 SRS \(=\{[\tau^i]_1\}_{i=0}^{d},[\tau]_2\)（KZG 的 powers-of-τ）。可信設定、<b>可更新</b>、\(\tau\) 用完銷毀。<b>一份，所有電路共用</b>。<code>ParamsKZG::setup(k)</code></div></div>
     <div class="fbox" style="border-left-color:#4338ca"><div class="lbl" style="color:#4338ca">② keygen —— 與<b>這個電路</b>綁定</div>
       <div class="cmt">拿 SRS + 電路，把固定部分<b>用 KZG 承諾起來</b> → 產出 \((\mathrm{vk},\mathrm{pk})\)。<code>keygen_vk</code> / <code>keygen_pk</code></div></div>
   </div>
-  <div class="grid-2" style="gap:.7rem">
+  <div class="grid-2" style="gap:.6rem">
     <div class="card green"><h3 style="color:#15803d">vk 驗證金鑰 <span class="muted" style="font-weight:400;font-size:.8em">小 · 公開 · 可上鏈</span></h3>
-      <ul style="margin:.2rem 0">
+      <ul style="margin:.1rem 0">
         <li>evaluation domain（\(2^k\) 大小）</li>
         <li><b>fixed / selector 欄的承諾</b>（KZG）</li>
         <li><b>置換論證的承諾</b>（wiring \(\sigma\)）</li>
@@ -871,7 +873,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       </ul>
       <p class="muted" style="font-size:.85rem;margin:.1rem 0 0">= 驗證者需要的<b>最小集合</b>。</p></div>
     <div class="card accent"><h3>pk 證明金鑰 <span class="muted" style="font-weight:400;font-size:.8em">大 · prover 私用</span></h3>
-      <ul style="margin:.2rem 0">
+      <ul style="margin:.1rem 0">
         <li><b>整個 vk</b>（pk ⊇ vk）</li>
         <li>fixed / selector：係數式 + Lagrange 求值 + 延伸 coset</li>
         <li>置換多項式 \(\sigma\)（多種形式）</li>
@@ -879,7 +881,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       </ul>
       <p class="muted" style="font-size:.85rem;margin:.1rem 0 0">= 用來真正<b>算商多項式、產生證明</b>的全部預處理料。</p></div>
   </div>
-  <div class="fbox" style="border-left-color:#16a34a;margin-top:.55rem"><div class="cmt"><b>pk ⊇ vk</b>。換電路只要重跑 <b>keygen</b>、<b>不用重做 setup</b>（SRS 通用）—— 這正是「通用可更新 SRS」勝過 Groth16「每電路一次 trusted setup」之處。對照 Part V demo：<b>Stage 1 = setup、Stage 2 = keygen</b>。<span class="muted">對照 halo2_proofs v0.3.0 API（keygen_vk / keygen_pk）· The halo2 Book — Proving system</span></div></div>
+  <div class="fbox" style="border-left-color:#16a34a;margin-top:.35rem"><div class="cmt"><b>setup / keygen 是一次性前置（不在 ①–⑥ 流程裡）</b>，產物從<b>承諾步驟</b>起才用到。<b>pk ⊇ vk</b>。換電路只要重跑 <b>keygen</b>、<b>不用重做 setup</b>（SRS 通用）—— 這正是「通用可更新 SRS」勝過 Groth16「每電路一次 trusted setup」之處。對照 Part V demo：<b>Stage 1 = setup、Stage 2 = keygen</b>。<span class="muted">對照 halo2_proofs v0.3.0 API（keygen_vk / keygen_pk）· The halo2 Book — Proving system</span></div></div>
 </section>
 
 <!-- II-6 SHPLONK + proof size -->
@@ -911,6 +913,20 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <figcaption>原始圖解 · 我們論文電路即 N 不變恆 31,872 bytes</figcaption>
     </figure>
   </div>
+</section>
+
+<!-- II-6a SHPLONK derivation: HOW batch opening works -->
+<section class="slide" data-part="II" data-label="SHPLONK 推導">
+  <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導</div>
+  <h2>SHPLONK：<span class="accent">怎麼做到批次開啟</span></h2>
+  <p class="muted" style="margin:0 0 .4rem;font-size:.94rem">單次 KZG 只能「一條多項式、一個點」。把一大堆 \((f_i,\ \text{點集}\ S_i)\) 壓成一個證明，靠<b>兩個隨機挑戰</b>，各摺一次。</p>
+  <ol class="steps" style="margin:.1rem 0">
+    <li><b>記號</b>：各 \(f_i\) 要在點集 \(S_i\) 開啟。令 \(r_i=f_i\) 在 \(S_i\) 上的插值、\(Z_{S_i}(X)=\prod_{s\in S_i}(X-s)\)、\(T=\bigcup_i S_i\)。因 \(f_i\) 在 \(S_i\) 上 \(=r_i\)，故 \(Z_{S_i}\mid(f_i-r_i)\)。</li>
+    <li><b>① 折「多條」→ 一條</b>（挑戰 \(\gamma\)）：把 \(k\) 條商線性疊成一條，<b>承諾一個</b> \(W\)。\[ h(X)=\sum_{i}\gamma^{\,i-1}\,\frac{f_i(X)-r_i(X)}{Z_{S_i}(X)},\qquad W=[h(\tau)]_1 \]</li>
+    <li><b>② 折「多點」→ 一點</b>（挑戰 \(z\)）：構造 \(L\) 使 \(L(z)=0\)，於是 \((X-z)\mid L\)，<b>再承諾一個</b> \(W'\)。\[ L(X)=\sum_i\gamma^{\,i-1}Z_{T\setminus S_i}(z)\big(f_i(X)-r_i(z)\big)-Z_T(z)\,h(X),\quad W'=\Big[\tfrac{L(\tau)}{\tau-z}\Big]_1 \]</li>
+    <li><b>驗證（一條配對）</b>：verifier 用承諾同態自組 \([L]_1=\sum_i\gamma^{i-1}Z_{T\setminus S_i}(z)\big([f_i]_1-[r_i(z)]_1\big)-Z_T(z)\,W\)，檢查 \[ e\big([L]_1,\ [1]_2\big)\overset{?}{=}e\big(W',\ [\tau]_2-z[1]_2\big) \]</li>
+  </ol>
+  <div class="fbox" style="border-left-color:#16a34a"><div class="cmt"><b>結果：證明 \(=(W,W')\) 只有 2 個 \(G_1\) 元素、驗證 2 次配對，與「開幾個」\(N\) 無關。</b>直覺：\(\gamma\) 把多條<b>線性獨立</b>地疊起來（壓倒機率不互相抵銷）；\(z\) 把多點檢查<b>退化回單次 KZG</b>。<span class="muted">構造對照 BDFG ePrint 2020/081。</span></div></div>
 </section>
 
 <!-- II-6b protocol -> verify identity (self-derivable) -->
@@ -1294,6 +1310,7 @@ Stage 4 VERIFY       verified      1.96 ms
 'KZG 範例':"上一張是抽象推導,這張用一個乾淨的小例子,把 KZG 最關鍵的『開啟』講到看得見。\n要證的是:某條多項式 f 在點 z 的值是 v。例子取 f 等於 X 的三次方、z 等於 3,那麼 v 就是 27。\n靈魂在這條恆等式:f 在 z 等於 v,完全等價於 X 減 z 能整除 f 減 v。這裡 f 減 v 就是 X 三次方減 27,它除以 X 減 3 剛好整除,商是 X 平方加 3X 加 9,你可以乘回去驗證。\n這個商多項式,就是開啟證明的核心:prover 算得出這個商,就證明了 f 在 3 真的等於 27;他若謊報,X 減 3 根本除不盡,合法的商不存在,偽造機率可忽略。承諾跟證明都只是一個群元素,跟多項式多大無關。\n【開啟怎麼算】\n① 靈魂恆等式：f(z)=v 等價於 (X−z) 整除 f−v。這裡 f−v=X³−27。\n② 算商多項式：q(X)=(X³−27)/(X−3)=X²+3X+9（差立方）；驗算 (X²+3X+9)(X−3)=X³−27，對。能整除就證明 f(3)=27。\n③ 承諾 C=[f(τ)]₁、開啟證明 π=[q(τ)]₁，都只是一個群元素。\n④ 驗證一條配對：用雙線性，兩邊都等於 e(g1,g2) 的 f(τ)−27 次方，相等就過。\n重點：算得出 q 就是真的；說謊時 X−3 不整除 f−v，沒有合法的 q，偽造機率可忽略。群元素是 254-bit，真實位元組在 Part V 跑出來。",
 'Setup → Keygen':"承諾講完了,但有個關鍵問題:到底承諾誰?答案是電路裡固定不變的部分 —— 閘的係數、selector、還有 wiring —— 這些要先預處理、先承諾好,這一步就叫 keygen,它分兩段。\n第一段 setup:產生通用的 SRS,也就是 KZG 那串 tau 的各次方。它跟你的電路無關、做一次、可更新、tau 用完銷毀,所有電路共用同一份。\n第二段 keygen:拿 SRS 加上這個電路,把固定部分用 KZG 承諾起來,產出兩把鑰匙。vk 驗證金鑰很小、可以公開上鏈,裡面是 domain、fixed 跟 selector 欄的承諾、wiring 置換的承諾、加上約束系統的結構。pk 證明金鑰很大、是 prover 私用的,它包含整個 vk,再加上所有預處理多項式 —— fixed 欄的各種形式、置換多項式、還有邊界用的 Lagrange 基。\n一句話:pk 包含 vk;換電路只要重跑 keygen,不用重做 setup —— 這正是通用 SRS 贏過 Groth16『每電路一次設定』的地方。",
 'SHPLONK':"為什麼最後的證明可以又小、又不隨電路深度長大?關鍵在 SHPLONK 這層批次開啟。\n先回一個常見疑問:KZG 不是已經有開啟了嗎?是,但 KZG 的開啟是『一條多項式、一個點』的原子操作。整條協議要開啟的東西有一大堆 —— 每條 advice、grand-product、商多項式的每一塊,各在隨機點開啟,動輒幾十個。\n如果一個一個單獨開,證明大小跟驗證時間就隨數量線性長,KZG 常數大小的優勢全沒了。SHPLONK 把這一大堆批次成『一個』開啟證明,只要兩個群元素、兩次配對,不管多少個。這才是證明又小又快、不隨深度長的真正原因。\n【為什麼要批次,單次的 KZG open 不夠嗎】\nKZG 的 open 是『一條多項式、一個點』→ 一個 π。但整條協議要開啟一大堆:每條 advice、grand-product Z、商 t 的每一塊、fixed/selector… 各在 ζ(有的還要在 ωζ 讀下一列),動輒 10 到 30 個『(多項式,點)』。\n如果逐個單開:N 個開啟就要 N 個群元素 + N 次配對,證明大小跟驗證時間都隨 N(電路複雜度)線性長,KZG 常數大小的優勢就沒了。\nSHPLONK 把這一大堆批次成『一個』開啟證明(2 個群元素、2 次配對),不管 N 多大都一樣 —— 這才是證明又小、驗證又快、不隨深度長的真正原因。\n投影片這句是 BDFG 2020/081 的摘要原文:它把「多條多項式、各在不同點開啟」批次成單一開啟證明,他們的第二個方案只要兩個群元素、兩次配對。\n配合右邊這張圖:列數一直翻倍,proof 幾乎不動。\n我們論文的電路就是這性質的體現 —— N 不管多大,proof 恆 31,872 bytes。\n另外 Fiat–Shamir 把互動挑戰換成對 transcript 的雜湊,PSE 預設用 Blake2b。\n下一張就把這些隨機挑戰按正確順序串起來,收尾整條協議。\n【接續我們的例子】\na(X)、合成 G(X)、商 t(X)、排列 Z(X) 這幾條,在 ζ（和讀下一列的 ωζ）各自要開啟的值,全部批次成一個 π;N 多大都恆 31,872 bytes 講的就是這件事。",
+'SHPLONK 推導':"上一張講為什麼要批次,這張講『怎麼批次』,核心是用兩個隨機挑戰、各摺一次。\n先看要開的東西:很多條多項式 fᵢ,各自要在一組點 Sᵢ 上開啟。準備兩個工具:rᵢ 是 fᵢ 在那組點上的插值、Z_Sᵢ 是那組點的消失多項式;因為 fᵢ 在那些點上就等於 rᵢ,所以 fᵢ 減 rᵢ 一定被 Z_Sᵢ 整除,商存在。\n第一摺,用挑戰 gamma 把『多條』摺成一條:把每條的商乘上 gamma 的次方加起來、變成一條 h,只承諾這一個 W。gamma 的次方保證它們線性獨立,壓倒機率下不會互相抵消。\n第二摺,用挑戰 z 把『多點』摺成一點:組一條 L,讓它在 z 這點剛好等於零,於是 X 減 z 整除 L,再承諾一個 W';這一步等於把整批檢查退化回我們已經會的『單次 KZG 在一點開啟』。\n驗證者靠承諾的同態,自己把 L 的承諾組出來,只驗一條配對。\n結果:不管你要開幾個,證明永遠只有 W 跟 W' 兩個群元素、驗證兩次配對 —— 這就是 proof 不隨電路長大的數學原因。",
 '驗證恆等式推導':"這張把整條協議收尾,看驗證者最後到底在驗什麼。\n先強調一個 soundness 的關鍵:Fiat–Shamir 的每一個隨機挑戰,都必須在相關承諾送出『之後』才抽。所以整個協議是承諾、挑戰交錯的好幾個回合:prover 先承諾 advice,才拿到挑戰 beta、gamma;用它們建好排列與查表的多項式再承諾,才拿到 alpha;算出商多項式的承諾後,最後才拿到求值點 zeta。這個順序錯了,證明就能被偽造。\n到了 zeta,prover 開啟所有多項式的取值,驗證者只做一件事:代進去檢查那條大等式,看 G 在 zeta 是不是等於商乘上 zeta 的 n 次方減一。憑 Schwartz–Zippel,這一個隨機點成立,整條恆等式就以壓倒機率成立 —— 一個點,換來對整條多項式的信任。\n【承諾 ↔ 挑戰 回合詳解】\n① 第一回合,承諾各個 advice 欄,先加 blinding 隨機項給零知識。\n② 對 transcript 雜湊抽出 β、γ,第二回合用它們建排列跟查表的 grand-product Z 並承諾。\n③ 再抽 α,第三回合算商 t 等於 G 除以 Z_H;因為 t 次數高,要切成多塊小於 n 次的 t0、t1 各自承諾。\n④ 最後抽求值點 ζ,在 ζ 開啟所有多項式,需要讀下一列的就在 ω 乘 ζ 也開一次,每個都附 KZG 開啟證明。\n⑤ 驗證者把開啟值代進去,檢查 G 在 ζ 等於 t 在 ζ 乘上 ζ 的 n 次方減 1;Schwartz–Zippel 保證在隨機 ζ 成立就幾乎處處成立。\n所有開啟用 SHPLONK 批次,實作再用 linearization 減少開啟數。\n【接續我們的例子】\n我們例子 n=4,所以最後驗的就是 G(ζ)=t(ζ)(ζ⁴−1);ζ 是對 transcript 雜湊抽出的隨機點。",
 '為什麼能用':"第三部分:為什麼這套東西數學上站得住?我想回答一個直覺上的疑問 —— 為什麼只在一個隨機點檢查,就能相信整條多項式?",
 '為什麼成立':"第三部分的主軸:為什麼這套東西在數學上站得住?\n先回答最反直覺的一點 —— 為什麼只在一個隨機點檢查,就敢相信整條多項式都對?關鍵是 Schwartz–Zippel:一條非零、低次的多項式,頂多在很少的點上為零;所以在一個 2 的 254 次方那麼大的域裡隨機挑一點,如果它剛好為零,那這條多項式幾乎一定本來就是零。驗一個隨機點,約等於處處成立。\n四個安全性質就建在這上面:完備性 —— 合法見證逐列滿足,必被接受;可靠性 —— 靠承諾綁定加上這個隨機點論證,作弊會導致矛盾;零知識 —— advice 加了隨機遮罩,證明不洩漏見證;簡潔性 —— KZG 加 SHPLONK,常數次配對,證明大小跟電路無關。\n【四性質逐項解釋】\n① 完備性:誠實 prover 的合法 witness 逐列滿足每條閘,合成多項式 G 在子群 H 上恆為零,等式必成立,驗證者機率 1 接受。\n② 可靠性:KZG 承諾先把多項式綁死(binding),作弊者改不了已承諾的值;再加 Schwartz–Zippel,他無法在隨機點蒙混;最強的一層是 AGM 下存在抽取器 E,能直接從一個會過關的證明把見證抽出來 —— 抽得出來就代表他「真的知道」w,抽不出來就導出矛盾。\n③ 零知識:advice 欄送出前加隨機 blinding,存在模擬器 S,不看見證也能產生與真證明同分布的假證明,所以證明本身漏不出 w。\n④ 簡潔性:KZG 加 SHPLONK,proof 是固定幾個群元素、驗證是固定次數配對,跟電路多大無關。\n\n【右邊兩段原文怎麼念】\n· 知識可靠性的正式定義(AGM):存在一個有效率的抽取器 E,使任何「代數對手」A 贏的機率可忽略 —— 代數對手就是每丟出一個群元素都得說出它是哪些已知元素的線性組合,正是這個限制讓抽取器抽得出見證。\n· 它靠的硬假設是 q-DLOG:就算把 τ 的 1 到 q 次方都掛在 G1、G2 的指數上給你,你也算不回 τ;BN254 在這假設下約 128 位元安全。\n收尾一句:這份報告給的是定義加證明策略,逐步形式化證明寫在論文 ch3。",
@@ -1592,6 +1609,7 @@ Stage 4 VERIFY       verified      1.96 ms
 'KZG 完整推導':["KZG","SRS","τ (toxic waste)","商多項式 t (quotient)","π (proof)","配對檢查","雙線性 (bilinearity)","G₁ / G₂","q-DLOG","Schwartz–Zippel"],
 'Setup → Keygen':["setup","keygen","SRS","通用可更新 SRS","可信設定 (trusted setup)","vk (verifying key)","pk (proving key)","KZG","τ (toxic waste)"],
 'SHPLONK':["SHPLONK","KZG","群元素","配對檢查","Fiat–Shamir","transcript","Blake2b","非互動 (non-interactive)"],
+'SHPLONK 推導':["SHPLONK","KZG","商多項式 t (quotient)","配對檢查","雙線性 (bilinearity)","群元素","Fiat–Shamir","Schwartz–Zippel"],
 '驗證恆等式推導':["Fiat–Shamir","可靠性 (soundness)","blinding","grand-product Z","β,γ,α,ζ","商多項式 t (quotient)","rotation","KZG","Schwartz–Zippel","linearization","vanishing 多項式 Z_H"],
 '為什麼成立':["Schwartz–Zippel","完備性 (completeness)","可靠性 (soundness)","零知識 (zero knowledge)","簡潔性 (succinct)","承諾綁定 (binding)","AGM","extractor (抽取器)","模擬器 (simulator)","q-DLOG","128-bit 安全","ROM (隨機預言機)","KZG","SHPLONK"],
 '能 / 不能':["𝔽ᵣ (有限域)","degree (次數)","rotation","查表 (lookup)","Copy constraint (複製約束)","wiring","selector","MUX","k (電路規模)","boolean 拆解","SHA / Keccak","除法 / 模逆","quotient witness","浮點","pp=48 定點","資料相依控制流"],
@@ -1689,6 +1707,11 @@ Stage 4 VERIFY       verified      1.96 ms
 'SHPLONK':[
  ["為什麼證明大小幾乎不隨電路長大？","SHPLONK 把『多條多項式、各在不同點開啟』批次成單一開啟證明（2 個群元素、2 次配對）；承諾本身又是常數大小，所以列數翻倍 proof 幾乎不動。我們電路實測 N 不變恆 31,872 bytes。"],
  ["Fiat–Shamir 安全嗎？","在隨機預言機模型下安全；把互動挑戰換成對 transcript 的雜湊（PSE 預設 Blake2b）。前提是每個挑戰都在相關承諾之後才抽（見下一張）。"]
+],
+'SHPLONK 推導':[
+ ["γ 跟 z 兩個挑戰各自在做什麼？","γ 把『多條多項式』線性疊成一條（次方保證線性獨立、壓倒機率不互相抵消）；z 把『多個開啟點』摺成單一點，讓整批檢查退化回一次標準 KZG 開啟。各摺一次，所以只剩 2 個群元素。"],
+ ["為什麼 (fᵢ−rᵢ) 一定被 Z_Sᵢ 整除？","rᵢ 是 fᵢ 在點集 Sᵢ 上的插值，故 fᵢ 與 rᵢ 在 Sᵢ 每個點都相等 → fᵢ−rᵢ 以 Sᵢ 全部為根 → 被 Z_Sᵢ=∏(X−s) 整除，商才存在、才承諾得了。"],
+ ["驗證者沒有 h、L 這些多項式，怎麼驗？","靠承諾的同態：verifier 用公開的 [fᵢ]、純量 rᵢ(z)、Z(z) 自己線性組出 [L]，再對 W′ 做一條配對檢查。全程只需 2 個群元素 W、W′，與開啟數量 N 無關。"]
 ],
 '驗證恆等式推導':[
  ["為什麼挑戰一定要在承諾之後才抽？先抽會怎樣？","若證明者先看到挑戰，就能針對那個點客製假多項式蒙混（grinding）。承諾先把多項式鎖死、再抽隨機點，Schwartz–Zippel 的機率論證才成立。"],
@@ -1866,7 +1889,7 @@ Stage 4 VERIFY       verified      1.96 ms
 
   // teleprompter: while open, panels follow the slide you scroll to
   // ===== pipeline locator rail: mark which stage we are on + the connecting action between steps =====
-  const STAGE={'算術化':1,'四種欄':1,'自訂閘':2,'複製約束 / 查表':2,'整除性推導':3,'整除性範例':3,'KZG 承諾':4,'KZG 完整推導':4,'KZG 範例':4,'Setup → Keygen':4,'SHPLONK':5,'驗證恆等式推導':6};
+  const STAGE={'算術化':1,'四種欄':1,'自訂閘':2,'複製約束 / 查表':2,'整除性推導':3,'整除性範例':3,'KZG 承諾':4,'KZG 完整推導':4,'KZG 範例':4,'Setup → Keygen':4,'SHPLONK':5,'SHPLONK 推導':5,'驗證恆等式推導':6};
   slides.forEach(s=>{if(STAGE[s.dataset.label])s.classList.add('rail');});
   const rail=document.createElement('div'); rail.className='flowrail';
   rail.innerHTML='<div class="fr-title">證明流程 · 你在這</div>'+[[1,'算術化 · 排表','填見證 + 加規則'],[2,'加約束 · 閘/複製/查表','每欄插值成多項式'],[3,'多項式 · 整除 Z_H','承諾每條多項式'],[4,'KZG 承諾','FS 抽隨機點 + 批次'],[5,'SHPLONK 批次開啟','在 ζ 開啟 + 配對'],[6,'隨機點驗證',null]].map(a=>'<div class="fr-stage" data-s="'+a[0]+'"><span class="fr-n">'+a[0]+'</span>'+a[1]+'</div>'+(a[2]?'<div class="fr-arrow">↓ '+a[2]+'</div>':'')).join('');
