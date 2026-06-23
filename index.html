@@ -372,6 +372,44 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   </div>
 </section>
 
+<!-- I-3 two layers + IPA vs KZG -->
+<section class="slide" data-part="I" data-label="兩層架構">
+  <div class="slide-meta"><span class="part-label">PART I</span> · 在做什麼</div>
+  <h2>兩層架構，與一個<span class="accent">必須講清楚的分叉</span></h2>
+  <figure>
+    <svg viewBox="0 0 900 200" role="img" aria-label="Halo2 兩層架構">
+      <rect x="20" y="20" width="860" height="70" rx="10" fill="#eef2ff" stroke="#c7d2fe"/>
+      <text x="40" y="48" font-size="15" font-weight="700" fill="#3730a3">上層 · PLONKish 算術化（與承諾無關，兩版本共用）</text>
+      <text x="40" y="72" font-size="13" fill="#55596b">把計算排成一張 2ᵏ 列的表 + 一組「恆等於 0」的多項式恆等式</text>
+      <rect x="20" y="110" width="860" height="70" rx="10" fill="#f7f8fa" stroke="#d9dce3"/>
+      <text x="40" y="138" font-size="15" font-weight="700" fill="#1a1a1f">下層 · 多項式承諾方案 (PCS)</text>
+      <text x="40" y="162" font-size="13" fill="#55596b">把表編碼成多項式並「承諾」，用代數方式檢查恆等式 — 這層有兩種選擇 ↓</text>
+    </svg>
+  </figure>
+  <table>
+    <tr><th>版本</th><th>承諾</th><th>曲線</th><th>信任設定</th><th>用途</th></tr>
+    <tr><td>原版 ECC / Zcash</td><td>IPA（內積論證）</td><td>Pasta (Pallas/Vesta)</td><td><b>免</b>（遞迴友善）</td><td>Zcash Orchard</td></tr>
+    <tr class="hl"><td><b>PSE fork ← 我們用</b></td><td><b>KZG</b></td><td><b>BN254</b></td><td>需通用 SRS</td><td>EVM 上鏈驗證</td></tr>
+  </table>
+  <p style="margin-top:.6rem;font-size:.95rem"><b>為什麼選它：</b>BN254 配對是以太坊內建 precompile → 鏈上驗證便宜；KZG 證明大小固定。代價是一次性的通用可信設定。</p>
+</section>
+
+<!-- I-6b trusted setup: what it is + where the IPA/KZG/Groth16 difference comes from -->
+<section class="slide" data-part="I" data-label="可信設定">
+  <div class="slide-meta"><span class="part-label">PART I</span> · 那個分叉的核心</div>
+  <h2>可信設定（Trusted Setup）：<span class="accent">在做什麼 · 跟 IPA 差在哪</span></h2>
+  <p class="muted" style="margin:0 0 .5rem;font-size:.95rem">前面反覆提到「KZG 需要可信設定、原版 IPA 不用」。它到底在做什麼？為什麼有的需要、有的不用？</p>
+  <div class="fbox" style="margin-bottom:.55rem"><div class="lbl">可信設定在做什麼</div>
+    <div class="cmt">一次性「儀式」產生公共參數 SRS：從一個<b>隨機秘密 \(\tau\)</b> 算出 \(\{[\tau^i]_1\}\dots\)（承諾要用）。關鍵是 \(\tau\) 是 <b>toxic waste（有毒廢料）</b> —— 算完<b>必須銷毀</b>；<b>任何人若留著 \(\tau\) 就能偽造假證明</b>。降低風險：用多方計算儀式（powers-of-τ），<b>只要一個參與者誠實銷毀自己那份，整體就安全</b>；通用可更新版還能讓新人持續加入增強。</div></div>
+  <table style="font-size:.9rem">
+    <tr><th>方案</th><th>要 setup？</th><th>為什麼</th><th>代價 / 好處</th></tr>
+    <tr><td>原版 Halo2 · <b>IPA</b></td><td><b style="color:#15803d">不要</b></td><td>Pedersen/IPA 用<b>公開的隨機基</b>（hash 出來、nothing-up-my-sleeve），<b>沒把秘密藏進參數</b> → 沒有 toxic waste</td><td>無設定風險、遞迴友善；但驗證 <b>線性</b>、proof 較大</td></tr>
+    <tr><td>Groth16</td><td><b style="color:#b91c1c">每電路一次</b></td><td>CRS <b>綁特定電路</b></td><td>換電路要重辦儀式，最不通用</td></tr>
+    <tr class="hl"><td><b>Halo2 PSE · KZG</b>（我們）</td><td><b>一次 · 通用 · 可更新</b></td><td>承諾/開啟靠<b>藏了 \(\tau\) 的結構化 SRS</b>（配對檢查要 \([\tau]_2\)）</td><td>一次性可信設定；但<b>所有電路共用</b>、可更新降風險，換得證明小 + 上鏈便宜</td></tr>
+  </table>
+  <div class="fbox" style="border-left-color:#16a34a;margin-top:.55rem"><div class="cmt"><b>差異的本質：承諾方案有沒有把秘密藏進公共參數。</b>藏了（KZG 的 \(\tau\)）→ 就需要可信設定把它安全產生並銷毀；沒藏（IPA 用公開隨機基）→ 根本不需要。我們選 KZG，是用「一次性、通用可更新的 setup」換「BN254 上鏈驗證便宜 + 證明小」。<span class="muted">τ 的形式、SRS 細節見後面 KZG；pk/vk 怎麼從 SRS 生出見〈Setup → Keygen〉。</span></div></div>
+</section>
+
 <!-- I-0c PLONK — the modern paradigm they may not know -->
 <section class="slide" data-part="I" data-label="PLONK">
   <div class="slide-meta"><span class="part-label">PART I</span> · 現代範式</div>
@@ -465,44 +503,6 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   </div>
   <div class="defn"><span class="dt">Succinct · SNARK · zk-SNARK</span>
     <span class="quote">“… produces short proofs —i.e. of length polylogarithmic in the circuit size— then we say that it is succinct. A succinct NARK is called a SNARK. … A zk-SNARK is a zero-knowledge SNARK.”</span></div>
-</section>
-
-<!-- I-3 two layers + IPA vs KZG -->
-<section class="slide" data-part="I" data-label="兩層架構">
-  <div class="slide-meta"><span class="part-label">PART I</span> · 在做什麼</div>
-  <h2>兩層架構，與一個<span class="accent">必須講清楚的分叉</span></h2>
-  <figure>
-    <svg viewBox="0 0 900 200" role="img" aria-label="Halo2 兩層架構">
-      <rect x="20" y="20" width="860" height="70" rx="10" fill="#eef2ff" stroke="#c7d2fe"/>
-      <text x="40" y="48" font-size="15" font-weight="700" fill="#3730a3">上層 · PLONKish 算術化（與承諾無關，兩版本共用）</text>
-      <text x="40" y="72" font-size="13" fill="#55596b">把計算排成一張 2ᵏ 列的表 + 一組「恆等於 0」的多項式恆等式</text>
-      <rect x="20" y="110" width="860" height="70" rx="10" fill="#f7f8fa" stroke="#d9dce3"/>
-      <text x="40" y="138" font-size="15" font-weight="700" fill="#1a1a1f">下層 · 多項式承諾方案 (PCS)</text>
-      <text x="40" y="162" font-size="13" fill="#55596b">把表編碼成多項式並「承諾」，用代數方式檢查恆等式 — 這層有兩種選擇 ↓</text>
-    </svg>
-  </figure>
-  <table>
-    <tr><th>版本</th><th>承諾</th><th>曲線</th><th>信任設定</th><th>用途</th></tr>
-    <tr><td>原版 ECC / Zcash</td><td>IPA（內積論證）</td><td>Pasta (Pallas/Vesta)</td><td><b>免</b>（遞迴友善）</td><td>Zcash Orchard</td></tr>
-    <tr class="hl"><td><b>PSE fork ← 我們用</b></td><td><b>KZG</b></td><td><b>BN254</b></td><td>需通用 SRS</td><td>EVM 上鏈驗證</td></tr>
-  </table>
-  <p style="margin-top:.6rem;font-size:.95rem"><b>為什麼選它：</b>BN254 配對是以太坊內建 precompile → 鏈上驗證便宜；KZG 證明大小固定。代價是一次性的通用可信設定。</p>
-</section>
-
-<!-- I-6b trusted setup: what it is + where the IPA/KZG/Groth16 difference comes from -->
-<section class="slide" data-part="I" data-label="可信設定">
-  <div class="slide-meta"><span class="part-label">PART I</span> · 那個分叉的核心</div>
-  <h2>可信設定（Trusted Setup）：<span class="accent">在做什麼 · 跟 IPA 差在哪</span></h2>
-  <p class="muted" style="margin:0 0 .5rem;font-size:.95rem">前面反覆提到「KZG 需要可信設定、原版 IPA 不用」。它到底在做什麼？為什麼有的需要、有的不用？</p>
-  <div class="fbox" style="margin-bottom:.55rem"><div class="lbl">可信設定在做什麼</div>
-    <div class="cmt">一次性「儀式」產生公共參數 SRS：從一個<b>隨機秘密 \(\tau\)</b> 算出 \(\{[\tau^i]_1\}\dots\)（承諾要用）。關鍵是 \(\tau\) 是 <b>toxic waste（有毒廢料）</b> —— 算完<b>必須銷毀</b>；<b>任何人若留著 \(\tau\) 就能偽造假證明</b>。降低風險：用多方計算儀式（powers-of-τ），<b>只要一個參與者誠實銷毀自己那份，整體就安全</b>；通用可更新版還能讓新人持續加入增強。</div></div>
-  <table style="font-size:.9rem">
-    <tr><th>方案</th><th>要 setup？</th><th>為什麼</th><th>代價 / 好處</th></tr>
-    <tr><td>原版 Halo2 · <b>IPA</b></td><td><b style="color:#15803d">不要</b></td><td>Pedersen/IPA 用<b>公開的隨機基</b>（hash 出來、nothing-up-my-sleeve），<b>沒把秘密藏進參數</b> → 沒有 toxic waste</td><td>無設定風險、遞迴友善；但驗證 <b>線性</b>、proof 較大</td></tr>
-    <tr><td>Groth16</td><td><b style="color:#b91c1c">每電路一次</b></td><td>CRS <b>綁特定電路</b></td><td>換電路要重辦儀式，最不通用</td></tr>
-    <tr class="hl"><td><b>Halo2 PSE · KZG</b>（我們）</td><td><b>一次 · 通用 · 可更新</b></td><td>承諾/開啟靠<b>藏了 \(\tau\) 的結構化 SRS</b>（配對檢查要 \([\tau]_2\)）</td><td>一次性可信設定；但<b>所有電路共用</b>、可更新降風險，換得證明小 + 上鏈便宜</td></tr>
-  </table>
-  <div class="fbox" style="border-left-color:#16a34a;margin-top:.55rem"><div class="cmt"><b>差異的本質：承諾方案有沒有把秘密藏進公共參數。</b>藏了（KZG 的 \(\tau\)）→ 就需要可信設定把它安全產生並銷毀；沒藏（IPA 用公開隨機基）→ 根本不需要。我們選 KZG，是用「一次性、通用可更新的 setup」換「BN254 上鏈驗證便宜 + 證明小」。<span class="muted">τ 的形式、SRS 細節見後面 KZG；pk/vk 怎麼從 SRS 生出見〈Setup → Keygen〉。</span></div></div>
 </section>
 
 <!-- ===== PART II OPENER ===== -->
