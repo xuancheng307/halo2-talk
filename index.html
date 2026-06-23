@@ -154,6 +154,9 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .minitab th,.minitab td{border:1px solid #d9dce3;padding:0 6px;text-align:center;color:var(--text);min-width:1.4em;line-height:1.45}
 .minitab th{background:#f3f0ff;font-weight:700;color:#5b21b6}
 .minitab tr.gate td{background:#ede9fe;font-weight:700}
+.soulbox{background:#f0fdf4;border:1.5px solid #86efac;border-left:5px solid #16a34a;border-radius:9px;padding:.35rem .75rem;margin:.1rem 0 .3rem;font-size:.94rem;line-height:1.5;color:var(--text)}
+.soulbox .tag{font-weight:800;color:#15803d}
+.soulbox b{color:#15803d}
 .note-foot{display:flex;align-items:center;justify-content:space-between;padding:.45rem .85rem;border-top:1px solid rgba(124,58,237,.18)}
 .note-nav{background:rgba(255,255,255,.7);border:1px solid var(--border);border-radius:8px;padding:.28rem .7rem;font-size:.78rem;font-weight:600;color:var(--text-dim);cursor:pointer}
 .note-nav:hover{border-color:var(--accent);color:var(--accent)}
@@ -825,6 +828,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="II" data-label="KZG 完整推導">
   <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導（聽不懂可跳過，不影響主線）</div>
   <h2>KZG：<span class="accent">逐步形式推導</span></h2>
+  <div class="soulbox"><span class="tag">🎯 真正要驗的就這條</span>：\(e\big(C-[v]_1,[1]_2\big)=e\big(\pi,[\tau]_2-[z]_2\big)\) —— 在秘密點 \(\tau\) 確認 <b>\(f(z)=v\)</b>。下面 ①–⑦ 都是在<b>湊出它、或證明它夠</b>。</div>
   <ol class="steps">
     <li><b>記號 &amp; SRS</b>：\([x]_1:=x\,g_1,\ [x]_2:=x\,g_2\)；\(\ \mathrm{srs}=\big([\tau^i]_1\big)_{i=0}^{d},\,[1]_2,[\tau]_2\)。秘密 \(\tau\) 用完即銷毀。<span class="muted" style="font-size:.86em">（加法記號，即乘法群的 \(g_1^{\,x}\)）</span></li>
     <li><b>承諾</b>（用 srs，不需知道 \(\tau\)）：\[ C=[f(\tau)]_1=\sum_{i=0}^{d} f_i\,[\tau^i]_1 \]</li>
@@ -832,9 +836,9 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <li><b>開啟</b>：\[ q(X)=\frac{f(X)-v}{X-z},\qquad \pi=[q(\tau)]_1 \]</li>
     <li><b>驗證（一次配對檢查）</b>：\[ e\big(C-[v]_1,\ [1]_2\big)\ \overset{?}{=}\ e\big(\pi,\ [\tau]_2-[z]_2\big) \]</li>
     <li><b>為何成立</b>（雙線性 \(e([a]_1,[b]_2)=e(g_1,g_2)^{ab}\)）：左 \(=e(g_1,g_2)^{f(\tau)-v}\)，右 \(=e(g_1,g_2)^{q(\tau)(\tau-z)}\)；相等 \(\Leftrightarrow f(\tau)-v=q(\tau)(\tau-z)\)，即恆等式在 \(X=\tau\) 成立。</li>
-    <li><b>可靠性</b>：若 \(f(z)\neq v\)，則 \((X-z)\nmid(f(X)-v)\)，無合法 \(q\) → 偽造成功機率 \(\le \mathrm{negl}(\lambda)\)（q-DLOG / Schwartz–Zippel，\(\tau\) 為秘密隨機點）。</li>
+    <li><b>可靠性</b>：\(f(z)\neq v\Rightarrow(X-z)\nmid(f-v)\)，無合法 \(q\)，偽造機率 \(\le\mathrm{negl}\)（AGM/q-DLOG，\(\tau\) 為秘密隨機點）。</li>
   </ol>
-  <p class="muted" style="font-size:.92rem;margin-top:.2rem">大小：\(|C|=|\pi|=1\) 個 \(G_1\)、驗證 2 配對，<b>與 \(\deg f\) 無關</b>。零知識需在 \(f\) 加 blinding。<b style="color:#15803d">具體開啟見下一張範例。</b></p>
+  <p class="muted" style="font-size:.9rem;margin-top:.15rem">大小：\(|C|=|\pi|=1\) 個 \(G_1\)、2 配對，與 \(\deg f\) 無關。<b style="color:#15803d">具體開啟見下一張範例。</b></p>
 </section>
 
 <!-- II-5c KZG worked example (concrete quotient) -->
