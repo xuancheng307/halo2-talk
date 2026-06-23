@@ -150,6 +150,10 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .note-item.editing .it-edit{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;gap:.3rem}
 .note-item.editing .it-edit textarea{flex:1 1 auto;min-height:0;resize:none}
 .note-item.editing .it-edit .it-btns{flex:0 0 auto}
+.minitab{border-collapse:collapse;font-size:.7rem;flex:0 0 auto;width:auto;margin:0}
+.minitab th,.minitab td{border:1px solid #d9dce3;padding:0 6px;text-align:center;color:var(--text);min-width:1.4em;line-height:1.45}
+.minitab th{background:#f3f0ff;font-weight:700;color:#5b21b6}
+.minitab tr.gate td{background:#ede9fe;font-weight:700}
 .note-foot{display:flex;align-items:center;justify-content:space-between;padding:.45rem .85rem;border-top:1px solid rgba(124,58,237,.18)}
 .note-nav{background:rgba(255,255,255,.7);border:1px solid var(--border);border-radius:8px;padding:.28rem .7rem;font-size:.78rem;font-weight:600;color:var(--text-dim);cursor:pointer}
 .note-nav:hover{border-color:var(--accent);color:var(--accent)}
@@ -578,10 +582,16 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <span class="quote">“PLONKish circuits are defined in terms of a rectangular matrix of values.”</span>
         <a class="src" href="https://zcash.github.io/halo2/concepts/arithmetization.html" target="_blank" rel="noopener">The halo2 Book — PLONKish Arithmetization ↗</a></div>
       <div class="fbox" style="border-left-color:#7c3aed;margin-top:.45rem"><div class="lbl" style="color:#5b21b6">PLONKish 有多自由？ — 一條閘就能很複雜</div>
-        <div class="cmt">不像 R1CS 只能 \(a\cdot b=c\)（次數 2）。PLONKish 一條閘 = 一個<b>多元、可跨鄰列、可高次</b>的多項式（degree ≤ ~6）：
-          <div style="margin:.3rem 0 .1rem"><b>高次 · 單列</b>：\(q\cdot(y-x^{5})=0\) —— 一個非線性步驟<b>一列</b>搞定（Poseidon 的 S-box，PF2 會用到）；R1CS 得拆成多條乘法。</div>
-          <div style="margin:.1rem 0"><b>跨列 · 一條</b>：\(q\cdot\big(a(X)+a(\omega X)+a(\omega^{2}X)-s\big)=0\) —— 一條約束加總連續三列。</div>
-          <b>→ 複雜運算不必拆碎</b>，這就是我們能塞定點 Horner kernel 的前提。</div></div>
+        <div class="cmt">不像 R1CS 只能 \(a\cdot b=c\)（次數 2）；PLONKish 一條閘可<b>多元、跨鄰列、高次</b>（degree ≤ ~6）：
+          <div style="display:flex;gap:.7rem;align-items:center;margin:.2rem 0 .1rem">
+            <div style="flex:1"><b>高次 · 單列</b>：\(q\cdot(y-x^{5})=0\) —— <b>一列</b>算完 \(x^5\)（Poseidon S-box，PF2 會用到）；R1CS 要拆多條乘。</div>
+            <table class="minitab"><tr><th>x</th><th>y=x⁵</th><th>sel</th></tr><tr class="gate"><td>2</td><td>32</td><td>1</td></tr></table>
+          </div>
+          <div style="display:flex;gap:.7rem;align-items:center;margin:.1rem 0">
+            <div style="flex:1"><b>跨列 · 一條</b>：\(q\cdot\big(a(X)+a(\omega X)+a(\omega^{2}X)-s\big)=0\) —— 一條約束<b>加總連續三列</b>（閘那列讀本列+下兩列）。</div>
+            <table class="minitab"><tr><th>a</th><th>s</th><th>sel</th></tr><tr class="gate"><td>2</td><td>9</td><td>1</td></tr><tr><td>3</td><td></td><td></td></tr><tr><td>4</td><td></td><td></td></tr></table>
+          </div>
+          <b>→ 複雜運算不必拆碎</b>，正是我們能塞定點 Horner kernel 的前提。</div></div>
     </div>
     <figure>
       <svg viewBox="0 0 440 250" role="img" aria-label="trace table 範例">
