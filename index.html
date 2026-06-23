@@ -484,6 +484,22 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <p style="margin-top:.6rem;font-size:.95rem"><b>為什麼選它：</b>BN254 配對是以太坊內建 precompile → 鏈上驗證便宜；KZG 證明大小固定。代價是一次性的通用可信設定。</p>
 </section>
 
+<!-- I-6b trusted setup: what it is + where the IPA/KZG/Groth16 difference comes from -->
+<section class="slide" data-part="I" data-label="可信設定">
+  <div class="slide-meta"><span class="part-label">PART I</span> · 那個分叉的核心</div>
+  <h2>可信設定（Trusted Setup）：<span class="accent">在做什麼 · 跟 IPA 差在哪</span></h2>
+  <p class="muted" style="margin:0 0 .5rem;font-size:.95rem">前面反覆提到「KZG 需要可信設定、原版 IPA 不用」。它到底在做什麼？為什麼有的需要、有的不用？</p>
+  <div class="fbox" style="margin-bottom:.55rem"><div class="lbl">可信設定在做什麼</div>
+    <div class="cmt">一次性「儀式」產生公共參數 SRS：從一個<b>隨機秘密 \(\tau\)</b> 算出 \(\{[\tau^i]_1\}\dots\)（承諾要用）。關鍵是 \(\tau\) 是 <b>toxic waste（有毒廢料）</b> —— 算完<b>必須銷毀</b>；<b>任何人若留著 \(\tau\) 就能偽造假證明</b>。降低風險：用多方計算儀式（powers-of-τ），<b>只要一個參與者誠實銷毀自己那份，整體就安全</b>；通用可更新版還能讓新人持續加入增強。</div></div>
+  <table style="font-size:.9rem">
+    <tr><th>方案</th><th>要 setup？</th><th>為什麼</th><th>代價 / 好處</th></tr>
+    <tr><td>原版 Halo2 · <b>IPA</b></td><td><b style="color:#15803d">不要</b></td><td>Pedersen/IPA 用<b>公開的隨機基</b>（hash 出來、nothing-up-my-sleeve），<b>沒把秘密藏進參數</b> → 沒有 toxic waste</td><td>無設定風險、遞迴友善；但驗證 <b>線性</b>、proof 較大</td></tr>
+    <tr><td>Groth16</td><td><b style="color:#b91c1c">每電路一次</b></td><td>CRS <b>綁特定電路</b></td><td>換電路要重辦儀式，最不通用</td></tr>
+    <tr class="hl"><td><b>Halo2 PSE · KZG</b>（我們）</td><td><b>一次 · 通用 · 可更新</b></td><td>承諾/開啟靠<b>藏了 \(\tau\) 的結構化 SRS</b>（配對檢查要 \([\tau]_2\)）</td><td>一次性可信設定；但<b>所有電路共用</b>、可更新降風險，換得證明小 + 上鏈便宜</td></tr>
+  </table>
+  <div class="fbox" style="border-left-color:#16a34a;margin-top:.55rem"><div class="cmt"><b>差異的本質：承諾方案有沒有把秘密藏進公共參數。</b>藏了（KZG 的 \(\tau\)）→ 就需要可信設定把它安全產生並銷毀；沒藏（IPA 用公開隨機基）→ 根本不需要。我們選 KZG，是用「一次性、通用可更新的 setup」換「BN254 上鏈驗證便宜 + 證明小」。<span class="muted">τ 的形式、SRS 細節見後面 KZG；pk/vk 怎麼從 SRS 生出見〈Setup → Keygen〉。</span></div></div>
+</section>
+
 <!-- ===== PART II OPENER ===== -->
 <section class="slide part-opener" data-part="II" data-label="怎麼做">
   <div><div class="pnum">PART II</div><h1>怎麼做</h1>
@@ -1263,6 +1279,7 @@ Stage 4 VERIFY       verified      1.96 ms
 '輸入什麼 + 形式化':"學長教授最愛問的兩題,我直接放前面回答:到底在證什麼(relation),以及輸入是什麼。\n核心:一個電路就定義一個 NP 關係 R_C —— 所有「公開 x、私密 w」的合法組合;合法 = 存在一張 trace,讓所有閘、查表、複製約束同時成立。整個系統就是對 R_C 的 SNARK(Setup / Prove / Verify)。\n【輸入有三種 + 必須是體元素】\n公開的 instance(驗證者看得到,如 P(x)=98)、私密的 witness(永不洩漏,如 x=3)、還有電路本身(setup 時固定)。\n最常被忽略:輸入不是任意 byte,是有限域的元素;任何資料 —— 數字、簽章、Merkle 路徑、定點小數 —— 都要先編碼成 field elements 才進得了電路。\n【「形式化定義」之爭 + 我們的回答】\n有人說的「形式化定義」指的是「把要證的 relation(也就是輸入)定義清楚」—— 這我們完全有。\n古典是手寫一條謂詞(像 v 等於 g 的 β 次方);我們的 relation 由電路誘導,你描述一個計算,那些約束就定義出 R_C。\n被問就直接寫具體的:demo 是 P(x)=y;PF1 是「Merkle 路徑成立,且 Σ w 乘 Δ 的絕對值 ≤ τ」,跟古典同一個格式。\n【更深一層:arithmetization soundness】\n電路誘導的 R_C 到底等不等於你想證的那個數學 relation?這叫 arithmetization soundness —— 正是我們論文用截斷閘、範圍檢查、誤差界去補的:我們不只定義了輸入,還證明電路忠實實現它。",
 'zk-SNARK 性質':"四個安全性質,一樣引原文。\n完備性:誠實證明者照規則跑,驗證者一定接受,機率是一。\n可靠性:證明沒辦法騙過驗證者。\n知識可靠性:存在一個抽取器,能把證明者的見證抽出來 —— 這比單純可靠性更強。\n零知識:證明不洩漏見證的任何資訊。\n最下面那條把簡潔性跟 zk-SNARK 補上:證明長度只跟電路大小成 polylog,這樣的 NARK 叫 SNARK,再加上零知識就是 zk-SNARK。\n知道要證什麼、要哪些性質了,接下來看 Halo2 實際怎麼搭出來 —— 它其實分兩層。",
 '兩層架構':"這張很關鍵。\nHalo2 其實是兩層:上層是 PLONKish 算術化,把計算排成一張表加一組多項式;下層才是多項式承諾。\n重點在下層有兩種選擇 —— 原版用 IPA、跑 Pasta 曲線、免可信設定;我們用的 PSE 分支換成 KZG、跑 BN254。\n為什麼選後者?因為 BN254 的配對是以太坊內建的,鏈上驗證便宜,而且 KZG 證明大小固定。\n代價就是需要一次性的可信設定。",
+'可信設定':"前面一直提到一個分叉:KZG 需要可信設定、原版 IPA 不用。這一頁把它講清楚。\n先說可信設定在做什麼:它是一個一次性的儀式,產生公共參數 SRS。這串參數是從一個隨機的秘密 tau 算出來的,而這個 tau 是有毒廢料 —— 算完一定要銷毀,因為任何人只要留著 tau,就能偽造假證明。怎麼讓人放心?用多方計算的儀式,很多人輪流貢獻亂數,只要其中一個人誠實把自己那份銷毀,整體就安全;通用可更新版還能讓新參與者持續加入、把信任愈疊愈厚。\n那差異到底差在哪?關鍵就一句:承諾方案有沒有把秘密藏進公共參數。KZG 的參數藏了 tau,配對驗證要用到它,所以非得有可信設定不可;原版的 IPA 用的是公開、可重算的隨機基,沒有藏任何秘密,自然不需要設定 —— 代價是它驗證是線性的、比較慢、證明也大,但好處是免設定、對遞迴友善。Groth16 更嚴格,每換一個電路就要重辦一次儀式。\n我們選 KZG,就是拿『一次性、通用又可更新的設定』去換『證明小、加上 BN254 上鏈驗證便宜』。",
 '怎麼做':"好,知道它在做什麼了,接下來進到最核心的「怎麼做」。\n我會照這條鏈走一遍:算術化、自訂閘、複製約束跟查表、KZG 承諾、SHPLONK 跟 Fiat–Shamir,最後串成完整流水線。\n每一步我都會給原文定義跟一張圖。",
 '要證什麼 + 限制':"在進流程之前,先說清楚整條流程到底在證什麼。\n核心命題很簡單:我知道一個私密的 w,使公開的 x 跟它一起滿足某個關係 R —— x 公開、w 私密,而且最後的證明不洩漏 w。對到例子,demo 就是『我知道 x 使 P(x)=98』,我們論文的 PF1 就是『我知道一個投組,使淨加權風險落在限額內』,卻不透露任何個別部位。\n那它理論上能證到多廣?答案是整個 NP —— 只要這個關係是『給了見證就能快速驗證』的,原則上都寫得成電路、都能證,理論上沒有表達力的牆。\n至於實際實作時有哪些限制 —— 像沒有原生浮點、電路大小要固定、約束要低次 —— 那是電路架構帶來的工程限制,不是理論限制。我故意留到把整條流程講完以後,後面那張〈能 / 不能〉再一次列清楚。各位現在先記住一句:理論上,整個 NP 都能證。",
 '完整流程圖':"進細節之前,先給一張地圖,看整條流程怎麼走,後面每一步就是把這張圖的某個方塊放大。\n記住三件事貫穿全程:x 是公開輸入、w 是私密見證、最後的證明 π 不洩漏 w。\n整條分兩層:先是算術化層 —— 把計算填成一張表、加上約束;再來是密碼學層 —— 把表變成多項式、承諾、開啟。最後驗證者只做一個常數時間的檢查就輸出接受或拒絕,完全不用重跑你的計算 —— 這就是它又小又快驗的整體骨架。\n【完整流程：預備 + prover 六步】\n最上面有兩件預備:私下準備電路跟輸入,公開的 instance x、私密的見證 w;還有一次性的可信設定,產生 SRS 再 keygen 出 pk、vk。\n然後 prover 走六步:\n① 算術化,把計算填成 2 的 k 次方列的 trace table;\n② 加約束,自訂閘、複製約束、查表,全都是等於零的多項式;\n③ 承諾,把每一欄多項式用 KZG 壓成一個群元素;\n④ Fiat–Shamir,對 transcript 雜湊抽一個隨機挑戰點;\n⑤ SHPLONK 批次開啟,產生大約幾 KB 的證明 π;\n· 最後把 π 加公開的 x 交給 verifier,第六步做配對檢查,輸出接受或拒絕,就一個 bit、常數時間、不重跑計算。\n補一句:MockProver 只跑前兩步、純查約束、不做密碼學,是除錯用的。\n記住三件事:x 公開、w 私密、π 不洩漏 w。",
@@ -1562,6 +1579,7 @@ Stage 4 VERIFY       verified      1.96 ms
 '輸入什麼 + 形式化':["R_C","trace (table)","𝔽ᵣ (有限域)","instance 欄","advice 欄","fixed 欄","Gate (閘)","Lookup","Copy constraint (複製約束)","effective relation","L_R (language)","polynomial constraints","關係 R","arithmetization soundness"],
 'zk-SNARK 性質':["完備性 (completeness)","可靠性 (soundness)","知識可靠性 (knowledge soundness)","extractor (抽取器)","零知識 (zero knowledge)","NARK","SNARK","zk-SNARK","簡潔性 (succinct)"],
 '兩層架構':["兩層架構","算術化","多項式承諾","IPA (內積論證)","Pasta (Pallas/Vesta)","KZG","BN254","SRS","EVM precompile","Zcash Orchard","可信設定 (trusted setup)"],
+'可信設定':["可信設定 (trusted setup)","τ (toxic waste)","SRS","通用可更新 SRS","IPA (內積論證)","KZG","Groth16","Pasta (Pallas/Vesta)"],
 '怎麼做':["算術化","自訂閘 (custom gate)","Copy constraint (複製約束)","查表 (lookup)","KZG","SHPLONK","Fiat–Shamir","prove / verify"],
 '要證什麼 + 限制':["statement","關係 R","R_C","𝔽ᵣ (有限域)","算術電路","k (電路規模)","低次多項式","NP 關係","poly-time","trace (table)","PF1","τ (toxic waste)","浮點"],
 '完整流程圖':["算術化","SRS","keygen","π (proof)","prove / verify"],
@@ -1625,6 +1643,11 @@ Stage 4 VERIFY       verified      1.96 ms
 '兩層架構':[
  ["為什麼選 KZG 而不是原版 IPA？","BN254 的 pairing 是以太坊內建 precompile，上鏈驗證便宜；KZG 證明大小固定、驗證常數。代價是要一次性可信設定（IPA 免設定但驗證線性）。"],
  ["換掉承諾層，安全性會變嗎？","上層 PLONKish 算術化不變，只是把『綁定多項式』的方法從離散對數(IPA)換成 pairing(KZG)，安全假設從 DL 換成 pairing 代數假設；協議骨架一樣。"]
+],
+'可信設定':[
+ ["可信設定的秘密 τ 如果沒被銷毀會怎樣？","留著 τ 的人可以對任意假命題生出能通過驗證的證明（偽造）。所以 τ 是 toxic waste；powers-of-τ 儀式用 MPC，只要歷史上有一個參與者誠實銷毀自己那份，整體就安全。"],
+ ["IPA 為什麼完全不需要可信設定？","IPA/Bulletproofs 的承諾用 Pedersen，基底是一組公開、可重算的『nothing-up-my-sleeve』隨機點（hash 到曲線），沒有任何藏起來的秘密 → 沒有 toxic waste、沒有需要銷毀的東西。代價是驗證線性、proof 較大。"],
+ ["通用可更新 SRS 比 Groth16 的每電路設定好在哪？","Groth16 每個電路都要一次專屬可信設定（換電路重辦、各自有風險）；KZG 的通用 SRS 一份所有電路共用，且 updatable —— 新人可持續加入增強，信任只需歷史上有一個誠實參與者。"]
 ],
 '要證什麼 + 限制':[
  ["哪些東西塞不進電路？","原生浮點、資料相依的分支/無上界迴圈、超高次約束；要嘛做不到、要嘛要拆成 gadget。浮點正是我們論文要解的。"],
