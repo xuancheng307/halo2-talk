@@ -526,8 +526,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <text x="225" y="30" font-size="13" text-anchor="middle" fill="#3730a3">私下準備：電路 R_C ＋ 輸入（x 公開 · w 私密）</text>
       <rect x="460" y="8" width="430" height="34" rx="8" fill="#f7f8fa" stroke="#d9dce3" stroke-dasharray="5 3"/>
       <text x="675" y="30" font-size="12.5" text-anchor="middle" fill="#55596b">一次性<tspan font-weight="700">前置</tspan>（不在 ①–⑥ 內）：Trusted Setup → SRS → keygen → (pk, vk)</text>
-      <path d="M470,42 C455,55 450,58 446,68" fill="none" stroke="#6366f1" stroke-width="1.6" marker-end="url(#a2)"/>
-      <text x="498" y="60" font-size="9.5" fill="#6366f1">SRS ↘ 從「承諾」起才用到</text>
+      <path d="M650,42 C622,56 608,58 598,68" fill="none" stroke="#6366f1" stroke-width="1.6" marker-end="url(#a2)"/>
+      <text x="642" y="60" font-size="9.5" fill="#6366f1" text-anchor="middle">SRS ↘ 從「承諾」起才用到</text>
       <g text-anchor="middle">
         <rect x="10" y="70" width="164" height="64" rx="9" fill="#ffffff" stroke="#a5b4fc" stroke-width="1.5"/>
         <text x="92" y="92" font-size="12.5" font-weight="700" fill="#4338ca">① 算術化</text>
@@ -538,16 +538,16 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <text x="266" y="110" font-size="11" fill="#55596b">自訂閘 + 複製約束</text>
         <text x="266" y="125" font-size="9.5" fill="#8b94a3">+ 查表（皆 = 多項式 = 0）</text>
         <rect x="358" y="70" width="164" height="64" rx="9" fill="#eef2ff" stroke="#818cf8" stroke-width="1.5"/>
-        <text x="440" y="92" font-size="12.5" font-weight="700" fill="#3730a3">③ 承諾</text>
-        <text x="440" y="110" font-size="11" fill="#55596b">每欄 KZG commit</text>
-        <text x="440" y="125" font-size="9.5" fill="#8b94a3">[fᵢ(τ)]₁（用 SRS）</text>
+        <text x="440" y="92" font-size="12.5" font-weight="700" fill="#3730a3">③ 整除</text>
+        <text x="440" y="110" font-size="11" fill="#55596b">插值 → 合成 G(X)</text>
+        <text x="440" y="125" font-size="9.5" fill="#8b94a3">G = t · Z_H</text>
         <rect x="532" y="70" width="164" height="64" rx="9" fill="#ffffff" stroke="#a5b4fc" stroke-width="1.5"/>
-        <text x="614" y="92" font-size="12.5" font-weight="700" fill="#4338ca">④ 挑戰</text>
-        <text x="614" y="110" font-size="11" fill="#55596b">Fiat–Shamir</text>
-        <text x="614" y="125" font-size="9.5" fill="#8b94a3">ζ = H(transcript)</text>
+        <text x="614" y="92" font-size="12.5" font-weight="700" fill="#4338ca">④ 承諾</text>
+        <text x="614" y="110" font-size="11" fill="#55596b">每欄 KZG commit</text>
+        <text x="614" y="125" font-size="9.5" fill="#8b94a3">[fᵢ(τ)]₁（用 SRS）</text>
         <rect x="706" y="70" width="164" height="64" rx="9" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5"/>
         <text x="788" y="92" font-size="12.5" font-weight="700" fill="#5b21b6">⑤ 批次開啟</text>
-        <text x="788" y="110" font-size="11" fill="#55596b">SHPLONK</text>
+        <text x="788" y="110" font-size="11" fill="#55596b">SHPLONK · FS</text>
         <text x="788" y="125" font-size="10" fill="#7c3aed">→ 證明 π (~KB)</text>
       </g>
       <g stroke="#94a3b8" stroke-width="1.6" marker-end="url(#a2)">
@@ -1298,7 +1298,7 @@ Stage 4 VERIFY       verified      1.96 ms
 'zk-SNARK 性質':"四個安全性質,一樣引原文。\n完備性:誠實證明者照規則跑,驗證者一定接受,機率是一。\n可靠性:證明沒辦法騙過驗證者。\n知識可靠性:存在一個抽取器,能把證明者的見證抽出來 —— 這比單純可靠性更強。\n零知識:證明不洩漏見證的任何資訊。\n最下面那條把簡潔性跟 zk-SNARK 補上:證明長度只跟電路大小成 polylog,這樣的 NARK 叫 SNARK,再加上零知識就是 zk-SNARK。\n知道要證什麼、要哪些性質了,接下來看 Halo2 實際怎麼搭出來 —— 它其實分兩層。",
 '兩層架構':"這張很關鍵。\nHalo2 其實是兩層:上層是 PLONKish 算術化,把計算排成一張表加一組多項式;下層才是多項式承諾。\n重點在下層有兩種選擇 —— 原版用 IPA、跑 Pasta 曲線、免可信設定;我們用的 PSE 分支換成 KZG、跑 BN254。\n為什麼選後者?因為 BN254 的配對是以太坊內建的,鏈上驗證便宜,而且 KZG 證明大小固定。\n代價就是需要一次性的可信設定。",
 '可信設定':"前面一直提到一個分叉:KZG 需要可信設定、原版 IPA 不用。這一頁把它講清楚。\n先說可信設定在做什麼:它是一個一次性的儀式,產生公共參數 SRS。這串參數是從一個隨機的秘密 tau 算出來的,而這個 tau 是有毒廢料 —— 算完一定要銷毀,因為任何人只要留著 tau,就能偽造假證明。怎麼讓人放心?用多方計算的儀式,很多人輪流貢獻亂數,只要其中一個人誠實把自己那份銷毀,整體就安全;通用可更新版還能讓新參與者持續加入、把信任愈疊愈厚。\n那差異到底差在哪?關鍵就一句:承諾方案有沒有把秘密藏進公共參數。KZG 的參數藏了 tau,配對驗證要用到它,所以非得有可信設定不可;原版的 IPA 用的是公開、可重算的隨機基,沒有藏任何秘密,自然不需要設定 —— 代價是它驗證是線性的、比較慢、證明也大,但好處是免設定、對遞迴友善。Groth16 更嚴格,每換一個電路就要重辦一次儀式。\n我們選 KZG,就是拿『一次性、通用又可更新的設定』去換『證明小、加上 BN254 上鏈驗證便宜』。",
-'怎麼做':"好,知道它在做什麼了,接下來進到最核心的「怎麼做」。\n我會照這條鏈走一遍:算術化、自訂閘、複製約束跟查表、KZG 承諾、SHPLONK 跟 Fiat–Shamir,最後串成完整流水線。\n每一步我都會給原文定義跟一張圖。",'完整流程圖':"進細節之前,先給一張地圖,看整條流程怎麼走,後面每一步就是把這張圖的某個方塊放大。\n記住三件事貫穿全程:x 是公開輸入、w 是私密見證、最後的證明 π 不洩漏 w。\n整條分兩層:先是算術化層 —— 把計算填成一張表、加上約束;再來是密碼學層 —— 把表變成多項式、承諾、開啟。最後驗證者只做一個常數時間的檢查就輸出接受或拒絕,完全不用重跑你的計算 —— 這就是它又小又快驗的整體骨架。\n【完整流程：預備 + prover 六步】\n最上面有兩件預備:私下準備電路跟輸入,公開的 instance x、私密的見證 w;還有一次性的可信設定,產生 SRS 再 keygen 出 pk、vk。\n然後 prover 走六步:\n① 算術化,把計算填成 2 的 k 次方列的 trace table;\n② 加約束,自訂閘、複製約束、查表,全都是等於零的多項式;\n③ 承諾,把每一欄多項式用 KZG 壓成一個群元素;\n④ Fiat–Shamir,對 transcript 雜湊抽一個隨機挑戰點;\n⑤ SHPLONK 批次開啟,產生大約幾 KB 的證明 π;\n· 最後把 π 加公開的 x 交給 verifier,第六步做配對檢查,輸出接受或拒絕,就一個 bit、常數時間、不重跑計算。\n補一句:MockProver 只跑前兩步、純查約束、不做密碼學,是除錯用的。\n記住三件事:x 公開、w 私密、π 不洩漏 w。",
+'怎麼做':"好,知道它在做什麼了,接下來進到最核心的「怎麼做」。\n我會照這條鏈走一遍:算術化、自訂閘、複製約束跟查表、KZG 承諾、SHPLONK 跟 Fiat–Shamir,最後串成完整流水線。\n每一步我都會給原文定義跟一張圖。",'完整流程圖':"進細節之前,先給一張地圖,看整條流程怎麼走,後面每一步就是把這張圖的某個方塊放大。\n記住三件事貫穿全程:x 是公開輸入、w 是私密見證、最後的證明 π 不洩漏 w。\n整條分兩層:先是算術化層 —— 把計算填成一張表、加上約束;再來是密碼學層 —— 把表變成多項式、承諾、開啟。最後驗證者只做一個常數時間的檢查就輸出接受或拒絕,完全不用重跑你的計算 —— 這就是它又小又快驗的整體骨架。\n【完整流程：預備 + prover 六步】\n最上面有兩件預備:私下準備電路跟輸入,公開的 instance x、私密的見證 w;還有一次性的可信設定,產生 SRS 再 keygen 出 pk、vk。\n然後 prover 走六步:\n① 算術化,把計算填成 2 的 k 次方列的 trace table;\n② 加約束,自訂閘、複製約束、查表,全都是等於零的多項式;\n③ 整除,把每一欄插值成多項式、用挑戰合成一條大多項式 G,並化成 G 等於商 t 乘上消失多項式;\n④ 承諾,把這些多項式用 KZG 各壓成一個群元素;Fiat–Shamir 的隨機挑戰就穿插在這幾個承諾回合裡抽出來;\n⑤ SHPLONK 批次開啟,把一大堆開啟壓成一個大約幾 KB 的證明 π;\n· 最後把 π 加公開的 x 交給 verifier,第六步做配對檢查,輸出接受或拒絕,就一個 bit、常數時間、不重跑計算。\n補一句:MockProver 只跑前兩步、純查約束、不做密碼學,是除錯用的。\n記住三件事:x 公開、w 私密、π 不洩漏 w。",
 '算術化':"第一層,算術化 —— 這是把『程式』翻譯成『數學』的關鍵一步。\n核心觀念:把整個計算攤平成一張表 —— 每一列是計算的一個步驟,每一欄是一種量。Halo2 用的原文叫 arithmetization,就是我們描述電路的語言:把電路寫成有限域上、變數之間的多項式約束;而 PLONKish 這種寫法,就規定電路是一個長方形的數值矩陣。\n為什麼要攤成表?因為下一步我們要把每一欄變成一條多項式,讓『整張表算對』這件事,可以用多項式在幾個點的取值一次檢查掉。表,就是通往多項式的那座橋。\n【右邊範例逐列念】\n要算的是 P(x)=2x³+3x²+4x+5,取 x=3。\n用 Horner 拆成一層層:((2·x+3)·x+4)·x+5,acc 欄就照這個遞推填:\n· 第 1 列 acc = 2(最高次係數);\n· 第 2 列 acc = 2·3+3 = 9;\n· 第 3 列 acc = 9·3+4 = 31;\n· 第 4 列 acc = 31·3+5 = 98 —— 就是答案。\n每列的 x 欄都是 3、coeff 欄放當層係數、sel 欄是 1 代表這列閘生效;最後那列 acc=98 用複製約束綁到公開的 instance。\n一句話:這張表不是示意圖,是 demo 真的會填進去、逐列被閘檢查的資料。",
 '四種欄':"電路其實就是一張表,表有四種欄、各司其職,我一樣引原文。\n抓兩個分類就好:advice 跟 instance 是『資料』—— advice 是 prover 的私密見證(像我們的 acc、x),instance 是公開輸入輸出(像 P(x)=98);fixed 跟 selector 是『規則』—— 電路固定的常數與 0/1 開關,屬於驗證金鑰。\n一個提醒:advice、acc 這些名字是我們自己取的,電路只認第幾欄;真正給這些欄定規矩的,是下一個 —— 閘。\n【四種欄（引原文）】\nfixed 欄 = 電路固定的常數、advice 欄 = 對應見證值、instance 欄 = 公開輸入;第四種 selector = fixed 欄裡的 0/1 開關,決定某一列哪個閘生效。\n【對到 demo + 一個提醒】\nacc 跟 x 是 advice、係數是 fixed、輸出的 P(x) 是 instance。\nacc、x 這些名字是我們自己取的,電路只認「第幾個 advice 欄」。接下來看給這些欄定規矩的東西 —— 閘。",
 '自訂閘':"閘是整個系統的靈魂,也是 Halo2 最靈活的地方。\n概念很簡單:一條閘就是一個多項式,要求它在每一列都等於零 —— 等於零就代表那一列守規矩;而且它能同時引用本列和相鄰列的格子,這讓它表達得了『這一步的結果餵給下一步』。我們論文的核心閘就一條 Horner 步:本列 acc 乘 x 加係數,要等於下一列的 acc。\n最關鍵的直覺等下會講透:閘是『檢查』不是『計算』—— prover 先把整張表算好填死,閘只是事後一次驗證它前後一致。\n【公式逐項】\n核心閘就一條:sel · ( acc·x + coeff − acc_next ) = 0。\n· sel 是 selector,只有設 1 的那列這條閘才生效,設 0 的列整條乘成 0、自動跳過;\n· acc 是本列的累積值,acc_next 是「下一列」的累積值,用 rotation(Rotation::next)去讀;\n· 移項就是 acc_next = acc·x + coeff —— 正好是 Horner 的一步。\n所以每一列都強制「上一層結果乘 x 加這層係數等於下一層」,一路逼到最後一列就是 P(x)。\n\n【最關鍵直覺:閘是「檢查」不是「計算」——一定要講清楚,否則聽不懂】\n分成兩件事。\n① prover 先「算」:照順序把每列填好 —— 第0列 acc=2、第1列 2·3+3=9、第2列 9·3+4=31、第3列 31·3+5=98。整張表算完、寫死了。\n② 閘只「查」:表填好後,閘在每一列同時檢查相鄰兩列對不對 —— 第0列查 2·3+3−9=0 ✓、第1列查 9·3+4−31=0 ✓、第2列查 31·3+5−98=0 ✓。\n所以 acc 不是被「帶回來」,它早就填在表裡了;閘讀的是兩個不同格子(本列 acc、下一列 acc),寫的關係是「下一列 acc = 本列 acc·x + 係數」,不是「acc 等於它自己」,所以沒有自指。\n一句話:算,是 prover 先做好的;閘,只是事後一次把整張表「前後一致」驗過。\n關鍵限制:閘只能看固定偏移的列(本列、下一列),不能隨機跳,所以演算法必須排成規則的縱向流水線 —— 這直接決定了我們把多項式求值寫成逐列遞推。",
