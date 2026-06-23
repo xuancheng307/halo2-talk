@@ -40,6 +40,7 @@ h2.sec{font-size:1.1rem;font-weight:800;margin:1.6rem 0 .7rem}
 .utab .grp-sel{background:#ede9fe;color:var(--violet)}
 .utab td.rowid{background:#f7f8fa;color:var(--text-faint);font-family:var(--font-mono)}
 .utab td.adv{font-weight:700}
+.utab td.reads{background:#fef3c7;color:#92400e;font-weight:800;border-left:3px solid #d97706;border-right:3px solid #d97706}
 .utab td.on{background:#c7f0d2;color:#15803d;font-weight:800}
 .utab td.off{color:#cbd0da}
 .utab td.what{text-align:left;color:var(--text-dim);font-size:.85rem}
@@ -89,12 +90,12 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
       <tr><td class="rowid">1</td><td class="adv">3</td><td class="adv">4</td><td class="adv">12</td><td class="off">0</td><td class="on">1</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="what">乘法 \(a\cdot b{-}c=0\) → \(12{-}12=0\) ✓</td></tr>
       <tr><td class="rowid">2</td><td class="adv">2</td><td class="dot">·</td><td class="adv">32</td><td class="off">0</td><td class="off">0</td><td class="on">1</td><td class="off">0</td><td class="off">0</td><td class="what">高次 \(c{-}a^{5}=0\) → \(32{-}2^5=0\) ✓</td></tr>
       <tr><td class="rowid">3</td><td class="adv">1</td><td class="dot">·</td><td class="dot">·</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="on">1</td><td class="off">0</td><td class="what">布林 \(a(a{-}1)=0\) → \(1\cdot0=0\) ✓（逼 a∈{0,1}）</td></tr>
-      <tr><td class="rowid">4</td><td class="adv">2</td><td class="adv">9</td><td class="dot">·</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="on">1</td><td class="what">跨列 \(a{+}a_{\downarrow}{+}a_{\downarrow\downarrow}{-}b=0\) → \(2{+}3{+}4{-}9=0\) ✓</td></tr>
-      <tr class="supply"><td class="rowid">5</td><td class="adv">3</td><td class="dot">·</td><td class="dot">·</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="what">（沒閘生效；只是供第 4 列的 qΣ 往下讀的 a 值）</td></tr>
-      <tr class="supply"><td class="rowid">6</td><td class="adv">4</td><td class="dot">·</td><td class="dot">·</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="what">（同上，供 qΣ 讀的 a 值）</td></tr>
+      <tr><td class="rowid">4</td><td class="adv reads">2 ↓</td><td class="adv">9</td><td class="dot">·</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="on">1</td><td class="what"><b>qΣ 在這列生效</b>：讀<span style="color:#92400e">黃框三格 a</span>（本列 2 + 下列 3 + 下下列 4）\(=b\) → \(2{+}3{+}4=9\) ✓</td></tr>
+      <tr class="supply"><td class="rowid">5</td><td class="adv reads">3</td><td class="dot">·</td><td class="dot">·</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="what">這列<b>沒有閘生效</b>（所有 q=0）；它的 a=3 只是<b>被第 4 列的 qΣ 讀走</b>。</td></tr>
+      <tr class="supply"><td class="rowid">6</td><td class="adv reads">4</td><td class="dot">·</td><td class="dot">·</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="off">0</td><td class="what">同上，a=4 被第 4 列的 qΣ 讀走。</td></tr>
     </tbody>
   </table></div>
-  <div class="note">看懂三件事：<b>(1)</b> 欄位固定就這幾個，每條閘都讀<b>同一組</b> <code>a b c</code>；<b>(2)</b> 每列只有一個 <code>q*</code>=1，決定那列驗哪條閘；<b>(3)</b> 跨列閘（qΣ）在第 4 列生效，但它<b>往下讀第 4、5、6 列的 a</b>（rotation）—— 同一欄、不同列。</div>
+  <div class="note">看懂三件事：<b>(1)</b> 欄位固定就這幾個，每條閘都讀<b>同一組</b> <code>a b c</code>；<b>(2)</b> 每列只有一個 <code>q*</code>=1，決定那列驗哪條閘；<b>(3)</b> 第 4 列的 qΣ 只在那列生效，卻靠 <b>rotation</b> 往下讀<b style="color:#92400e">黃框那三格 a</b>（第 4/5/6 列＝2,3,4）—— 方程式裡 <code>a(X)</code>=本列、<code>a(ωX)</code>=下列、<code>a(ω²X)</code>=下下列。<b>不是多了欄，是同一條式子用 ω 指向下面的列。</b></div>
 
   <h2 class="sec">每條閘長什麼樣（都跑在上面那張表）</h2>
   <div class="glist">
