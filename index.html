@@ -1449,7 +1449,7 @@ Stage 4 VERIFY       verified      1.96 ms
 "模擬器 (simulator)":"零知識裡：不知見證也能產生同分布證明的理論演算法。",
 "ROM (隨機預言機)":"把雜湊理想化成隨機函數的模型；Fiat–Shamir 安全性在此模型下成立。",
 "128-bit 安全":"破解約需 2^128 次運算、目前視為安全；BN254 提供此等級。",
-"degree (次數)":"多項式最高次方；閘次數影響證明成本（Halo2 約 ≤6）。",
+"degree (次數)":"閘約束多項式的最高次 —— 看最高項有幾個變數相乘（a·b 是 2、x⁵ 是 5），<b>不是</b>引用幾個格子（a+b+c−d 引用 4 格卻只有 1 次）。次數越高 prove 越貴，Halo2 約 ≤6。",
 "wiring":"把電路不同 cell 接線在一起（複製約束實現）。",
 "MUX":"多工器；用 selector 在兩條路徑間選一條。",
 "k (電路規模)":"電路為 2^k 列；k 越大越耗記憶體（k=28 約 30GB）。",
@@ -1600,7 +1600,7 @@ Stage 4 VERIFY       verified      1.96 ms
 '兩層架構':["兩層架構","算術化","多項式承諾","IPA (內積論證)","Pasta (Pallas/Vesta)","KZG","BN254","SRS","EVM precompile","Zcash Orchard","可信設定 (trusted setup)","遞迴友善 (recursion-friendly)"],
 '可信設定':["可信設定 (trusted setup)","τ (toxic waste)","SRS","通用可更新 SRS","IPA (內積論證)","KZG","Groth16","Pasta (Pallas/Vesta)","遞迴友善 (recursion-friendly)"],
 '怎麼做':["算術化","自訂閘 (custom gate)","Copy constraint (複製約束)","查表 (lookup)","KZG","SHPLONK","Fiat–Shamir","prove / verify"],'完整流程圖':["算術化","SRS","keygen","π (proof)","prove / verify"],
-'算術化':["算術化","polynomial constraints","PLONKish 算術化","𝔽ᵣ (有限域)","trace (table)"],
+'算術化':["算術化","polynomial constraints","PLONKish 算術化","degree (次數)","𝔽ᵣ (有限域)","trace (table)"],
 '四種欄':["fixed 欄","advice 欄","instance 欄","selector","見證 (witness)"],
 '自訂閘':["自訂閘 (custom gate)","多元多項式","selector","rotation","Gate (閘)","Horner 閘"],
 '複製約束 / 查表':["Copy constraint (複製約束)","查表 (lookup)","排列大乘積 (grand product)","置換 σ (permutation)","多重集 (multiset)","β,γ,α,ζ","Fiat–Shamir","乘法子群 H","logUp / log-derivative","ByteTable"],
@@ -1669,7 +1669,12 @@ Stage 4 VERIFY       verified      1.96 ms
 ],'算術化':[
  ["為什麼要排成 2^k 列？","證明用到在 2^k 階乘法子群上做 FFT/插值，子群階是 2 的次方才有快速 FFT；vanishing 多項式 X^n−1 也才漂亮。"],
  ["trace 表跟一般程式執行軌跡一樣嗎？","概念類似（每列一步），但每欄是一條多項式、每列要滿足多項式約束、值都在有限域上 —— 是『可被多項式檢查』的軌跡。"]
-],
+,
+ ["degree 是什麼？是一列的格子數量嗎？", "不是。degree = 閘那條約束多項式的次數 = 最高項裡幾個變數<b>相乘</b>。a·b−c 是 2 次、y−x⁵ 是 5 次；而 a+b+c+d−e 引用 5 格卻只有 1 次。跟引用幾個格子無關，只看相乘深度。"],
+ ["一個格子可以表達 x¹⁰⁰ 嗎？", "格子<b>裝得下</b>（x¹⁰⁰ mod p 就是一個數，prover 填進去）；但『一條 degree-100 的閘』<b>不行</b>，超過次數上限（Halo2 約 ≤6）。要拆成多列低次閘（重複平方 x²→x⁴→…）—— 這正是我們論文用逐步 Horner 的理由。"],
+ ["degree 為什麼有上限？", "閘次數越高 → 商多項式 t 次數越高 → 需要更大的求值域、更多 SRS、prove 更慢更貴。所以實務壓在 ~6 以內，更高就拆成多列。"],
+ ["那什麼時候『算』？電路會幫我算 x⁵ 嗎？", "電路<b>從不算，只檢查</b>。prover 永遠在電路外自己把所有值（含 x⁵、每個中間值）算好填進見證；你想<b>證明</b>哪個關係，就為它加一條閘約束。"],
+ ["我隨便亂填數字，怎麼確保符合多項式關係？驗證怎麼驗每條閘？", "只要違反任一條閘，合成多項式 G 在那列就不為 0 → Z_H 除不盡 G → 生不出合法的商 t → 證明<b>過不了</b>（不是沒抓到，是根本做不出）。驗證不是一條條驗：把所有閘合成 G，只在<b>一個隨機點 ζ</b> 檢查 G(ζ)=t(ζ)·Z_H(ζ)（Schwartz–Zippel 保證作弊幾乎必露），而 a(ζ)、t(ζ) 有 KZG 開啟證明擔保是真值 → 一次驗了全部閘、全部列。"]],
 '自訂閘':[
  ["閘是在『計算』還是『檢查』？acc 指到自己不會自指嗎？","是『檢查』不是計算。兩階段：① prover 先按順序把表算好填死（acc：2→9→31→98）；② 閘只在每一列同時檢查相鄰兩列一致（如第0列 2·3+3−9=0）。acc 不是被帶回來，是早就在表裡；閘關聯的是『本列 acc』與『下一列 acc』兩個不同格子（下一列 acc = 本列 acc·x+係數），不是 acc=f(acc)，所以不自指。"],
  ["這條 Horner 閘是固定的嗎？還是可以自訂？","可以自訂——它只是教學示範的一條閘，不是 Halo2 內建。你能定義各種閘：布林 x(1−x)=0、加法 a+b−c=0、乘法 a·b−c=0… 一張電路可有很多條、各用 selector 開關。但有邊界：必須是低次多項式恆等式（degree 常 ≤ 5–9）、只能引用固定 rotation 的列、只有體上加減乘。我們論文的 kernel 閘就比 demo 多了 ÷S 截斷 + rem∈[0,S) + byte 查表，正是自訂閘靈活的實證。"],
