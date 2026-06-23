@@ -708,12 +708,12 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <div class="cmt">\(Z_n=1\) ⟺ \(\{a_i\}\) 在 \(\mathrm{id}\) 與置換 \(\sigma\) 下是同一個多重集 → 被 \(\sigma\) 串在一起的 cell 必相等。\(\beta,\gamma\) 為 Fiat–Shamir 挑戰。</div></div>
     </div>
     <div>
-      <div class="defn"><span class="dt">原文 · plookup</span>
+      <div class="defn"><span class="dt">原文 · plookup（原始構想）</span>
         <span class="quote">“We present a protocol for checking the values of a committed polynomial … over a multiplicative subgroup … are contained in the values of a table.”</span>
         <a class="src" href="https://eprint.iacr.org/2020/315" target="_blank" rel="noopener">Gabizon & Williamson — ePrint 2020/315 ↗</a></div>
-      <div class="fbox"><div class="lbl">作法：對數導數（log-derivative / logUp）</div>
+      <div class="fbox"><div class="lbl">作法：logUp 對數導數（Haböck 2022/1530）</div>
         \[ \sum_{i}\frac{1}{X+f_i}=\sum_{j}\frac{m_j}{X+t_j} \]
-        <div class="cmt">\(m_j\)=重數。我們的表 \(t_j=\{0,\dots,255\}\)（ByteTable），用於定點截斷餘數的逐 byte 範圍檢查。</div></div>
+        <div class="cmt">\(m_j\)=重數。表 \(t_j=\{0,\dots,255\}\)（ByteTable）做逐 byte 範圍檢查。<span class="muted" style="font-size:.86em">機制詳見 gates.html</span></div></div>
     </div>
   </div>
   <figure style="margin:.1rem 0 0">

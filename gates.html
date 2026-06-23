@@ -216,8 +216,43 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
     </div>
   </div>
 
+  <h2 class="sec">查表的數學 —— logUp 怎麼把「值 ∈ 表」變成多項式</h2>
+  <div class="tablecap">「值要落在表裡」聽起來不像方程式。<b>logUp</b> 用一條漂亮的恆等式，把它變成可在隨機點抽查的多項式約束。</div>
+
+  <div class="cc">
+    <b>① 核心恆等式（對數導數 / log-derivative）：</b>
+    \[ \sum_{i=0}^{n-1}\frac{1}{X+f_i}\;=\;\sum_{j=0}^{m-1}\frac{m_j}{X+t_j} \]
+    其中 \(f_i\)＝被查的值、\(t_j\)＝表的值、\(m_j\)＝\(t_j\) 被查到的<b>次數（重數）</b>。這條<b>有理函數</b>等式成立 \(\iff\) 多重集合 \(\{f_i\}\subseteq\{t_j\}\)（即每個查值都在表裡）。
+    <br><b>為什麼？看「極點」：</b>左邊在 \(X=-f_i\) 各有一個極點、右邊在 \(X=-t_j\) 有重數 \(m_j\) 的極點；兩個有理函數相等 \(\iff\) 極點位置與重數<b>完全對上</b> \(\iff\) 每個 \(f_i\) 都剛好等於某個 \(t_j\)。原文一句講透：<span style="color:#15803d">「logarithmic derivatives translate products of linear factors into sums of their reciprocals, turning zeroes into simple poles of same multiplicity.」</span></div>
+
+  <div class="gitem" style="max-width:none;margin:.4rem 0 .2rem">
+    <svg viewBox="0 0 680 130" role="img" aria-label="極點對齊：查值的極點落在表的極點上" style="width:100%;max-width:700px;height:auto;display:block;margin:0 auto">
+      <text x="20" y="22" font-size="12.5" fill="#7c3aed" font-weight="700">表的極點 {−tⱼ}</text>
+      <line x1="40" y1="86" x2="650" y2="86" stroke="#c4b5fd" stroke-width="2"/>
+      <g stroke="#7c3aed" stroke-width="2">
+        <line x1="80" y1="78" x2="80" y2="94"/><line x1="140" y1="78" x2="140" y2="94"/><line x1="200" y1="78" x2="200" y2="94"/><line x1="260" y1="78" x2="260" y2="94"/><line x1="320" y1="78" x2="320" y2="94"/><line x1="380" y1="78" x2="380" y2="94"/><line x1="440" y1="78" x2="440" y2="94"/><line x1="500" y1="78" x2="500" y2="94"/><line x1="560" y1="78" x2="560" y2="94"/><line x1="620" y1="78" x2="620" y2="94"/>
+      </g>
+      <text x="20" y="46" font-size="12.5" fill="#b45309" font-weight="700">查值的極點 {−fᵢ}</text>
+      <g fill="#d97706">
+        <circle cx="140" cy="56" r="6"/><circle cx="320" cy="56" r="6"/><circle cx="500" cy="56" r="6"/>
+      </g>
+      <g stroke="#d97706" stroke-width="1.6" stroke-dasharray="3 3"><line x1="140" y1="62" x2="140" y2="78"/><line x1="320" y1="62" x2="320" y2="78"/><line x1="500" y1="62" x2="500" y2="78"/></g>
+      <text x="345" y="120" font-size="13" text-anchor="middle" fill="#15803d" font-weight="800">每個查值的極點都<tspan fill="#b45309">落在</tspan>表的極點上 ⟺ 值 ∈ 表</text>
+    </svg>
+  </div>
+
+  <div class="note"><b>② 怎麼變成電路約束（三步）：</b>
+    <br>· <b>抽隨機 \(\beta\)</b>（Fiat–Shamir），把 \(X\to\beta\)：整條有理等式縮成<b>一個體元素等式</b>（Schwartz–Zippel：隨機點成立就幾乎處處成立）。
+    <br>· <b>除法用「逆元見證」拆掉</b>：電路不能寫 \(1/(\beta+f)\)，改讓 prover 填 \(u=1/(\beta+f)\)，閘只<b>檢查</b> \(u\cdot(\beta+f)=1\)（degree-2）。表側同理配重數 \(m_j\)。
+    <br>· <b>累加 = 0</b>：用一條跑動加總欄逐列累加 \(\sum u_f-\sum m\,u_t\)，邊界強制總和 \(=0\)。
+    <br>三者全是<b>低次閘＋邊界約束</b> → 折進 \(G=t\cdot Z_H\) → 在隨機點 \(\zeta\) 一次驗完。<b>被查值、重數、逆元都是 prover 填的見證，閘只負責檢查。</b></div>
+
+  <div class="cc" style="background:#fffbeb;border-color:#fcd34d">
+    <b>出處（別搞混）：</b>deck 與本頁用的這條公式是 <b>logUp</b> —— Haböck,《Multivariate lookups based on logarithmic derivatives》, ePrint <b>2022/1530</b>。更早的 <b>plookup</b>（Gabizon–Williamson, ePrint <b>2020/315</b>）目標相同，但作法是「把被查欄與表<b>排序串接</b>後用 grand-product 比相鄰差」，式子較繁；<b>原版 zcash halo2 走 plookup 路線，PSE 版改用 logUp（mv-lookup）</b>。
+  </div>
+
   <div class="foot">
-    一句話：<b>一張 2ᵏ 列的表、一組固定的欄</b>；每種閘配一個 selector 欄，<b>共用 advice 欄</b>、靠 selector 決定每列驗哪條；rotation 讀鄰列、複製約束接任意兩格。 ·
+    一句話：<b>一張 2ᵏ 列的表、一組固定的欄</b>；每種閘配一個 selector 欄，<b>共用 advice 欄</b>、靠 selector 決定每列驗哪條；rotation 讀鄰列、複製約束接任意兩格、查表用 logUp 證「值 ∈ 表」。 ·
     <a class="in" href="index.html">← 回報告</a>
   </div>
 </div>
