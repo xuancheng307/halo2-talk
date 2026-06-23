@@ -659,6 +659,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="II" data-label="自訂閘">
   <div class="slide-meta"><span class="part-label">PART II</span> · 第 2 層</div>
   <h2>自訂閘：每條規則 = 一個 <span class="accent">恆等於 0 的多項式</span></h2>
+  <div class="soulbox"><span class="tag">🎯 真正要驗的就這條</span>：\(s\cdot(\mathrm{acc}\cdot x+c-\mathrm{acc}')=0\) —— 被選到（\(s{=}1\)）的每一列都得滿足這條規則。下面的圖與例子都在<b>解釋這條怎麼讀、怎麼套</b>。</div>
   <div class="grid-2">
     <div>
       <div class="defn"><span class="dt">原文 · Polynomial constraints</span>
@@ -692,6 +693,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="II" data-label="複製約束 / 查表">
   <div class="slide-meta"><span class="part-label">PART II</span> · 第 2 層（續）</div>
   <h2>把 cell 接起來：<span class="accent">複製約束</span> 與 <span class="accent">查表</span></h2>
+  <div class="soulbox"><span class="tag">🎯 真正要驗的就這兩條</span>：複製約束看 \(Z_n=1\)（繞一圈乘積回到 1 ⟺ 該相等的 cell 都相等）；查表看 \(\sum_i\frac{1}{X+f_i}=\sum_j\frac{m_j}{X+t_j}\)（成立 ⟺ 每個查值都在表內）。</div>
   <div class="grid-2">
     <div>
       <div class="defn"><span class="dt">原文 · Equality (copy) constraints</span>
@@ -707,11 +709,11 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <a class="src" href="https://eprint.iacr.org/2020/315" target="_blank" rel="noopener">Gabizon & Williamson — ePrint 2020/315 ↗</a></div>
       <div class="fbox"><div class="lbl">作法：對數導數（log-derivative / logUp）</div>
         \[ \sum_{i}\frac{1}{X+f_i}=\sum_{j}\frac{m_j}{X+t_j} \]
-        <div class="cmt">成立 ⟺ 每個查值 \(f_i\) 都落在表 \(\{t_j\}\) 內（\(m_j\)=重數）。我們的表 \(t_j=\{0,\dots,255\}\)（ByteTable），做定點截斷餘數的逐 byte 範圍檢查。</div></div>
+        <div class="cmt">\(m_j\)=重數。我們的表 \(t_j=\{0,\dots,255\}\)（ByteTable），用於定點截斷餘數的逐 byte 範圍檢查。</div></div>
     </div>
   </div>
-  <figure>
-    <svg viewBox="0 0 900 120" role="img" aria-label="複製約束與查表示意">
+  <figure style="margin:.1rem 0 0">
+    <svg viewBox="0 0 900 120" role="img" aria-label="複製約束與查表示意" style="width:100%;max-width:900px;height:auto;display:block;margin:0 auto">
       <g font-size="12" text-anchor="middle">
         <rect x="30" y="40" width="70" height="34" rx="6" fill="#dbeafe"/><text x="65" y="62">x (row0)</text>
         <rect x="150" y="40" width="70" height="34" rx="6" fill="#dbeafe"/><text x="185" y="62">x (row1)</text>
@@ -734,14 +736,15 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="II" data-label="整除性推導">
   <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導（聽不懂可跳過，不影響主線）</div>
   <h2>算術化 → 多項式 → <span class="accent">整除 Z_H</span></h2>
+  <div class="soulbox"><span class="tag">🎯 真正要驗的就這條</span>：\(G(X)=t(X)\cdot Z_H(X)\) —— 「每一列都滿足約束」\(\Longleftrightarrow Z_H\mid G\)。下面 ①–④ 都是在<b>推出這個等價</b>。</div>
   <ol class="steps">
     <li><b>求值域</b>：取 \(n=2^k\) 階乘法子群 \(H=\langle\omega\rangle=\{1,\omega,\dots,\omega^{\,n-1}\}\)；vanishing 多項式 \(Z_H(X)=X^{n}-1\)（在 \(H\) 上恆為 0，因為 \((\omega^i)^n=1\)）。</li>
     <li><b>每欄插值成多項式</b>：令 advice \(a(\omega^{\,i})=\) 第 \(i\) 列的值（Lagrange 插值）；fixed / selector 同理記為 \(q(X)\)。rotation「下一列」\(=\) 代入 \(\omega X\)（因 \(a(\omega\cdot\omega^i)=a(\omega^{i+1})\)）。</li>
     <li><b>所有約束合成一條</b>（用挑戰 \(\alpha\) 的次方；含閘、複製約束、查表）：\[ G(X)=\sum_{j}\alpha^{\,j}\,g_j\big(a(X),\,a(\omega X),\,q(X),\dots\big) \]</li>
     <li><b>核心等價</b>：每一列都滿足約束 \(\ \Longleftrightarrow\ G\) 在 \(H\) 上恆為 0 \(\ \Longleftrightarrow\ Z_H\mid G\ \Longleftrightarrow\ \exists\,t(X):\) \[ G(X)=t(X)\cdot Z_H(X) \]</li>
   </ol>
-  <figure style="margin:.2rem 0 0">
-      <svg viewBox="0 0 320 224" role="img" aria-label="n 次單位根子群 H" style="width:100%;max-width:288px;height:auto;display:block;margin:0 auto">
+  <figure style="margin:0">
+      <svg viewBox="0 0 320 224" role="img" aria-label="n 次單位根子群 H" style="width:100%;max-width:236px;height:auto;display:block;margin:0 auto">
         <circle cx="160" cy="104" r="82" fill="none" stroke="#c7d2fe" stroke-width="2"/>
         <g fill="#4f46e5">
           <circle cx="242" cy="104" r="6"/><circle cx="218" cy="46" r="6"/><circle cx="160" cy="22" r="6"/><circle cx="102" cy="46" r="6"/>
@@ -845,6 +848,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="II" data-label="KZG 範例">
   <div class="slide-meta"><span class="part-label">PART II</span> · 第 3 層 · 範例</div>
   <h2>KZG 範例：<span class="accent">開啟一個值（quotient 怎麼來）</span></h2>
+  <div class="soulbox"><span class="tag">🎯 真正要驗的就這條</span>：\((X-z)\mid(f-v)\)（這裡 \(X^3-27\) 被 \(X-3\) 整除）⟺ \(f(3)=27\)，驗證落到一條配對 \(e(C-[v]_1,[1]_2)=e(\pi,[\tau]_2-[z]_2)\)。下面用具體數字走一遍。</div>
   <p class="muted" style="margin:0 0 .4rem;font-size:.96rem">要證「多項式 \(f\) 在 \(z\) 的值是 \(v\)」。用乾淨小例：取 \(f(X)=X^3,\ z=3,\ v=27\)。</p>
   <ol class="steps">
     <li><b>靈魂恆等式</b>：\(f(z)=v\ \Longleftrightarrow\ (X-z)\mid\big(f(X)-v\big)\)。這裡 \(f-v=X^3-27\)。</li>
@@ -924,6 +928,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="II" data-label="SHPLONK 推導">
   <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導（聽不懂可跳過，不影響主線）</div>
   <h2>SHPLONK：<span class="accent">怎麼做到批次開啟</span></h2>
+  <div class="soulbox"><span class="tag">🎯 真正要驗的就這條</span>：構造一條 \(L\) 使 \(L(z)=0\) —— 把「多條多項式、多個點」全壓成<b>一次 KZG 開啟</b>。下面 ①–④ 都在<b>湊出這個 \(L\)</b>，最終證明 \(=(W,W')\) 只有 2 個 \(G_1\)。</div>
   <div class="fbox" style="border-left-color:#d97706;margin-bottom:.5rem"><div class="lbl" style="color:#92400e">一招打天下：用一個隨機數，把「很多條」壓成「一條」</div>
     <div class="cmt"><b>暖身（先看同一點）</b>：要證 \(f_1,\dots,f_k\) 在<b>同一點 \(z\)</b> 的值，不必各開一次。verifier 給隨機 \(\gamma\)，prover 改證一條組合 \(F=\sum_i\gamma^{\,i-1}f_i\) 在 \(z\) 的值 —— <b>任一條造假，隨機組合幾乎必錯</b>，所以<b>一次開啟就驗全部</b>。這就是批次的靈魂。SHPLONK 只是把這招推廣到「各條開在<b>不同點</b>」。</div></div>
   <ol class="steps" style="margin:.1rem 0">
@@ -939,6 +944,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="II" data-label="驗證恆等式推導">
   <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導（聽不懂可跳過，不影響主線）</div>
   <h2>協議 → <span class="accent">在隨機點 ζ 驗一條等式</span></h2>
+  <div class="soulbox"><span class="tag">🎯 真正要驗的就這條</span>：\(G(\zeta)=t(\zeta)\,(\zeta^{n}-1)\) —— 只在<b>一個隨機點 \(\zeta\)</b> 抽查整除性（Schwartz–Zippel：隨機點成立 ⟹ 處處成立）。下面 ①–⑤ 是湊出它的回合。</div>
   <p class="muted" style="margin:0 0 .3rem;font-size:.92rem">Fiat–Shamir 的順序是 soundness 關鍵：<b>每個挑戰都必須在「相關承諾送出後」才抽</b>，所以是<b>承諾 ↔ 挑戰交錯的回合</b>，不是一次全送、一次全抽。</p>
   <ol class="steps">
     <li><b>Round 1 — 承諾 advice</b>：commit 各 advice 欄 \(a(X),\dots\)（先加 <b>blinding</b> 隨機項 → 零知識）。</li>
@@ -1054,6 +1060,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="IV" data-label="kernel 公式">
   <div class="slide-meta"><span class="part-label">PART IV</span> · 詳細作法（公式 · 聽不懂可跳過，不影響主線）</div>
   <h2>定點 Horner kernel — <span class="accent">逐步公式</span></h2>
+  <div class="soulbox"><span class="tag">🎯 真正要驗的就這條</span>：\(\mathrm{acc}_k\!\cdot\! R+c_k=\mathrm{acc}_{k+1}\!\cdot\! S+\mathrm{rem}_k,\ \mathrm{rem}_k\in[0,S)\) —— 餘數落在範圍內 ⟺ 誠實做了 \(\div S\) 截斷。下面 ①–⑤ 把它拆成可查表的閘。</div>
   <ol class="steps">
     <li><b>定點表示</b>：取尺度 \(S = 2^{pp},\ pp=48\)。實數 \(v\) 編碼成整數 \(\hat v = \lfloor v\cdot S\rceil\)（所有輸入都先這樣進電路）。</li>
     <li><b>多項式逼近</b>：用 Remez minimax 求係數，\( \; P(x)=\sum_{i=0}^{d} c_i\,x^{i}\; \)（係數定點化後存進 fixed 欄）。</li>
