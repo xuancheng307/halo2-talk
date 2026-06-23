@@ -573,6 +573,11 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <div class="defn"><span class="dt">原文 · PLONKish</span>
         <span class="quote">“PLONKish circuits are defined in terms of a rectangular matrix of values.”</span>
         <a class="src" href="https://zcash.github.io/halo2/concepts/arithmetization.html" target="_blank" rel="noopener">The halo2 Book — PLONKish Arithmetization ↗</a></div>
+      <div class="fbox" style="border-left-color:#7c3aed;margin-top:.45rem"><div class="lbl" style="color:#5b21b6">PLONKish 有多自由？ — 一條閘就能很複雜</div>
+        <div class="cmt">不像 R1CS 只能 \(a\cdot b=c\)（次數 2）。PLONKish 一條閘 = 一個<b>多元、可跨鄰列、可高次</b>的多項式（degree ≤ ~6）：
+          <div style="margin:.3rem 0 .1rem"><b>高次 · 單列</b>：\(q\cdot(y-x^{5})=0\) —— 一個非線性步驟<b>一列</b>搞定（Poseidon 的 S-box，PF2 會用到）；R1CS 得拆成多條乘法。</div>
+          <div style="margin:.1rem 0"><b>跨列 · 一條</b>：\(q\cdot\big(a(X)+a(\omega X)+a(\omega^{2}X)-s\big)=0\) —— 一條約束加總連續三列。</div>
+          <b>→ 複雜運算不必拆碎</b>，這就是我們能塞定點 Horner kernel 的前提。</div></div>
     </div>
     <figure>
       <svg viewBox="0 0 440 250" role="img" aria-label="trace table 範例">
