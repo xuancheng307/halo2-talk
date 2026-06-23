@@ -154,9 +154,12 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .minitab th,.minitab td{border:1px solid #d9dce3;padding:0 6px;text-align:center;color:var(--text);min-width:1.4em;line-height:1.45}
 .minitab th{background:#f3f0ff;font-weight:700;color:#5b21b6}
 .minitab tr.gate td{background:#ede9fe;font-weight:700}
-.soulbox{background:#f0fdf4;border:1.5px solid #86efac;border-left:5px solid #16a34a;border-radius:9px;padding:.35rem .75rem;margin:.1rem 0 .3rem;font-size:.94rem;line-height:1.5;color:var(--text)}
+.soulbox{background:#f0fdf4;border:1.5px solid #86efac;border-left:5px solid #16a34a;border-radius:9px;padding:.28rem .7rem;margin:.05rem 0 .22rem;font-size:.92rem;line-height:1.45;color:var(--text)}
 .soulbox .tag{font-weight:800;color:#15803d}
 .soulbox b{color:#15803d}
+.ideabox{background:#eff6ff;border:1.5px solid #93c5fd;border-left:5px solid #2563eb;border-radius:9px;padding:.28rem .7rem;margin:.05rem 0 .22rem;font-size:.92rem;line-height:1.45;color:var(--text)}
+.ideabox .tag{font-weight:800;color:#1d4ed8}
+.ideabox b{color:#1d4ed8}
 .note-foot{display:flex;align-items:center;justify-content:space-between;padding:.45rem .85rem;border-top:1px solid rgba(124,58,237,.18)}
 .note-nav{background:rgba(255,255,255,.7);border:1px solid var(--border);border-radius:8px;padding:.28rem .7rem;font-size:.78rem;font-weight:600;color:var(--text-dim);cursor:pointer}
 .note-nav:hover{border-color:var(--accent);color:var(--accent)}
@@ -628,6 +631,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="II" data-label="四種欄">
   <div class="slide-meta"><span class="part-label">PART II</span> · 第 1 層</div>
   <h2>四種欄 — <span class="accent">引原文，各司其職</span></h2>
+  <div class="ideabox"><span class="tag">💡 一句話核心</span>：抓兩類就好 —— <b>advice / instance = 資料</b>（私密見證＋公開輸出），<b>fixed / selector = 規則</b>（進 vk）。</div>
   <div class="defn"><span class="dt">原文 · Columns</span>
     <span class="quote">“Fixed columns are fixed by the circuit; advice columns correspond to witness values; and instance columns are normally used for public inputs.”</span>
     <a class="src" href="https://zcash.github.io/halo2/concepts/arithmetization.html" target="_blank" rel="noopener">The halo2 Book — PLONKish Arithmetization ↗</a></div>
@@ -800,20 +804,20 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="II" data-label="KZG 承諾">
   <div class="slide-meta"><span class="part-label">PART II</span> · 第 3 層</div>
   <h2>多項式承諾 KZG：把一條多項式壓成<span class="accent">一個群元素</span></h2>
+  <div class="ideabox"><span class="tag">💡 一句話核心</span>：把<b>一整條多項式壓成一個群元素</b>，驗證者憑它<b>一次配對</b>就能驗某點取值 —— 證明又小又快的根基。</div>
   <div class="grid-2">
     <div>
       <div class="defn"><span class="dt">原文 · Polynomial commitment scheme</span>
         <span class="quote">“A polynomial commitment scheme is a triplet S = (gen, com, open) such that gen(d) … outputs a structured reference string (SRS) srs; com(f, srs) … returns a commitment cm to f; open is a public coin protocol between [prover] and [verifier].”</span>
-        <span class="gloss"><b>gen</b>＝產 SRS（一次性、通用可更新、τ 用完丟）｜<b>com</b>＝把 f 壓成承諾 cm（一個群元素）｜<b>open</b>＝證 f 在某點 z 的值 = v。</span>
+        <span class="gloss"><b>gen</b>＝產 SRS｜<b>com</b>＝把 f 壓成承諾 cm（一個群元素）｜<b>open</b>＝證 f 在某點 z 的值 = v。</span>
         <a class="src" href="https://eprint.iacr.org/2020/081" target="_blank" rel="noopener">Boneh, Drake, Fisch, Gabizon — ePrint 2020/081, Def. 2.3 ↗</a></div>
       <div class="defn"><span class="dt">KZG 的具體做法（Kate–Zaverucha–Goldberg, 2010）</span>
         <span class="gloss"><code>com(f)=[f(τ)]₁</code>（單一 G₁ 元素）、SRS = <code>{[τⁱ]₁},[τ]₂</code>，通用可更新、τ 用完即丟。</span>
         <a class="src" href="https://www.iacr.org/archive/asiacrypt2010/6477178/6477178.pdf" target="_blank" rel="noopener">Kate, Zaverucha, Goldberg — ASIACRYPT 2010 ↗</a></div>
-      <p class="muted" style="font-size:.92rem;margin-top:.4rem">三步公式：<b>com</b> 承諾 \(C=[f(\tau)]_1\)、<b>open</b> 開啟 \(\pi=[q(\tau)]_1\)（\(q=\tfrac{f-v}{X-z}\)）、驗證一次配對 —— <b>完整推導見下一張</b>。</p>
-      <p class="muted" style="font-size:.9rem;margin-top:.2rem;color:#15803d">🔗 套例子：承諾我們的 \(a(X)\)（=[2,9,31,98] 插值）→ 群元素 \(C=[a(\tau)]_1\)（254-bit，真實位元組在 Part V）。</p>
+      <p class="muted" style="font-size:.92rem;margin-top:.4rem">三步公式：<b>com</b> 承諾 \(C=[f(\tau)]_1\)、<b>open</b> 開啟 \(\pi=[q(\tau)]_1\)（\(q=\tfrac{f-v}{X-z}\)）、驗證一次配對 —— <b>完整推導見下一張</b>。<span style="color:#15803d">套例子：承諾 \(a(X)\)=[2,9,31,98] 插值 → \(C=[a(\tau)]_1\)。</span></p>
     </div>
     <figure>
-      <svg viewBox="0 0 440 230" role="img" aria-label="KZG 承諾流程">
+      <svg viewBox="0 0 440 230" role="img" aria-label="KZG 承諾流程" style="width:100%;max-width:400px;height:auto;display:block;margin:0 auto">
         <rect x="20" y="30" width="160" height="44" rx="8" fill="#f7f8fa" stroke="#d9dce3"/><text x="100" y="57" font-size="13" text-anchor="middle">多項式 f(X)</text>
         <text x="200" y="57" font-size="16" fill="#4f46e5">→</text>
         <rect x="230" y="30" width="190" height="44" rx="8" fill="#eef2ff" stroke="#c7d2fe"/><text x="325" y="50" font-size="13" text-anchor="middle" fill="#3730a3">承諾 [f(τ)]₁</text><text x="325" y="66" font-size="11" text-anchor="middle" fill="#6366f1">單一群元素</text>
@@ -864,7 +868,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="II" data-label="Setup → Keygen">
   <div class="slide-meta"><span class="part-label">PART II</span> · 第 3 層（續）· 金鑰怎麼來</div>
   <h2>Setup → Keygen：<span class="accent">pk / vk 裡到底有什麼</span></h2>
-  <p class="muted" style="margin:0 0 .3rem;font-size:.95rem">承諾學會了，但「承諾誰」？電路裡<b>固定不變的部分</b>（閘係數、selector、wiring）要<b>先預處理、先承諾好</b> —— 這一步叫 <b>keygen</b>，分兩段：</p>
+  <div class="ideabox"><span class="tag">💡 一句話核心</span>：<b>pk 包含 vk</b>；換電路只重跑 keygen、<b>不必重做 setup</b> —— 通用 SRS 勝過 Groth16「每電路一次設定」。</div>
+  <p class="muted" style="margin:0 0 .25rem;font-size:.93rem">「承諾誰」？電路裡<b>固定不變的部分</b>（閘係數、selector、wiring）要<b>先預處理、先承諾好</b> —— 這步叫 <b>keygen</b>，分兩段：</p>
   <div class="grid-2" style="gap:.6rem;margin-bottom:.35rem">
     <div class="fbox"><div class="lbl">① setup —— 與電路<b>無關</b>、一次性</div>
       <div class="cmt">產生通用 SRS \(=\{[\tau^i]_1\}_{i=0}^{d},[\tau]_2\)（KZG 的 powers-of-τ）。可信設定、<b>可更新</b>、\(\tau\) 用完銷毀。<b>一份，所有電路共用</b>。<code>ParamsKZG::setup(k)</code></div></div>
@@ -873,7 +878,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   </div>
   <div class="grid-2" style="gap:.6rem">
     <div class="card green"><h3 style="color:#15803d">vk 驗證金鑰 <span class="muted" style="font-weight:400;font-size:.8em">小 · 公開 · 可上鏈</span></h3>
-      <ul style="margin:.1rem 0">
+      <ul style="margin:.1rem 0;line-height:1.35">
         <li>evaluation domain（\(2^k\) 大小）</li>
         <li><b>fixed / selector 欄的承諾</b>（KZG）</li>
         <li><b>置換論證的承諾</b>（wiring \(\sigma\)）</li>
@@ -882,7 +887,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       </ul>
       <p class="muted" style="font-size:.85rem;margin:.1rem 0 0">= 驗證者需要的<b>最小集合</b>。</p></div>
     <div class="card accent"><h3>pk 證明金鑰 <span class="muted" style="font-weight:400;font-size:.8em">大 · prover 私用</span></h3>
-      <ul style="margin:.1rem 0">
+      <ul style="margin:.1rem 0;line-height:1.35">
         <li><b>整個 vk</b>（pk ⊇ vk）</li>
         <li>fixed / selector：係數式 + Lagrange 求值 + 延伸 coset</li>
         <li>置換多項式 \(\sigma\)（多種形式）</li>
@@ -890,13 +895,14 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       </ul>
       <p class="muted" style="font-size:.85rem;margin:.1rem 0 0">= 用來真正<b>算商多項式、產生證明</b>的全部預處理料。</p></div>
   </div>
-  <div class="fbox" style="border-left-color:#16a34a;margin-top:.35rem"><div class="cmt"><b>setup / keygen 是一次性前置（不在 ①–⑥ 流程裡）</b>，產物從<b>承諾步驟</b>起才用到。<b>pk ⊇ vk</b>。換電路只要重跑 <b>keygen</b>、<b>不用重做 setup</b>（SRS 通用）—— 這正是「通用可更新 SRS」勝過 Groth16「每電路一次 trusted setup」之處。對照 Part V demo：<b>Stage 1 = setup、Stage 2 = keygen</b>。<span class="muted">對照 halo2_proofs v0.3.0 API（keygen_vk / keygen_pk）· The halo2 Book — Proving system</span></div></div>
+  <div class="fbox" style="border-left-color:#16a34a;margin-top:.25rem"><div class="cmt"><b>setup / keygen 是一次性前置（不在 ①–⑥ 流程裡）</b>，產物從<b>承諾步驟</b>起才用到。對照 Part V demo：<b>Stage 1 = setup、Stage 2 = keygen</b>（halo2_proofs <code>keygen_vk</code> / <code>keygen_pk</code>）。</div></div>
 </section>
 
 <!-- II-6 SHPLONK + proof size -->
 <section class="slide" data-part="II" data-label="SHPLONK">
   <div class="slide-meta"><span class="part-label">PART II</span> · 第 4 層</div>
   <h2>批次開啟 SHPLONK：為什麼證明<span class="accent">又小又不隨深度長</span></h2>
+  <div class="ideabox"><span class="tag">💡 一句話核心</span>：把幾十個開啟<b>批次成 2 個群元素、2 次配對</b> —— 不管電路多深，證明大小幾乎不變。</div>
   <div class="grid-2">
     <div>
       <div class="defn"><span class="dt">原文 · SHPLONK</span>
@@ -904,12 +910,12 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <span class="gloss">把「多條多項式、各在不同點開啟」批次成單一開啟證明（其方案 2：2 個 G₁ 元素），驗證僅 2 次配對 → 證明小、驗證快。</span>
         <a class="src" href="https://eprint.iacr.org/2020/081" target="_blank" rel="noopener">Boneh, Drake, Fisch, Gabizon — ePrint 2020/081 ↗</a></div>
       <div class="fbox" style="border-left-color:#d97706"><div class="lbl" style="color:#92400e">為什麼要批次？（KZG 的 open 不是夠了嗎）</div>
-        <div class="cmt">KZG 的 <code>open</code> = <b>一條</b>多項式、<b>一個</b>點 → 一個 \(\pi\)。但整條協議要開啟<b>一大堆</b>：每條 advice、\(Z\)、商 \(t\) 的每塊、fixed… 各在 \(\zeta\)（有的還要 \(\omega\zeta\)），動輒 10~30 個「(多項式, 點)」。<b>逐個單開：\(N\) 個 → \(N\) 個群元素 + \(N\) 次配對，隨 \(N\) 長</b>；SHPLONK 全部<b>批次成 1 個證明（2 群元素、2 配對），不隨 \(N\) 長</b> —— 這才是又小又快的原因。</div></div>
+        <div class="cmt">KZG 的 <code>open</code> = <b>一條</b>多項式、<b>一個</b>點 → 一個 \(\pi\)。但整條協議要開啟<b>一大堆</b>：每條 advice、\(Z\)、商 \(t\) 的每塊、fixed… 各在 \(\zeta\)（有的還要 \(\omega\zeta\)），動輒 10~30 個。<b>逐個單開 → \(N\) 個群元素 + \(N\) 次配對，隨 \(N\) 線性長</b>，KZG 常數大小的優勢就沒了。</div></div>
       <p style="font-size:.92rem;margin-top:.3rem"><b>Fiat–Shamir</b>：把互動挑戰換成對 transcript 的雜湊；PSE 預設 <b>Blake2b</b> → 非互動。</p>
-      <p class="muted" style="font-size:.9rem;margin-top:.45rem">🔗 接續例子：\(a(X)\)、\(G(X)\)、\(t(X)\)、\(Z(X)\) 這幾條在 \(\zeta\)／\(\omega\zeta\) 的開啟（我們 \(n=4,\ Z_H=X^4-1\)），批次成<b>一個</b> \(\pi\)。</p>
+      <p class="muted" style="font-size:.9rem;margin-top:.3rem">🔗 接續例子：\(a(X)\)、\(G(X)\)、\(t(X)\)、\(Z(X)\) 在 \(\zeta\)／\(\omega\zeta\) 的開啟，批次成<b>一個</b> \(\pi\)。</p>
     </div>
     <figure>
-      <svg viewBox="0 0 440 230" role="img" aria-label="證明大小不隨列數成長">
+      <svg viewBox="0 0 440 230" role="img" aria-label="證明大小不隨列數成長" style="width:100%;max-width:400px;height:auto;display:block;margin:0 auto">
         <text x="10" y="16" font-size="12" fill="#8b94a3">列數 2ᵏ 翻倍，proof 幾乎不變</text>
         <line x1="50" y1="190" x2="420" y2="190" stroke="#d9dce3"/><line x1="50" y1="40" x2="50" y2="190" stroke="#d9dce3"/>
         <g fill="#c7d2fe"><rect x="80" y="150" width="34" height="40"/><rect x="150" y="120" width="34" height="70"/><rect x="220" y="80" width="34" height="110"/><rect x="290" y="55" width="34" height="135"/></g>
@@ -982,6 +988,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="III" data-label="為什麼成立">
   <div class="slide-meta"><span class="part-label">PART III</span> · 為什麼能用 / 形式化</div>
   <h2>四個性質 — <span class="accent">各自怎麼成立</span>（含形式化背書）</h2>
+  <div class="ideabox"><span class="tag">💡 一句話核心</span>：<b>驗一個隨機點 ≈ 處處成立</b>（Schwartz–Zippel）—— 下面四個安全性質全建在這條直覺上。</div>
   <div style="display:flex;gap:14px;align-items:center;margin:0 0 .35rem">
     <svg viewBox="0 0 300 92" role="img" aria-label="Schwartz–Zippel 隨機點幾乎打不中根" style="flex:0 0 252px;height:62px">
       <line x1="12" y1="62" x2="290" y2="62" stroke="#d9dce3"/>
