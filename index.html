@@ -717,19 +717,23 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     </div>
   </div>
   <figure style="margin:.1rem 0 0">
-    <svg viewBox="0 0 900 120" role="img" aria-label="複製約束與查表示意" style="width:100%;max-width:900px;height:auto;display:block;margin:0 auto">
-      <g font-size="12" text-anchor="middle">
-        <rect x="30" y="40" width="70" height="34" rx="6" fill="#dbeafe"/><text x="65" y="62">x (row0)</text>
-        <rect x="150" y="40" width="70" height="34" rx="6" fill="#dbeafe"/><text x="185" y="62">x (row1)</text>
-        <rect x="270" y="40" width="70" height="34" rx="6" fill="#dbeafe"/><text x="305" y="62">x (row2)</text>
-        <path d="M65,40 C65,12 185,12 185,40" fill="none" stroke="#16a34a" stroke-width="2"/>
-        <path d="M185,40 C185,12 305,12 305,40" fill="none" stroke="#16a34a" stroke-width="2"/>
-        <text x="185" y="98" fill="#15803d" font-weight="700">複製約束：三個 x 必相等</text>
+    <svg viewBox="0 0 1000 140" role="img" aria-label="複製約束與查表示意" style="width:100%;max-width:1080px;height:auto;display:block;margin:0 auto">
+      <line x1="515" y1="14" x2="515" y2="126" stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="5 5"/>
+      <g text-anchor="middle">
+        <text x="255" y="22" font-size="15" font-weight="700" fill="#3730a3">複製約束 · 把 cell 接起來</text>
+        <rect x="40" y="42" width="110" height="46" rx="8" fill="#dbeafe" stroke="#93c5fd"/><text x="95" y="71" font-size="16" fill="#1d4ed8">x (row0)</text>
+        <rect x="200" y="42" width="110" height="46" rx="8" fill="#dbeafe" stroke="#93c5fd"/><text x="255" y="71" font-size="16" fill="#1d4ed8">x (row1)</text>
+        <rect x="360" y="42" width="110" height="46" rx="8" fill="#dbeafe" stroke="#93c5fd"/><text x="415" y="71" font-size="16" fill="#1d4ed8">x (row2)</text>
+        <path d="M95,42 C95,12 255,12 255,42" fill="none" stroke="#16a34a" stroke-width="2.5"/>
+        <path d="M255,42 C255,12 415,12 415,42" fill="none" stroke="#16a34a" stroke-width="2.5"/>
+        <text x="255" y="122" font-size="15" font-weight="700" fill="#15803d">三個 x 強制相等</text>
       </g>
-      <g font-size="12" text-anchor="middle">
-        <rect x="560" y="40" width="90" height="34" rx="6" fill="#fde68a"/><text x="605" y="62" fill="#92400e">rem byte</text>
-        <text x="690" y="62" font-size="16" fill="#4f46e5">→</text>
-        <rect x="720" y="30" width="150" height="54" rx="6" fill="#f5f3ff" stroke="#c4b5fd"/><text x="795" y="52" fill="#5b21b6">ByteTable[0..255]</text><text x="795" y="70" font-size="11" fill="#7c3aed">lookup ∈ 表內</text>
+      <g text-anchor="middle">
+        <text x="778" y="22" font-size="15" font-weight="700" fill="#92400e">查表 · 範圍檢查</text>
+        <rect x="585" y="42" width="130" height="46" rx="8" fill="#fde68a" stroke="#fcd34d"/><text x="650" y="71" font-size="16" fill="#92400e">rem byte</text>
+        <text x="748" y="73" font-size="24" fill="#4f46e5">→</text>
+        <rect x="788" y="36" width="190" height="58" rx="8" fill="#f5f3ff" stroke="#c4b5fd"/><text x="883" y="64" font-size="15" fill="#5b21b6">ByteTable[0..255]</text><text x="883" y="84" font-size="13" fill="#7c3aed">lookup ∈ 表內</text>
+        <text x="783" y="122" font-size="15" font-weight="700" fill="#b45309">每個 byte ∈ 0..255</text>
       </g>
     </svg>
     <figcaption>原始圖解（本報告自製）</figcaption>
@@ -741,14 +745,15 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="slide-meta"><span class="part-label">PART II</span> · 形式推導（聽不懂可跳過，不影響主線）</div>
   <h2>算術化 → 多項式 → <span class="accent">整除 Z_H</span></h2>
   <div class="soulbox"><span class="tag">🎯 真正要驗的就這條</span>：\(G(X)=t(X)\cdot Z_H(X)\) —— 「每一列都滿足約束」\(\Longleftrightarrow Z_H\mid G\)。下面 ①–④ 都是在<b>推出這個等價</b>。</div>
-  <ol class="steps">
+  <div style="display:grid;grid-template-columns:1.62fr 1fr;gap:1.2rem;align-items:center;margin-top:.2rem">
+  <ol class="steps" style="margin:.1rem 0">
     <li><b>求值域</b>：取 \(n=2^k\) 階乘法子群 \(H=\langle\omega\rangle=\{1,\omega,\dots,\omega^{\,n-1}\}\)；vanishing 多項式 \(Z_H(X)=X^{n}-1\)（在 \(H\) 上恆為 0，因為 \((\omega^i)^n=1\)）。</li>
     <li><b>每欄插值成多項式</b>：令 advice \(a(\omega^{\,i})=\) 第 \(i\) 列的值（Lagrange 插值）；fixed / selector 同理記為 \(q(X)\)。rotation「下一列」\(=\) 代入 \(\omega X\)（因 \(a(\omega\cdot\omega^i)=a(\omega^{i+1})\)）。</li>
     <li><b>所有約束合成一條</b>（用挑戰 \(\alpha\) 的次方；含閘、複製約束、查表）：\[ G(X)=\sum_{j}\alpha^{\,j}\,g_j\big(a(X),\,a(\omega X),\,q(X),\dots\big) \]</li>
     <li><b>核心等價</b>：每一列都滿足約束 \(\ \Longleftrightarrow\ G\) 在 \(H\) 上恆為 0 \(\ \Longleftrightarrow\ Z_H\mid G\ \Longleftrightarrow\ \exists\,t(X):\) \[ G(X)=t(X)\cdot Z_H(X) \]</li>
   </ol>
   <figure style="margin:0">
-      <svg viewBox="0 0 320 224" role="img" aria-label="n 次單位根子群 H" style="width:100%;max-width:236px;height:auto;display:block;margin:0 auto">
+      <svg viewBox="0 0 320 224" role="img" aria-label="n 次單位根子群 H" style="width:100%;max-width:340px;height:auto;display:block;margin:0 auto">
         <circle cx="160" cy="104" r="82" fill="none" stroke="#c7d2fe" stroke-width="2"/>
         <g fill="#4f46e5">
           <circle cx="242" cy="104" r="6"/><circle cx="218" cy="46" r="6"/><circle cx="160" cy="22" r="6"/><circle cx="102" cy="46" r="6"/>
@@ -763,6 +768,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       </svg>
       <figcaption>原始圖解（本報告自製）· n 次單位根 H（Z_H 在每點為 0）</figcaption>
     </figure>
+  </div>
 </section>
 
 <!-- II-4c worked example: run the demo through 算術化→多項式→整除 -->
