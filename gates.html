@@ -216,6 +216,40 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
     </div>
   </div>
 
+  <h2 class="sec">複製的數學 —— 排列大乘積怎麼把「兩格相等」變成多項式</h2>
+  <div class="tablecap">「這兩格要相等」也不像方程式。<b>複製約束</b>用一個<b>排列 σ</b> ＋ 一條<b>連乘積</b>，把它變成「兩個多重集合相等」的隨機點檢查。</div>
+
+  <div class="cc">
+    <b>① 核心構造（grand product）：</b>把每個格子編碼成一對 <b>(值, 位置)</b>。用挑戰 \(\beta,\gamma\) 把一對壓成一個指紋 \(v+\beta\cdot\text{位置}+\gamma\)，逐格累乘成一條跑動積 \(Z\)：
+    \[ Z_{i+1}=Z_i\cdot\frac{v_i+\beta\,\mathrm{id}(i)+\gamma}{\,v_i+\beta\,\sigma(i)+\gamma\,},\qquad Z_0=Z_n=1 \]
+    分子把每個值配<b>它自己的位置</b> \(\mathrm{id}(i)\)、分母配 <b>σ 排列後的位置</b> \(\sigma(i)\)；要求 \(Z\) 繞一圈<b>回到 1</b>。
+    <br><b>② 為什麼這保證相等：</b>\(Z_n=1 \iff \prod_i\!\big(v_i+\beta\,\mathrm{id}(i)+\gamma\big)=\prod_i\!\big(v_i+\beta\,\sigma(i)+\gamma\big) \iff\) 多重集合 \(\{(v_i,\mathrm{id}(i))\}=\{(v_i,\sigma(i))\}\)（\(\beta,\gamma\) 隨機 → 兩堆指紋乘積相等，幾乎必代表同一個多重集合）。位置被 σ 重排了、兩堆卻還相等 —— <b>唯一可能就是 σ 串在一起的那些格子，值都一樣</b>。</div>
+
+  <div class="gitem" style="max-width:none;margin:.4rem 0 .2rem">
+    <svg viewBox="0 0 680 182" role="img" aria-label="σ 把要相等的格子串成一個環" style="width:100%;max-width:700px;height:auto;display:block;margin:0 auto">
+      <text x="340" y="22" font-size="13" text-anchor="middle" fill="#15803d" font-weight="700">σ 把「要相等的格子」串成一個環（cycle）</text>
+      <g text-anchor="middle">
+        <rect x="56" y="54" width="128" height="42" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/><text x="120" y="80" font-size="14" fill="#15803d" font-weight="700">x (row0)=3</text>
+        <rect x="276" y="54" width="128" height="42" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/><text x="340" y="80" font-size="14" fill="#15803d" font-weight="700">x (row1)=3</text>
+        <rect x="496" y="54" width="128" height="42" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/><text x="560" y="80" font-size="14" fill="#15803d" font-weight="700">x (row2)=3</text>
+      </g>
+      <g stroke="#16a34a" stroke-width="2" fill="none" marker-end="url(#arc)">
+        <path d="M184,60 C220,38 244,38 276,60"/>
+        <path d="M404,60 C440,38 464,38 496,60"/>
+        <path d="M496,96 C360,150 256,150 120,96"/>
+      </g>
+      <defs><marker id="arc" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#16a34a"/></marker></defs>
+      <g font-size="11.5" fill="#8b94a3" text-anchor="middle"><text x="120" y="116">Z₀=1</text><text x="340" y="116">Z₁</text><text x="560" y="116">Z₂</text></g>
+      <text x="340" y="176" font-size="13" text-anchor="middle" fill="#15803d" font-weight="800">Z 從 1 出發繞一圈又回到 1 ⟺ 環上三個 x 的值全相等</text>
+    </svg>
+  </div>
+
+  <div class="note"><b>③ 例子 + 電路化：</b>demo 每列的 <code>x</code> 都要 = 3 → σ 把這些 x 格的位置串成一個環（0→1→2→0）。連乘 \(Z\) 從 1 出發、繞完環又回到 1，就證明了三個 x 相等。\(Z\) 是承諾的欄；邊界 \(\ell_0(X)\cdot(Z(X)-1)=0\)（起點 = 1）、每列的乘積規則、加 ZK 的盲化列，全是<b>低次閘</b> → 折進 \(G=t\cdot Z_H\) → 隨機點 \(\zeta\) 一次驗完。<b>σ 的承諾在 keygen 烤進 vk/pk；\(Z\) 每次證明才生</b>（對照前面那張「三種約束」表）。</div>
+
+  <div class="cc" style="background:#fffbeb;border-color:#fcd34d">
+    <b>出處：</b>排列論證來自 <b>PLONK</b>（Gabizon–Williamson–Ciobotaru, ePrint <b>2019/953</b>，§5 permutation argument）；halo2 的具體建構見 <b>The halo2 Book — Permutation argument</b>（用 \(\delta_i\cdot\omega^j\) 給每一欄不同陪集當「位置標籤」，是 Vitalik 對 PLONK 的優化）。
+  </div>
+
   <h2 class="sec">查表的數學 —— logUp 怎麼把「值 ∈ 表」變成多項式</h2>
   <div class="tablecap">「值要落在表裡」聽起來不像方程式。<b>logUp</b> 用一條漂亮的恆等式，把它變成可在隨機點抽查的多項式約束。</div>
 
