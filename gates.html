@@ -268,6 +268,34 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
     <br><b>那它怎麼抓出「不在表裡的值」？</b>假設你偷查一個表裡沒有的 <b>9</b>：左邊多一項 \(\dfrac{1}{X+9}\) → 在 \(X=-9\) 有個極點；但右邊只有表值 \(\{0..5\}\) 的極點，<b>湊不出 \(X=-9\)</b>（9 不是任何 \(t_j\)，沒有 \(m_j\) 能掛上去）→ 兩邊不相等 → 作弊被抓。<b>所以「等式成立 ⟺ 每個查值都在表裡」。</b>
   </div>
 
+  <div class="cc" style="background:#eef2ff;border-color:#93c5fd">
+    <b>那 \(\frac{1}{X+f}\) 到底怎麼「壓成多項式」去 KZG 承諾？（延續上面同一個例子）</b>
+    <br><b>① 先破關鍵點：\(\frac{1}{X+f}\) 不是多項式、不能直接承諾。</b>真正進電路時，<b>第一步把 X 固定成一個隨機數 \(\beta\)</b>（Fiat–Shamir 抽的）—— 一旦 \(X=\beta\)，\(\frac{1}{\beta+f}\) 就只是<b>一個具體數字</b>，prover 在外面算得出來。\(X\) 只是「看極點、懂原理」用的；<b>承諾的不是 \(\frac{1}{X+f}\)，是「一整欄算好的數字」插值成的多項式</b>。
+  </div>
+
+  <div class="tablecap"><b>② 把例子排成 trace 的欄</b>（\(\beta\) 已抽好；\(u,w\) 欄填的全是 prover 算好的具體數字，就像 Horner 例子裡 acc 欄填 2,9,31,98）：</div>
+  <div class="utab-wrap"><table class="utab">
+    <thead><tr><th>列</th><th class="grp-adv">f 查值</th><th class="grp-adv">u = 1/(β+f)</th><th class="grp-sel">t 表值</th><th class="grp-sel">m 重數</th><th class="grp-sel">w = m/(β+t)</th></tr></thead>
+    <tbody>
+      <tr><td class="rowid">0</td><td class="adv">3</td><td class="adv">\(\frac{1}{\beta+3}\)</td><td>0</td><td>1</td><td>\(\frac{1}{\beta+0}\)</td></tr>
+      <tr><td class="rowid">1</td><td class="adv">3</td><td class="adv">\(\frac{1}{\beta+3}\)</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td class="rowid">2</td><td class="adv">0</td><td class="adv">\(\frac{1}{\beta+0}\)</td><td>2</td><td>0</td><td>0</td></tr>
+      <tr class="supply"><td class="rowid">3</td><td>–</td><td>0</td><td>3</td><td class="adv">2</td><td>\(\frac{2}{\beta+3}\)</td></tr>
+      <tr class="supply"><td class="rowid">4</td><td>–</td><td>0</td><td>4</td><td>0</td><td>0</td></tr>
+      <tr class="supply"><td class="rowid">5</td><td>–</td><td>0</td><td>5</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">（沿用上面的例子，查了 3 次：<b>3 兩次、0 一次</b>，所以 \(m_3=2,\ m_0=1\)。表值 3 被第 0、1 列查走 → \(m_3=2\)；\(f\) 欄第 3–5 列是填補。左欄 \(\sum u=\frac{2}{\beta+3}+\frac{1}{\beta+0}\)；右欄 \(\sum w=\frac{1}{\beta+0}+\frac{2}{\beta+3}\) —— 相等。沒被查到的表值 \(m=0\)、\(w=0\)、自動消失。）</div>
+
+  <div class="note"><b>③ 每欄插值成一條多項式 → KZG 各承諾：</b>\(f,\ u,\ t,\ m,\ w\) 再加一條累加欄 \(S\)，每欄（一串數字）插值成 \(f(Y),u(Y),\dots\)（\(Y\)＝子群 H 上的位置變數），<b>用 KZG 各壓成一個群元素</b> —— 這就是收尾全景圖 lookup 框裡那幾條。
+    <br><b>④ logUp 規則 → H 上的多項式恆等式（折進 G）：</b>
+    <br>· 逆元對：\(u(Y)\cdot(\beta+f(Y))-1=0\) —— 強制 \(u\) 真的是 \(\tfrac{1}{\beta+f}\)（度數 2 的閘）
+    <br>· 表側：\(w(Y)\cdot(\beta+t(Y))-m(Y)=0\) —— 強制 \(w=\tfrac{m}{\beta+t}\)
+    <br>· 累加：\(S(\omega Y)-S(Y)-\big(u(Y)-w(Y)\big)=0\)（逐列累加 \(\textstyle\sum u-\sum w\)）
+    <br>· 邊界：\(S\) 從 0 出發、繞完<b>回到 0</b>（因 \(\sum u=\sum w\)）
+    <br>全是低次多項式 → 折進大 \(G\) → 除以 \(Z_H\) 得商 → 在隨機點 \(\zeta\) 一次驗完。
+    <br><b>切記兩個不同的變數：\(X\)（看極點用，固定成隨機 \(\beta\)）≠ \(Y\)（插值位置，跑遍 H）。承諾的是 \(u(Y)\) 這種「欄多項式」，不是 \(\frac{1}{X+f}\)。</b></div>
+
   <div class="gitem" style="max-width:none;margin:.4rem 0 .2rem">
     <svg viewBox="0 0 680 130" role="img" aria-label="極點對齊：查值的極點落在表的極點上" style="width:100%;max-width:700px;height:auto;display:block;margin:0 auto">
       <text x="20" y="22" font-size="12.5" fill="#7c3aed" font-weight="700">表的極點 {−tⱼ}</text>
