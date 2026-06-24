@@ -810,29 +810,46 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="II" data-label="KZG 承諾">
   <div class="slide-meta"><span class="part-label">PART II</span> · 第 3 層</div>
   <h2>多項式承諾 KZG：把一條多項式壓成<span class="accent">一個群元素</span></h2>
-  <div class="ideabox"><span class="tag">💡 一句話核心</span>：把<b>一整條多項式壓成一個群元素</b>，驗證者憑它<b>一次配對</b>就能驗某點取值 —— 證明又小又快的根基。</div>
+  <div class="ideabox"><span class="tag">💡 一句話核心</span>：把<b>一整條多項式壓成「一個點」</b>（一個群元素）。<b>怎麼壓？</b>把 f 的<b>係數</b>乘上 SRS 的<b>對應點</b>、全部相加 —— 這一個點就代表整條 f。</div>
   <div class="grid-2">
     <div>
       <div class="defn"><span class="dt">原文 · Polynomial commitment scheme</span>
         <span class="quote">“A polynomial commitment scheme is a triplet S = (gen, com, open) such that gen(d) … outputs a structured reference string (SRS) srs; com(f, srs) … returns a commitment cm to f; open is a public coin protocol between [prover] and [verifier].”</span>
-        <span class="gloss"><b>gen</b>＝產 SRS｜<b>com</b>＝把 f 壓成承諾 cm（一個群元素）｜<b>open</b>＝證 f 在某點 z 的值 = v。</span>
+        <span class="gloss"><b>gen</b>＝產 SRS｜<b>com</b>＝把 f 壓成承諾 cm（一個群元素）｜<b>open</b>＝證某點的值。<b style="color:#4f46e5">本頁專講 com；open ＋ 驗證 → 下一張。</b></span>
         <a class="src" href="https://eprint.iacr.org/2020/081" target="_blank" rel="noopener">Boneh, Drake, Fisch, Gabizon — ePrint 2020/081, Def. 2.3 ↗</a></div>
-      <div class="defn"><span class="dt">KZG 的具體做法（Kate–Zaverucha–Goldberg, 2010）</span>
-        <span class="gloss"><code>com(f)=[f(τ)]₁</code>（單一 G₁ 元素）、SRS = <code>{[τⁱ]₁},[τ]₂</code>，通用可更新、τ 用完即丟。</span>
+      <div class="defn"><span class="dt">com 怎麼算（Kate–Zaverucha–Goldberg, 2010）</span>
+        <span class="gloss">把 f 的<b>係數</b>乘 SRS <b>對應點</b>再相加：\[ \mathrm{com}(f)=[f(\tau)]_1=\textstyle\sum_i f_i[\tau^i]_1=f_0[1]_1+f_1[\tau]_1+f_2[\tau^2]_1+\cdots \]SRS \(=\{[\tau^i]_1\},[\tau]_2\)，通用可更新、\(\tau\) 用完即丟。</span>
         <a class="src" href="https://www.iacr.org/archive/asiacrypt2010/6477178/6477178.pdf" target="_blank" rel="noopener">Kate, Zaverucha, Goldberg — ASIACRYPT 2010 ↗</a></div>
-      <p class="muted" style="font-size:.92rem;margin-top:.4rem">三步公式：<b>com</b> 承諾 \(C=[f(\tau)]_1\)、<b>open</b> 開啟 \(\pi=[q(\tau)]_1\)（\(q=\tfrac{f-v}{X-z}\)）、驗證一次配對 —— <b>完整推導見下一張</b>。<span style="color:#15803d">套例子：承諾 \(a(X)\)=[2,9,31,98] 插值 → \(C=[a(\tau)]_1\)。</span></p>
+      <p class="muted" style="font-size:.92rem;margin-top:.35rem"><b>關鍵</b>：prover <b>不知道 \(\tau\)</b>，只是把公開的 SRS 點做線性組合 —— 從結果反推不出 \(\tau\) 或 \(f\)（離散對數難）。<span style="color:#15803d">套例子：承諾 \(a(X)=[2,9,31,98]\) 插值 → \(C=[a(\tau)]_1\)。</span></p>
     </div>
     <figure>
-      <svg viewBox="0 0 440 230" role="img" aria-label="KZG 承諾流程" style="width:100%;max-width:400px;height:auto;display:block;margin:0 auto">
-        <rect x="20" y="30" width="160" height="44" rx="8" fill="#f7f8fa" stroke="#d9dce3"/><text x="100" y="57" font-size="13" text-anchor="middle">多項式 f(X)</text>
-        <text x="200" y="57" font-size="16" fill="#4f46e5">→</text>
-        <rect x="230" y="30" width="190" height="44" rx="8" fill="#eef2ff" stroke="#c7d2fe"/><text x="325" y="50" font-size="13" text-anchor="middle" fill="#3730a3">承諾 [f(τ)]₁</text><text x="325" y="66" font-size="11" text-anchor="middle" fill="#6366f1">單一群元素</text>
-        <rect x="20" y="110" width="190" height="44" rx="8" fill="#f7f8fa" stroke="#d9dce3"/><text x="115" y="130" font-size="13" text-anchor="middle">開啟：f(z)=v 的證明</text><text x="115" y="146" font-size="11" text-anchor="middle" fill="#8b94a3">quotient 多項式</text>
-        <text x="230" y="137" font-size="16" fill="#16a34a">→</text>
-        <rect x="250" y="110" width="170" height="44" rx="8" fill="#dcfce7" stroke="#86efac"/><text x="335" y="130" font-size="13" text-anchor="middle" fill="#15803d">配對檢查 ✓</text><text x="335" y="146" font-size="11" text-anchor="middle" fill="#16a34a">常數時間</text>
-        <text x="20" y="195" font-size="12" fill="#55596b">SRS：{[τⁱ]₁} ⋯ 公開可信設定（toxic waste τ 銷毀）</text>
+      <svg viewBox="0 0 470 250" role="img" aria-label="KZG 承諾：係數乘 SRS 對應點再相加，得一個點" style="width:100%;max-width:440px;height:auto;display:block;margin:0 auto">
+        <text x="235" y="16" font-size="12.5" font-weight="700" text-anchor="middle" fill="#3730a3">把 f 的係數 × SRS 對應點，再全部相加</text>
+        <text x="8" y="52" font-size="11" fill="#1d4ed8" font-weight="700">f 係數</text>
+        <g text-anchor="middle" font-size="14" fill="#1d4ed8">
+          <rect x="82" y="36" width="50" height="30" rx="6" fill="#dbeafe" stroke="#93c5fd"/><text x="107" y="56">f₀</text>
+          <rect x="172" y="36" width="50" height="30" rx="6" fill="#dbeafe" stroke="#93c5fd"/><text x="197" y="56">f₁</text>
+          <rect x="262" y="36" width="50" height="30" rx="6" fill="#dbeafe" stroke="#93c5fd"/><text x="287" y="56">f₂</text>
+          <rect x="352" y="36" width="50" height="30" rx="6" fill="#dbeafe" stroke="#93c5fd"/><text x="377" y="56">f₃</text>
+        </g>
+        <g text-anchor="middle" font-size="15" fill="#7c3aed" font-weight="700"><text x="107" y="86">×</text><text x="197" y="86">×</text><text x="287" y="86">×</text><text x="377" y="86">×</text></g>
+        <text x="8" y="114" font-size="11" fill="#5b21b6" font-weight="700">SRS 點</text>
+        <g text-anchor="middle" font-size="12.5" fill="#5b21b6">
+          <rect x="80" y="96" width="54" height="32" rx="6" fill="#ede9fe" stroke="#c4b5fd"/><text x="107" y="117">[1]₁</text>
+          <rect x="170" y="96" width="54" height="32" rx="6" fill="#ede9fe" stroke="#c4b5fd"/><text x="197" y="117">[τ]₁</text>
+          <rect x="260" y="96" width="54" height="32" rx="6" fill="#ede9fe" stroke="#c4b5fd"/><text x="287" y="117">[τ²]₁</text>
+          <rect x="350" y="96" width="54" height="32" rx="6" fill="#ede9fe" stroke="#c4b5fd"/><text x="377" y="117">[τ³]₁</text>
+          <text x="430" y="117" fill="#9ca3af">…</text>
+        </g>
+        <g text-anchor="middle" font-size="16" fill="#16a34a" font-weight="700"><text x="152" y="117">+</text><text x="242" y="117">+</text><text x="332" y="117">+</text></g>
+        <text x="235" y="146" font-size="10.5" text-anchor="middle" fill="#8b94a3">SRS 公開、prover 拿得到；τ 藏在裡面、沒人知道</text>
+        <line x1="235" y1="152" x2="235" y2="178" stroke="#16a34a" stroke-width="2.5" marker-end="url(#kcm)"/>
+        <defs><marker id="kcm" markerWidth="9" markerHeight="9" refX="4.5" refY="7" orient="auto"><path d="M0,0 L9,0 L4.5,8 z" fill="#16a34a"/></marker></defs>
+        <rect x="112" y="184" width="246" height="46" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+        <text x="235" y="206" font-size="15" text-anchor="middle" fill="#15803d" font-weight="700">C = [f(τ)]₁</text>
+        <text x="235" y="223" font-size="11" text-anchor="middle" fill="#16a34a">一個 G₁ 群元素 · 就一個點，代表整條 f</text>
       </svg>
-      <figcaption>原始圖解（本報告自製）</figcaption>
+      <figcaption>原始圖解（本報告自製）· com：係數 × SRS 點 → 相加 → 一個點</figcaption>
     </figure>
   </div>
 </section>
