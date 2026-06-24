@@ -121,7 +121,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .kpi{display:flex;gap:2rem;flex-wrap:wrap;margin-top:.6rem}
 .kpi div{text-align:center}.kpi .v{font-size:1.9rem;font-weight:800;color:var(--accent)}
 .kpi .l{font-size:.78rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em}
-.foot{position:absolute;left:5rem;right:5rem;bottom:1.6rem;display:flex;justify-content:space-between;font-size:.74rem;color:var(--text-faint)}
+.foot{position:absolute;left:5rem;right:5rem;bottom:2.9rem;display:flex;justify-content:space-between;font-size:.74rem;color:var(--text-faint)}
 .hl-row{display:flex;gap:.6rem;align-items:baseline;margin-top:.5rem}
 .hl-row .num{font-size:1.4rem;font-weight:800;color:var(--accent);min-width:1.5em}
 
@@ -259,7 +259,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="brand">論文技術取捨<span class="tag">Why we chose this</span></div>
   <div class="pills" id="pills"></div>
   <button class="tour-btn" id="presBtn" title="簡報者模式：另開講稿視窗。投影機投主視窗（乾淨投影片），這個視窗留在你的筆電看講稿（需設「延伸顯示」）。翻頁會自動同步。">🖥 簡報者</button>
-  <a class="home-link" href="index.html">← 主報告</a>
+  <a class="home-link" href="https://github.com/xuancheng307/halo2-talk" target="_blank" rel="noopener">原始碼 ↗</a>
 </div>
 <div class="dots" id="dots"></div>
 <div id="playbar"><button id="pbPrev" title="上一段">⏮</button><button id="pbPlay" title="播放/暫停">⏸</button><button id="pbNext" title="下一段">⏭</button><span class="pb-title" id="pbTitle">—</span><span class="pb-prog"><i id="pbProg"></i></span><span class="pb-idx" id="pbIdx">—</span><button id="pbSpeed" title="播放速度（點擊切換）">1×</button><button id="pbStop" title="結束導覽">✕</button></div>
@@ -496,6 +496,26 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     </div>
   </div>
   <div class="soulbox"><span class="tag">🎯 收尾一句</span>：把「能算一個函數」變成「<b>能證一個金融模型</b>」。</div>
+  <div class="foot"><span>出處 · 引用 →</span><span>↑ 回頂</span></div>
+</section>
+
+<!-- ===== 10 · SOURCES ===== -->
+<section class="slide" data-part="" data-label="出處">
+  <div class="slide-meta"><span class="part-label">出處</span> · 引用與先行工作（誠實標註）</div>
+  <h2>出處 —— <span class="accent">取捨數據與先行工作</span></h2>
+  <p class="muted" style="margin:0 0 .5rem;font-size:.95rem">本報告所有取捨數字出自我們的碩士論文；凡<b>先行工作</b>（不是我們發明的）一律如實標註。</p>
+  <div class="grid-2">
+    <div>
+      <div class="defn"><span class="dt">本論文</span><span class="gloss">《Minimax Polynomial Approximation for Transcendental Functions in Zero-Knowledge Proofs》—— 所有 (pp, d)、ULP、截斷策略、bit-budget、Scenario A / C 數據的出處。</span></div>
+      <div class="defn"><span class="dt">證明系統 · Halo2 stack</span><span class="gloss">The halo2 Book；PLONK（Gabizon–Williamson–Ciobotaru, ePrint 2019/953）；KZG（2010）；SHPLONK（BDFG, ePrint 2020/081）；BN254。</span></div>
+      <div class="defn"><span class="dt">金融模型</span><span class="gloss">Black–Scholes（1973）；Merton 結構式信用模型（1974）。</span></div>
+    </div>
+    <div>
+      <div class="defn"><span class="dt">多項式逼近 · 先行工作（非我們發明）</span><span class="gloss">Minimax / Remez：Remez 1934、Chebyshev 1853；FHE Minimax：Lee et al., EUROCRYPT 2021；ZKFixedPointChip（2023，已在 Halo2 用 Remez）。</span></div>
+      <div class="defn"><span class="dt">查表與競品</span><span class="gloss">plookup（ePrint 2020/315）；logUp（Haböck, ePrint 2022/1530）；ezkl；zkLLM（CCS'24）；Kaizen（CCS'24）。</span></div>
+    </div>
+  </div>
+  <div class="soulbox" style="margin-top:.4rem"><span class="tag">🎯 一句話</span>：我們站在這些工作的肩上 —— 真正的新，是把它們組成「<b>能證、有誤差保證、能落地金融</b>」的一整套架構。</div>
   <div class="foot"><span>論文技術取捨 · 完</span><span>↑ 回頂</span></div>
 </section>
 
@@ -553,7 +573,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '量化飽和':"這張是個反直覺的結果。多項式逼近的直覺是『次數越高越貼合』,但在定點 ZK 裡,這個直覺會反過來咬你。\n現象叫量化飽和:超過一個最佳 degree d-star 之後,degree 再高反而更差。原因是兩股誤差在拉鋸 —— 逼近誤差確實還在降,但量化誤差被放大,過了甜蜜點之後,整體精度就掉頭往下。\n數字上,pp=16、degree 不超過 7,就讓 13 個函數全部做到 ULP=1;再往上加 degree,不會更好。\n所以取捨是:degree 不是免費的,它有一個甜蜜點,盲目加只會更糟。這個『harmful degree』效應,是我們首次在 ZK 文獻裡記錄的。",
 '函數與區間':"除了 degree,還有兩個更細的取捨,一個跟函數本身有關,一個跟區間有關。\n第一個,係數條件數:就算 pp 跟 degree 都一樣,不同函數的精度可以差很多。pp=48、degree=14 時,ln 是 142 個 ULP,erf 卻只有 15。這說明函數本身的係數結構,決定了精度地板,跟我們 kernel 怎麼設計無關 —— 有些函數天生就難逼近。\n第二個,區間的取捨:區間越窄越準,但覆蓋範圍就變小。ln 在 0 到 ln2 是 1 個 ULP,放寬到 0 到 e 減 1 就掉到 9;erf 在 0 到 1 是 3,放到 0 到 2 就變 20。窄區間換到精度,但覆蓋小了,得靠 range reduction 補回來。\n所以這張的取捨是一條拉鋸線:精度對覆蓋範圍。想又準又廣,就得切段加 range reduction,而切段又會放大 proof —— 這個代價,最後一張會兌現。",
 '我們站在哪':"這張是給老師看的誠實定位,很重要。老師一定會問:ZK 算超越函數早就有人做了,ezkl、zkLLM、ZKFixedPointChip 都有,你們做了什麼新的?我的原則是寧可少吹,也不要被抓到不誠實。\n先講互補,不是取代。查表是 ZKML 在大批次、低精度場景的理性選擇,我不否定它;我們補的是它做不到的地方:多函數共用同一張 256 表、高精度也撐得住、還有低頻呼叫 —— 金融合規正好就是這種需求。\n再來,誠實講什麼不是我們發明的:Minimax、Remez 是一百多年的教科書;FHE 從 2021 就在用;ZKFixedPointChip 2023 也已經在 Halo2 上用過 Remez;『Minimax 比 Taylor 好』本身也是教科書事實,不是我們的發現。\n那真正新的有五項:第一,第一個系統化地把 Minimax 跟 Taylor 在 ZK 定點下量化比較,並發現量化瓶頸;第二,把延遲截斷做在 Horner 鏈內這個粒度,還配上 BN254 的 bit-budget 分析;第三,形式化誤差預算加上窮舉驗證;第四,第一個有誤差分析的 ZK ln 和 erf 多項式電路;第五,不管什麼函數都只用一張 256 條目的表。\n一句話:我們不是又一個 ZK 函數庫,是把『能算』升級成『能證、有誤差保證、能落地金融』。",
-'成果與限界':"最後收尾,把這些取捨換到的成果跟代價一起講清楚。\n成果有三塊。Scenario A 是 Black-Scholes 的 Delta 對沖,pp=24:端到端 Delta 做到 1 個 ULP,比查表快 26.3 倍,而且 pp 大於等於 24 時這是唯一可行的路。Scenario C 是 Merton 信用違約,pp=32:做到 28.6 到 29 個有效位,7 個評等都對到小數第 8 位,proof 大約 15,360 bytes、verify 約 33 毫秒。整體 13 個函數全部 ULP=1,proof 落在 5 到 9.5 KB,verify 不超過 5.1 毫秒。\n代價也誠實講:erf 要用 5 段 piecewise 才能覆蓋 0 到 5,proof 因此乘上 2.2 倍;bit-budget 限制 d+1 乘 pp 小於 254,pp 上限在 degree=5 時是 42;大批次比單函數查表慢大約 7.5 倍;proof 比查表大約 6.8 倍 —— 但仍然小於 5KB。\n收尾一句話:這整篇論文,就是把『能算一個函數』,變成『能證一個金融模型』。謝謝大家,接下來問答。",
+'成果與限界':"最後收尾,把這些取捨換到的成果跟代價一起講清楚。\n成果有三塊。Scenario A 是 Black-Scholes 的 Delta 對沖,pp=24:端到端 Delta 做到 1 個 ULP,比查表快 26.3 倍,而且 pp 大於等於 24 時這是唯一可行的路。Scenario C 是 Merton 信用違約,pp=32:做到 28.6 到 29 個有效位,7 個評等都對到小數第 8 位,proof 大約 15,360 bytes、verify 約 33 毫秒。整體 13 個函數全部 ULP=1,proof 落在 5 到 9.5 KB,verify 不超過 5.1 毫秒。\n代價也誠實講:erf 要用 5 段 piecewise 才能覆蓋 0 到 5,proof 因此乘上 2.2 倍;bit-budget 限制 d+1 乘 pp 小於 254,pp 上限在 degree=5 時是 42;大批次比單函數查表慢大約 7.5 倍;proof 比查表大約 6.8 倍 —— 但仍然小於 5KB。\n收尾一句話:這整篇論文,就是把『能算一個函數』,變成『能證一個金融模型』。最後一頁,附上所有出處與先行工作。",
+'出處':"最後是出處,也是這份報告的誠實底線。\n報告裡所有的取捨數字 —— pp 跟 degree 的設計空間、各種 ULP、截斷策略、bit-budget、兩個金融情境的指標 —— 全部出自我們的碩士論文,可以核對。\n證明系統這邊,我們站在 Halo2、PLONK、KZG、SHPLONK、BN254 這些工作上;多項式逼近這邊,我要再強調一次誠實:Minimax 跟 Remez 是一百多年的數學,FHE 從 2021 就在用,ZKFixedPointChip 2023 也已經在 Halo2 上用過 —— 這些都不是我們發明的,我如實標出來。查表跟競品有 plookup、logUp、ezkl、zkLLM、Kaizen;金融模型是 Black-Scholes 跟 Merton。\n一句話收尾:我們站在這些工作的肩上,真正的新,是把它們組成『能證、有誤差保證、能落地金融』的一整套架構。謝謝大家。",
   };
 
   const deck=document.getElementById('deck');
