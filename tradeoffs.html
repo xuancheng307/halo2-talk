@@ -319,6 +319,24 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   </div>
 </section>
 
+<!-- ===== 2.5 · CORE TOOLS (why Halo2 + KZG) ===== -->
+<section class="slide" data-part="" data-label="核心工具">
+  <div class="slide-meta"><span class="part-label">底層工具</span> · 為什麼這個平台</div>
+  <h2>先選對工具：為什麼 <span class="accent">Halo2 + KZG</span></h2>
+  <div class="whybox"><span class="tag">❓ 在算函數之前</span>：得先選證明系統 + 承諾方案。老實說 —— <b>方法本身不綁 Halo2</b>，理論上能搬到別的系統；但這個底層對我們<b>最合身</b>，兩個原因：</div>
+  <div class="grid-2">
+    <div class="card"><h3>為什麼 Halo2（PLONKish），不是 Groth16</h3>
+      <p>我們的 kernel 要兩樣東西：<b>自訂閘</b>（逐步 Horner + 截斷）＋ <b>原生查表</b>（ByteTable 範圍檢查）。</p>
+      <p style="margin-top:.4rem">R1CS（Groth16）只有 <b>degree-2 乘法</b>、<b>沒有原生 lookup</b> → 做這套 kernel 得拆成一大堆約束，又貴又笨。<b>PLONKish</b> 給自訂閘（degree≤~6）＋原生查表＋通用可更新 setup，<b>正好合身</b>。</p>
+    </div>
+    <div class="card"><h3>為什麼 KZG，不是 IPA / FRI</h3>
+      <p>合規要 <b>proof 小、驗證便宜</b> → <b>KZG</b>：proof 常數大小、配對驗證便宜，BN254 是以太坊內建 precompile（EVM 友善）。代價：<b>一次性可信設定</b>。</p>
+      <p style="margin-top:.4rem" class="muted">對照：IPA（原版 Halo2）免設定，但驗證<b>線性</b>、proof 大；FRI（STARK）免設定、<b>抗量子</b>，但 proof 偏大（hash-based）。</p>
+    </div>
+  </div>
+  <div class="soulbox" style="margin-top:.5rem"><span class="tag">🎯 取捨一句</span>：方法可移植，但選 <b>PLONKish + KZG/BN254</b>，是為了「<b>閘 + 查表正好合身</b>」加「<b>驗證輕量</b>（proof 常數、配對便宜）」—— 代價是一次性可信設定。</div>
+</section>
+
 <!-- ===== 3 · TWO DEAD ENDS ===== -->
 <section class="slide" data-part="" data-label="兩條死路">
   <div class="slide-meta"><span class="part-label">取捨 2</span> · 為什麼不能直接放</div>
@@ -565,6 +583,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <script>
 (function(){
   const NOTES = {
+'核心工具':"在講我們怎麼算函數之前,先回答一個更上游的問題:為什麼整套東西建在 Halo2 加 KZG 上?我先誠實說,我們的方法本身不綁死 Halo2 —— 換個證明系統理論上也能搬;但這個底層對我們最合身,有兩個原因。\n第一,為什麼是 Halo2、不是 Groth16。我們的 kernel 需要兩樣東西:自訂閘 —— 就是逐步 Horner 加截斷那條;還有原生查表 —— ByteTable 範圍檢查。Groth16 用的 R1CS 只有 degree-2 的乘法約束、也沒有原生 lookup,要做我們這套 kernel 得拆成一大堆約束,又貴又笨。PLONKish 剛好給你自訂閘、原生查表、加上通用可更新的設定,正好合身。\n第二,為什麼承諾方案用 KZG、不是 IPA 或 FRI。合規這場景要 proof 小、驗證便宜。KZG 的 proof 是常數大小、用配對驗證很便宜,而且 BN254 的配對是以太坊內建的 precompile,上鏈友善。代價是要一次性的可信設定。對照一下:原版 Halo2 用的 IPA 免設定,但驗證是線性的、proof 也大;STARK 用的 FRI 免設定、還抗量子,但 proof 偏大,因為是 hash-based。\n所以一句話:方法可以移植,但我們選 PLONKish 加 KZG over BN254,是為了閘跟查表正好合身、加上驗證又輕,代價就是那一次性的可信設定。",
 '封面':"大家好。\n這份報告只講一件事:我們論文裡的每一個技術決定,背後的取捨是什麼。\n所以它不是教學、不是教你怎麼一步步做;是把每個選擇攤開來說清楚 —— 為什麼選這條、別的路為什麼走不通、換到了什麼、又付出什麼代價。\n我會一張一張、一步一步把 why 講明白。我們開始。",
 '要解的問題':"先講我們到底在解什麼問題。\n金融法遵要機構證明一件事:風險在限額內 —— 對沖基金要證 Delta 曝險沒超門檻、信用衍生品要證組合違約機率沒超監管上限。麻煩在於,傳統做法得把部位全攤開給監管或對手方看,等於把交易策略洩漏出去。\nZK 正好對症:證明你算對了,卻不洩漏輸入。但真要套到金融,就撞上一道牆 —— 這些合規檢查背後是金融模型,Black-Scholes、Merton,全靠超越函數 ln、exp、erf;像風險計算核心的常態 CDF,就是用 erf 寫出來的。\n問題是,ZK 電路裡只有有限體的加跟乘、沒有原生浮點,這幾個函數根本算不出來。\n所以一句話:ZK 能證對、不洩漏輸入,但一要用到金融,就撞上『電路算不了超越函數』這道牆。整篇論文就在拆這道牆 —— 而拆牆的每一步,都是取捨。",
 '兩條死路':"那為什麼不能把超越函數直接放進去?直覺只有兩條路,我帶你看為什麼兩條都死。\n第一條,查表:把每個可能的輸入預先算好、存成一張表。低精度還行,pp=16 大概六萬格;但金融要 pp=24、pp=32,表就爆成一千六百多萬、四十三億格,而且每個函數一張 —— 任何電路都裝不下。\n第二條,多項式逼近:用一條低次多項式近似函數,再用 Horner 求值。這條可行,但有兩個坑。坑 A 是 Taylor 在定點量化下會崩潰,pp=32、d=10 時 ln 只剩 4.4 個有效位、約一位十進位;換成 L 無窮最佳的 Minimax 就有 28.6 位。坑 B 是溢位:Horner 一步步乘下去,中間值膨脹成 S 的 d+1 次方,pp=32、d=10 就到 2 的 352 次方,遠超 BN254 的 253 位。\n所以可行的只剩多項式這條,但得先解掉 Taylor 崩潰跟中間值溢位這兩個坑 —— 這正是接下來四個設計決定要回答的。",
@@ -634,7 +653,14 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 "Scenario C":"Merton 信用違約情境，pp=32：28.6–29.0 有效位、proof≈15,360 B、verify≈33 ms。",
 "誤差預算 (error budget)":"把總誤差拆給逼近/量化/截斷各部分、形式化界定上限；本論文配窮舉驗證。",
 "窮舉驗證":"對定點輸入空間逐一檢查實際誤差是否在界內，補上形式化誤差界的實證。",
-"Black–Scholes Delta":"選擇權對標的價格的一階敏感度，用常態 CDF Φ 計算；Scenario A 要證它在限額內。"
+"Black–Scholes Delta":"選擇權對標的價格的一階敏感度，用常態 CDF Φ 計算；Scenario A 要證它在限額內。",
+"自訂閘 (custom gate)":"PLONKish 讓你自定義、可跨相鄰列的低次多項式約束（本論文用它做逐步 Horner + 截斷）；R1CS 沒有這個。",
+"PLONKish":"Halo2 的算術化：自訂閘 + 原生查表 + 通用可更新 setup；正好是本論文 kernel（Horner 閘 + ByteTable）的天然載體。",
+"Groth16 / R1CS":"R1CS 只有 degree-2 乘法約束、無原生 lookup；Groth16 證明最小但每電路要專屬可信設定、表達力受限 → 做不了我們的 kernel。",
+"KZG 承諾":"把多項式壓成一個群元素的承諾；proof 常數大小、配對驗證便宜，但需一次性可信設定。PSE Halo2 用的承諾層。",
+"IPA (內積論證)":"原版 Halo2 的承諾：免可信設定，但驗證時間線性、proof 較大 → 不利輕量／上鏈驗證。",
+"FRI / STARK":"hash-based 承諾：免設定、抗量子，但 proof 偏大；對需要輕量驗證的合規場景較不划算。",
+"可信設定 (trusted setup)":"產生公共參數 SRS 的一次性儀式；KZG 需要（通用可更新版做一次、全電路共用，一人誠實即安全），IPA／FRI 不需要。"
   };
   // formal / precise definitions — shown as 形式： under 白話 (only terms that have one)
   const FORMAL = {
@@ -658,6 +684,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   const TERMS = {
 '封面':["零知識證明 (ZK)","超越函數","定點 pp=48","Minimax / Remez","逐步截斷 (per-step)","通用 Horner kernel","ByteTable"],
 '要解的問題':["金融法遵 (compliance)","Delta 曝險","Black–Scholes","Merton 模型","常態 CDF Φ","erf (誤差函數)","exp / ln / erf","超越函數","有限體 (𝔽ᵣ)","浮點","零知識證明 (ZK)"],
+'核心工具':["PLONKish","自訂閘 (custom gate)","查表 (lookup)","Groth16 / R1CS","KZG 承諾","IPA (內積論證)","FRI / STARK","可信設定 (trusted setup)","BN254","通用 Horner kernel","ByteTable"],
 '兩條死路':["查表 (lookup)","pp (定點精度)","Taylor 展開","Minimax / Remez","有效位 (有效數字)","Horner 法","中間值膨脹","溢位 (overflow)","BN254","尺度 S=2^pp","逐步截斷 (per-step)"],
 '四個設計決定':["定點 pp=48","浮點","Minimax / Remez","Taylor 展開","ULP","逐步截斷 (per-step)","延遲截斷 (deferred)","溢位 (overflow)","通用 Horner kernel","ByteTable","fixed 欄","proof (證明 π)","verify (驗證)"],
 '免費空間':["延遲截斷 (deferred)","逐步截斷 (per-step)","bit-budget","暫存空間 (紅利)","BN254","pp (定點精度)","degree (多項式次數 d)","中間值膨脹","溢位 (overflow)"],
@@ -672,6 +699,10 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '要解的問題':[
  ["為什麼不乾脆不上 ZK，用傳統稽核+保密協議就好？","稽核要把部位給第三方看，洩漏風險與信任成本都在；ZK 讓你『不交出資料也能證明合規』，把信任從『相信機構誠實』換成『相信數學』。代價是要把金融模型搬進電路 —— 這正是這篇論文付的代價。"],
  ["合規檢查不就是比大小嗎？哪裡需要超越函數？","門檻本身是比大小，但『風險值』要先算出來：Black–Scholes 的 Delta 用常態 CDF Φ、Merton 的違約機率用 ln 與 Φ。算這個風險值就得求 erf/ln/exp，這才是撞牆的地方。"]
+],
+'核心工具':[
+ ["可信設定不是缺點嗎？為什麼還選 KZG？","是缺點，但可控：用『通用可更新』的 setup —— 做一次、所有電路共用，儀式裡只要一個人誠實銷毀秘密就安全。換來的是 proof 常數大小＋配對驗證便宜＋上鏈友善。免設定的代價（IPA 線性驗證、FRI 大 proof）對需要輕量、可重複驗證的合規反而更不利，所以這個取捨划算。"],
+ ["既然方法不綁 Halo2，為什麼不直接用 STARK（免設定、抗量子）？","FRI 免設定又後量子，確實誘人；但它 proof 偏大（hash-based）、驗證成本也高，對要輕量驗證的合規不划算。而且我們 kernel 要的自訂閘＋原生查表，PLONKish 最自然。後量子確實是 KZG／BN254 的真限制（STARK 在這點贏）—— 但綜合『合身＋輕驗證』，這個底層仍是最佳取捨。"]
 ],
 '兩條死路':[
  ["查表不能壓縮、或只存關鍵點再插值嗎？","插值等於又回到多項式逼近這條路（還多了查表開銷）；純壓縮也救不了 pp=32 的 43 億格量級。所以查表的死法是『精度一拉高就指數爆量』，這是結構性的，不是工程沒調好。"],
