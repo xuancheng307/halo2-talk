@@ -312,7 +312,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <!-- ===== PART I OPENER ===== -->
 <section class="slide part-opener" data-part="I" data-label="在做什麼">
   <div><div class="pnum">PART I</div><h1>在做什麼</h1>
-  <p class="lead">Halo2 是一台「可驗證計算」引擎：證明你正確執行了某段計算，卻不洩漏私密輸入，且證明又小又快驗。</p></div>
+  <p class="lead">Halo2 是一台「可驗證計算」引擎：證明你正確執行了某段計算，卻不洩漏私密輸入，且驗證遠快於重跑、設定一次即可通用於任意電路。</p></div>
 </section>
 
 <!-- I-0 lineage (moved up: what it is -> where it came from) -->
@@ -421,9 +421,9 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <tr><th>方案</th><th>要 setup？</th><th>為什麼</th><th>代價 / 好處</th></tr>
     <tr><td>原版 Halo2 · <b>IPA</b></td><td><b style="color:#15803d">不要</b></td><td>Pedersen/IPA 用<b>公開的隨機基</b>（hash 出來、nothing-up-my-sleeve），<b>沒把秘密藏進參數</b> → 沒有 toxic waste</td><td>無設定風險、遞迴友善；但驗證 <b>線性</b>、proof 較大</td></tr>
     <tr><td>Groth16</td><td><b style="color:#b91c1c">每電路一次</b></td><td>CRS <b>綁特定電路</b></td><td>換電路要重辦儀式，最不通用</td></tr>
-    <tr class="hl"><td><b>Halo2 PSE · KZG</b>（我們）</td><td><b>一次 · 通用 · 可更新</b></td><td>承諾/開啟靠<b>藏了 \(\tau\) 的結構化 SRS</b>（配對檢查要 \([\tau]_2\)）</td><td>一次性可信設定；但<b>所有電路共用</b>、可更新降風險，換得證明小 + 上鏈便宜</td></tr>
+    <tr class="hl"><td><b>Halo2 PSE · KZG</b>（我們）</td><td><b>一次 · 通用 · 可更新</b></td><td>承諾/開啟靠<b>藏了 \(\tau\) 的結構化 SRS</b>（配對檢查要 \([\tau]_2\)）</td><td>一次性可信設定；但<b>所有電路共用</b>、可更新降風險，換得<b>通用可更新</b> + 上鏈便宜</td></tr>
   </table>
-  <div class="fbox" style="border-left-color:#16a34a;margin-top:.55rem"><div class="cmt"><b>差異的本質：承諾方案有沒有把秘密藏進公共參數。</b>藏了（KZG 的 \(\tau\)）→ 就需要可信設定把它安全產生並銷毀；沒藏（IPA 用公開隨機基）→ 根本不需要。我們選 KZG，是用「一次性、通用可更新的 setup」換「BN254 上鏈驗證便宜 + 證明小」。<span class="muted">τ 的形式、SRS 細節見後面 KZG；pk/vk 怎麼從 SRS 生出見〈Setup → Keygen〉。</span></div></div>
+  <div class="fbox" style="border-left-color:#16a34a;margin-top:.55rem"><div class="cmt"><b>差異的本質：承諾方案有沒有把秘密藏進公共參數。</b>藏了（KZG 的 \(\tau\)）→ 就需要可信設定把它安全產生並銷毀；沒藏（IPA 用公開隨機基）→ 根本不需要。我們選 KZG，是用「一次性、通用可更新的 setup（不必每電路重辦）」換「BN254 上鏈驗證便宜、承諾固定大小」—— 注意：證明小不是它的賣點（Groth16 反而更小），通用設定 + 自訂閘/查表才是。<span class="muted">τ 的形式、SRS 細節見後面 KZG；pk/vk 怎麼從 SRS 生出見〈Setup → Keygen〉。</span></div></div>
 </section>
 
 <!-- I-0c PLONK — the modern paradigm they may not know -->
@@ -462,14 +462,13 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <a class="src" href="https://zcash.github.io/halo2/concepts/proofs.html" target="_blank" rel="noopener">The halo2 Book — Proof systems ↗</a></div>
     </div>
     <div class="card accent">
-      <h3>對應我們的 demo</h3>
+      <h3>三個詞的關係</h3>
       <ul>
-        <li><b>關係 R</b>：「P(x) = 98」是否成立。</li>
-        <li><b>電路</b>：那條 Horner 閘的實作。</li>
-        <li><b>見證</b>：私密的 x = 3 與每列的 acc。</li>
-        <li><b>公開輸入 (instance)</b>：98。</li>
+        <li><b>關係 R</b> = 規格：哪些「(公開, 私密)」組合算「對」。</li>
+        <li><b>電路</b> = R 的<b>實作</b>：放進證明系統的那張約束表。</li>
+        <li><b>見證 w</b> = 私密解：能讓 R 成立的那組私密輸入。</li>
       </ul>
-      <p class="muted" style="margin-top:.5rem;font-size:.95rem">下一張:把這套語言加上四個安全性質,就是 zk-SNARK。</p>
+      <p class="muted" style="margin-top:.5rem;font-size:.95rem">一句話：<b>用「電路」證明你握有讓「關係 R」成立的「見證」。</b>下一張把它形式化，並對應到 demo 與我們的 PF1。</p>
     </div>
   </div>
 </section>
@@ -501,6 +500,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="I" data-label="zk-SNARK 性質">
   <div class="slide-meta"><span class="part-label">PART I</span> · 關鍵定義（原文）</div>
   <h2>zk-SNARK 的<span class="accent">四個安全性質</span> — 引原文</h2>
+  <p class="muted" style="margin:-.1rem 0 .35rem;font-size:.92rem">這四項是<b>一般 zk-SNARK 共有</b>的標準性質，熟悉者可<b>快速帶過</b> —— 此頁只放<b>原文定義</b>；「為什麼 Halo2 各自成立」留到 Part III〈為什麼能用〉用機制論證，不在這裡重複。</p>
   <div class="grid-2">
     <div>
       <div class="defn"><span class="dt">Completeness</span>
