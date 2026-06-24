@@ -793,6 +793,11 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <div class="cmt"><b>acc</b> = [<b style="color:#16a34a">2, 9, 31, 98</b>]（Horner 逐列填到 98）｜<b>x</b> ≡ 3｜<b>coeff</b> = [3, 4, 5, ·]｜<b>sel</b> = [1, 1, 1, 0]</div></div>
       <div class="fbox" style="margin-top:.5rem"><div class="lbl">② 每欄 → 一條多項式</div>
         <div class="cmt">每一欄插值成一條多項式：\(a(X)\) 在 \(\omega^i\) 取上面那四個值（\(x,c,s\) 同理）。「下一列」\(=a(\omega X)\)。</div></div>
+      <div class="fbox" style="margin-top:.5rem;border-left-color:#2563eb"><div class="lbl" style="color:#1d4ed8">🔢 那條 \(t\) 真的算給你看（小體 \(\mathbb F_{101}\)，\(\omega=10\)，\(H=\{1,10,100,91\}\) 裝下 2,9,31,98）</div>
+        <div class="cmt" style="line-height:1.85">插值 \(\;a(X)=35+89X+32X^2+48X^3\)<br>
+        合成 \(\;g(X)=80+62X+7X^2+21X^4+39X^5+94X^6\) <span class="muted" style="font-size:.84em">（deg 6，\(H\) 全 0）</span><br>
+        除以 \(Z_H=X^4-1\)（餘 \(0\)）\(\;\Rightarrow\;\) <b style="color:#15803d">\(t(X)=94X^2+39X+21\)</b>　驗算 \(t(X)(X^4-1)=g(X)\) ✓</div>
+        <div class="muted" style="font-size:.83rem;margin-top:.15rem">係數 35,89… 是插值混出來的、非表值 2,9,31,98；BN254 上一樣存在這條 \(t\)，只是 254-bit 印不出 —— 「\(\exists t\)」不是空話。</div></div>
     </div>
     <div>
       <div class="fbox" style="margin:0"><div class="lbl">③ 閘 → 一條多項式 g<span style="font-weight:400;color:var(--text-dim)">（本例只有一條閘 → 合成後 \(G=g\)，不用 \(\alpha\)）</span></div>
@@ -808,7 +813,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     </div>
   </div>
   <div class="fbox" style="border-left-color:#16a34a;margin-top:.5rem"><div class="lbl" style="color:#15803d">⑤ 整除收尾</div>
-    <div class="cmt">\(g\) 在整個 \(H\) 上為 0 \(\;\Leftrightarrow\; Z_H\mid g \;\Leftrightarrow\; \exists\,t:\ g(X)=t(X)\,Z_H(X)\)（\(Z_H=X^{n}-1\)，本例 \(n=4\) 列 \(\Rightarrow X^4-1\)）。「計算正確」就兌現成「我有一條 \(t\)」—— 下一步承諾、在隨機點驗。</div></div>
+    <div class="cmt">\(g\) 在整個 \(H\) 上為 0 \(\;\Leftrightarrow\; Z_H\mid g \;\Leftrightarrow\; \exists\,t:\ g(X)=t(X)\,Z_H(X)\)（\(Z_H=X^{n}-1\)，本例 \(n=4\) 列 \(\Rightarrow X^4-1\)）。「計算正確」就兌現成「我有一條 \(t\)」—— 左邊已用 \(\mathbb F_{101}\) 把它算出來。下一步：承諾、在隨機點驗。</div></div>
 </section>
 
 <!-- II-5 KZG -->
