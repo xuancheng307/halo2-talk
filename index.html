@@ -749,7 +749,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <ol class="steps" style="margin:.1rem 0">
     <li><b>求值域</b>：取 \(n=2^k\) 階乘法子群 \(H=\langle\omega\rangle=\{1,\omega,\dots,\omega^{\,n-1}\}\)；vanishing 多項式 \(Z_H(X)=X^{n}-1\)（在 \(H\) 上恆為 0，因為 \((\omega^i)^n=1\)）。</li>
     <li><b>每欄插值成多項式</b>：令 advice \(a(\omega^{\,i})=\) 第 \(i\) 列的值（Lagrange 插值）；fixed / selector 同理記為 \(q(X)\)。rotation「下一列」\(=\) 代入 \(\omega X\)（因 \(a(\omega\cdot\omega^i)=a(\omega^{i+1})\)）。</li>
-    <li><b>所有約束合成一條</b>（用挑戰 \(\alpha\) 的次方；含閘、複製約束、查表）：\[ G(X)=\sum_{j}\alpha^{\,j}\,g_j\big(a(X),\,a(\omega X),\,q(X),\dots\big) \]</li>
+    <li><b>所有約束合成一條</b>（每條約束各乘 \(\alpha\) 的一個次方、疊起來；含閘、複製約束、查表）：\[ G(X)=g_0(X)+\alpha\,g_1(X)+\alpha^{2}g_2(X)+\dots=\sum_{j}\alpha^{\,j}\,g_j(X) \]</li>
     <li><b>核心等價</b>：每一列都滿足約束 \(\ \Longleftrightarrow\ G\) 在 \(H\) 上恆為 0 \(\ \Longleftrightarrow\ Z_H\mid G\ \Longleftrightarrow\ \exists\,t(X):\) \[ G(X)=t(X)\cdot Z_H(X) \]</li>
   </ol>
   <figure style="margin:0">
