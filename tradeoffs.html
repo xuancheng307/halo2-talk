@@ -429,9 +429,10 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <div class="card accent" style="margin-top:.6rem"><h3>數字</h3>
         <p>pp=16、\( d\le 7 \) 就讓 <b>13 個函數全 ULP=1</b>。再往上加 degree，不會更好。</p>
       </div>
+      <div class="ideabox" style="margin-top:.5rem"><span class="tag">💡 為什麼會放大</span>：degree 越高 → 係數越多、各自量化（誤差累加）＋ 高次項 \( x^d \) 放大輸入誤差；過了 \( d^\* \) 就蓋過逼近誤差的下降。</div>
     </div>
     <figure>
-      <svg viewBox="0 0 420 240" role="img" aria-label="精度隨 degree 先升後降，存在甜蜜點 d*">
+      <svg viewBox="0 0 420 240" role="img" aria-label="精度隨 degree 先升後降，存在甜蜜點 d*" style="width:100%;max-width:360px;height:auto;display:block;margin:0 auto">
         <line x1="50" y1="200" x2="400" y2="200" stroke="#94a3b8" stroke-width="1.5"/>
         <line x1="50" y1="200" x2="50" y2="20" stroke="#94a3b8" stroke-width="1.5"/>
         <text x="225" y="228" font-size="12" text-anchor="middle" fill="#55596b">degree d →</text>
@@ -446,7 +447,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <figcaption>原始圖解（本報告自製）· 精度先升後降，有最佳點</figcaption>
     </figure>
   </div>
-  <p style="margin-top:.4rem"><b>取捨：</b>degree <b>不是免費</b>，有一個甜蜜點，盲目加只會更糟。<span class="muted">（這個「harmful degree」效應是我們首次在 ZK 文獻記錄的。）</span></p>
+  <p style="margin-top:.4rem"><b>取捨：</b>degree <b>不是免費</b>，有一個甜蜜點，盲目加只會更糟。<span class="muted">（這現象在 DSP／硬體早有討論〔de Dinechin 2015〕；我們是<b>首次在 ZK 定點下量化、刻畫</b>它 —— 是測量，不是發明。）</span></p>
 </section>
 
 <!-- ===== 7 · FUNCTION & INTERVAL ===== -->
@@ -461,7 +462,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <tr><td>\( \ln \)</td><td>142 ULP</td></tr>
         <tr class="hl"><td>\( \mathrm{erf} \)</td><td><b>15 ULP</b></td></tr>
       </table>
-      <p class="muted" style="margin-top:.4rem;font-size:.9rem">函數本身的<b>係數結構</b>決定精度地板，<b>與 kernel 設計無關</b>。</p>
+      <p class="muted" style="margin-top:.4rem;font-size:.9rem">為什麼差這麼多：\( \mathrm{erf} \) 是<b>奇函數</b>、一半係數為 0、約 7 個有效 Horner 步；\( \ln \) 14 步全有效、累加的量化誤差多。<b>函數結構（條件數）決定地板，與 kernel 無關。</b></p>
     </div>
     <div class="card amber"><h3>② 區間：精度 ↔ 覆蓋的拉鋸</h3>
       <p>窄區間更準，但覆蓋變小：</p>
@@ -645,7 +646,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 "BN254":"配對友善橢圓曲線（約 128-bit 安全）；純量場約 254-bit，是中間值的硬天花板。",
 "degree (多項式次數 d)":"逼近多項式 P(x)=Σ cᵢxⁱ 的最高次；越大越貼合但閘越多，且過了甜蜜點反而更差。",
 "d* (最佳 degree)":"精度最高的那個 degree；超過它再加次數，量化誤差被放大、整體精度掉頭往下。",
-"量化飽和":"超過 d* 後 degree 再高反而更差的現象（逼近誤差續降、量化誤差被放大）；本論文首次在 ZK 文獻記錄。",
+"量化飽和":"超過 d* 後 degree 再高反而更差的現象（逼近誤差續降、量化誤差被放大）；DSP／硬體早有討論（de Dinechin 2015），本論文首次在 ZK 定點下量化刻畫。",
 "harmful degree":"超過甜蜜點 d* 之後『有害』的那些 degree；加了只會更糟。",
 "量化誤差":"把實數/係數塞進有限位定點時的捨入誤差；degree 越高被放大得越多。",
 "逼近誤差":"多項式與真函數的差距；degree 越高越小（但會被量化誤差反超）。",
