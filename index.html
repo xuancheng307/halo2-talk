@@ -1112,32 +1112,24 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- IV-1 our method -->
 <section class="slide" data-part="IV" data-label="超越函數塞進閘">
-  <div class="slide-meta"><span class="part-label">PART IV</span> · 我們的貢獻</div>
-  <h2>把<span class="accent">超越函數</span>塞進 Halo2 的閘</h2>
-  <figure>
-    <svg viewBox="0 0 900 120" role="img" aria-label="我們的方法流程">
-      <g font-size="12" text-anchor="middle">
-        <rect x="20" y="35" width="180" height="56" rx="10" fill="#eef2ff" stroke="#c7d2fe"/><text x="110" y="58" font-weight="700" fill="#3730a3">① 定點 pp=48</text><text x="110" y="77" font-size="10.5" fill="#6366f1">每值 2⁴⁸ 縮放，整數模擬小數</text>
-        <text x="208" y="67" font-size="18" fill="#8b94a3">→</text>
-        <rect x="225" y="35" width="180" height="56" rx="10" fill="#f7f8fa" stroke="#d9dce3"/><text x="315" y="58" font-weight="700" fill="#4338ca">② Remez minimax</text><text x="315" y="77" font-size="10.5" fill="#55596b">d 次多項式，區間最大誤差最小</text>
-        <text x="413" y="67" font-size="18" fill="#8b94a3">→</text>
-        <rect x="430" y="35" width="180" height="56" rx="10" fill="#f7f8fa" stroke="#d9dce3"/><text x="520" y="58" font-weight="700" fill="#4338ca">③ 逐步 Horner 閘</text><text x="520" y="77" font-size="10.5" fill="#55596b">acc·R + c = acc下·S + rem</text>
-        <text x="618" y="67" font-size="18" fill="#8b94a3">→</text>
-        <rect x="635" y="35" width="180" height="56" rx="10" fill="#fffbeb" stroke="#fde68a"/><text x="725" y="58" font-weight="700" fill="#92400e">④ ByteTable 查表</text><text x="725" y="77" font-size="10.5" fill="#b45309">截斷餘數做 byte 範圍檢查</text>
-      </g>
-    </svg>
-    <figcaption>原始圖解（本報告自製）</figcaption>
-  </figure>
-  <div class="grid-2">
-    <div class="card accent"><h3>關鍵洞見</h3><p style="font-size:.95rem">一套電路、共用 256 條目 ByteTable，<b>換函數只換 d 個係數</b>，不重設計電路 — 通用性來自 fixed 欄。</p></div>
-    <div class="card amber"><h3>demo 閘 → 論文 kernel</h3><p style="font-size:.95rem">demo 的 <code class="inl">acc·x+c=acc_next</code>，論文多了 <b>÷S 截斷 + 餘數 byte 拆解 + lookup</b>，即完整定點 Horner kernel。</p></div>
-  </div>
+  <div class="slide-meta"><span class="part-label">PART IV</span> · 我們的貢獻 · 核心取捨</div>
+  <h2>我們的四個<span class="accent">設計決定</span> —— 每個都是被逼出來的取捨</h2>
+  <div class="whybox"><span class="tag">❓ 為什麼不是隨便選</span>：Halo2 只有體的加、乘。要在上面重建 \(\exp/\ln/\mathrm{erf}\)，每個決定都被「<b>精度 ↔ 體容量 ↔ 電路次數</b>」夾著走 —— 下面四個，全是試過別的、撞牆後才定的。</div>
+  <table style="font-size:.9rem">
+    <tr><th>設計決定</th><th>為什麼這個（別的為什麼不行）</th><th>換到的效果</th></tr>
+    <tr><td><b>定點 pp=48</b><br><span class="muted" style="font-size:.85em">不用浮點</span></td><td>體裡<b>沒有浮點</b> → 整數 ×\(2^{48}\) 模擬小數。pp 越大越準，中間值也越容易撐爆體。</td><td>能在體上算小數；代價＝中間值會脹，<b>逼出下面的截斷</b>。</td></tr>
+    <tr class="hl"><td><b>Minimax（Remez）</b><br><span class="muted" style="font-size:.85em">不用 Taylor</span></td><td><b>Taylor 在定點下崩潰</b>：pp=32、d=10 時 \(\ln\) 只剩 4.4 有效位；Minimax 達 28.6 位。</td><td>Minimax 是<b>必要條件</b>、不是「比較好」；13 函數在最小 degree 就 ULP=1。</td></tr>
+    <tr><td><b>逐步截斷 per-step</b><br><span class="muted" style="font-size:.85em">不用延遲截斷</span></td><td>延遲截斷在低 pp 其實<b>更省</b>；但 pp≥32 中間值膨脹到 \(\approx 2^{352}\)、<b>溢位 BN254</b>。</td><td>高精度<b>唯一可行路</b> —— 這個 pp 邊界是我們第一個量化出來的。</td></tr>
+    <tr><td><b>通用 Horner ＋ ByteTable</b></td><td>換函數<b>只改 \(d\) 個係數</b>（放 fixed 欄）；256 條目 ByteTable <b>全函數共用</b>。</td><td>一套電路撐 13 個函數；加新函數<b>零電路重設計</b>。</td></tr>
+  </table>
+  <div class="soulbox" style="margin-top:.5rem"><span class="tag">🎯 目標效果</span>：金融精度 <b>24–32 bit</b>、證明 <b>sub-10KB</b>、驗證 <b>sub-second</b>，全程<b>不揭露部位</b> —— 這是從「能評估一個函數」跨到「能證一個金融模型」的那一步。</div>
 </section>
 
 <!-- IV-1b detailed kernel formulas -->
 <section class="slide" data-part="IV" data-label="kernel 公式">
   <div class="slide-meta"><span class="part-label">PART IV</span> · 詳細作法（公式 · 聽不懂可跳過，不影響主線）</div>
   <h2>定點 Horner kernel — <span class="accent">逐步公式</span></h2>
+  <div class="whybox"><span class="tag">❓ 這頁在補哪個決定</span>：上一頁第三個取捨「<b>逐步截斷</b>」，具體就靠這條閘 ＋ 查表逼出來。想看公式的人看，否則可跳過。</div>
   <div class="soulbox"><span class="tag">🎯 真正要驗的就這條</span>：\(\mathrm{acc}_k\!\cdot\! R+c_k=\mathrm{acc}_{k+1}\!\cdot\! S+\mathrm{rem}_k,\ \mathrm{rem}_k\in[0,S)\) —— 餘數落在範圍內 ⟺ 誠實做了 \(\div S\) 截斷。下面 ①–⑤ 把它拆成可查表的閘。</div>
   <ol class="steps">
     <li><b>定點表示</b>：取尺度 \(S = 2^{pp},\ pp=48\)。實數 \(v\) 編碼成整數 \(\hat v = \lfloor v\cdot S\rceil\)（所有輸入都先這樣進電路）。</li>
@@ -1408,8 +1400,8 @@ Stage 4 VERIFY       verified      1.96 ms
 '我們怎麼用它':"第四部分,把 Halo2 接回我們自己的工作。\n一句話:Halo2 沒有浮點、沒有 exp、ln、erf 這些超越函數,我們得自己在它的閘上把它們重建出來 —— 但先說清楚,我們為什麼非要它不可。",
 '核心動機':"先講清楚我們整篇論文為什麼存在 —— 從一個真實需求講起。\n金融法遵要機構證明「風險在限額內」:對沖基金要證 Delta 曝險沒超門檻、信用衍生品要證組合的違約機率沒超監管上限。問題是傳統做法得把部位全攤開給監管或對手方看,等於把核心交易策略洩漏出去。\nZK 正好對症:證明你算對了、卻不洩漏輸入。但真要用到金融合規,就撞上一道牆 —— 這些合規檢查背後是金融模型,Black-Scholes、Merton,全都靠超越函數 ln、exp、erf;而 ZK 電路只有有限體的加跟乘、沒有浮點,這幾個函數根本算不出來,這就是上一頁那條「沒有原生浮點」真正的痛點。\n更關鍵的是那個洞:現有的 ZK 金融系統只會做加法類的證明,像储备证明、范围证明;而超越函數求值,只有機器學習推論做過、精度才 8 到 16 位,遠低於金融合規要的 24 到 32 位 —— 差兩個基點,一個合規判定就翻盤。所以到今天為止,沒有任何系統能證明「一個金融模型被正確計算過」。這就是我們站的位置,卡在數值分析、密碼學、計算金融三個領域的交叉口。",
 '兩條死路':"那為什麼不能直接把超越函數放進去?直覺有兩條路,我帶你看為什麼兩條都死。\n第一條,查表 —— 這是 ZKML 的主流:把每個可能的輸入都預先算好、存成一張表。低精度還行,pp=16 大概一兩萬到六萬格;但金融精度要 pp=24、pp=32,表就爆成 1680 萬、43 億格,每個函數一張 —— 任何實際電路都裝不下。這其實呼應前面那頁:子群連 2 的 28 次方都到頂了,2 的 32 次方根本不存在。\n第二條,多項式逼近 —— 用一條低次多項式近似函數、用 Horner 求值。這條可行,但有兩個坑。一個是 Taylor:在定點量化下會崩潰,pp=32、d=10 時 ln 只剩 4.4 個有效位、等於一位十進位;換成 L 無窮最佳的 Minimax、也就是 Remez 算出來的,能到 28.6 位。所以 Minimax 對我們不是「比較好」,是「必要條件」。另一個是溢位:Horner 一步步乘下去,中間值膨脹成 S 的 d+1 次方,pp=32、d=10 就到 2 的 352 次方,遠超 BN254 的 253 位 —— 所以必須逐步截斷。\n這兩條死路逼出我們要解的問題,就是這條:在 ZK 電路裡,用定點、Minimax 多項式、逐步截斷、範圍檢查,把超越函數忠實重建出來,而且給出可以證明的誤差界,做到金融精度。\n最後落地在兩個情境:Scenario A 是 Black-Scholes 的 Delta 對沖,pp=24,首個選擇權風險合規的 ZK 證明;Scenario C 是 Merton 信用違約模型,pp=32,首個結構式信用模型的 ZK 電路。接下來這套四層方法,就是怎麼做到的。",
-'超越函數塞進閘':"方法四步:\n① 定點,每個數用 2 的 48 次方縮放,用整數模擬小數;\n② 用 Remez minimax 找一條多項式,讓區間內最大誤差最小;\n③ 用剛剛那個逐步 Horner 閘求值;\n④ 用 ByteTable 查表做範圍檢查。\n最漂亮的一點:換不同的函數,只要換那幾個係數,電路完全不用重設計 —— 這個通用性,就是來自 Halo2 的 fixed 欄。\n等一下 demo 的閘,加上截斷跟範圍檢查,就是論文完整的 kernel。",
-'kernel 公式':"這張把我們論文的 kernel,怎麼把超越函數塞進閘,寫成精確公式,這五步,你抓動作就好。\n第一步,定點:沒有小數,就用一個大的縮放尺度 S 把實數乘上去變整數來模擬。\n第二步,逼近:用 Remez minimax 找一條多項式近似目標函數,讓整個區間的最大誤差最小,係數放進 fixed 欄。\n第三步,逐步截斷 Horner:每一步乘加之後除以 S 取整,維持定點。\n第四步,是讓它安全的關鍵:用一條閘強制『誠實截斷』,把取整剩下的餘數綁住。第五步,範圍檢查:用查表保證餘數落在合法範圍,也就是拆成 byte、每個 byte 都在 0 到 255。最漂亮的是,換一個函數只要換係數,電路一行都不用動。\n【被問『範圍檢查為什麼保證誠實截斷』就這樣一步步帶】\n① 截斷 acc_{k+1}=⌊(acc_k·R+c_k)/S⌋ 的『誠實』,等價於餘數 rem_k=acc_k·R+c_k−acc_{k+1}·S 落在 [0,S)。\n② 但閘只強制那條等式(acc_k·R+c_k=acc_{k+1}·S+rem_k);光這樣,prover 可亂選 acc_{k+1} 配一個超範圍的 rem 也讓等式成立。\n③ 補救:用查表強制 rem_k∈[0,S)。因 S=2⁴⁸=256⁶,把 rem 拆 6 個 byte、每個 byte 用 ByteTable 查它在 0–255。\n④ 一旦 rem 被鎖在 [0,S),acc_{k+1} 就唯一(真正的商),沒有作弊空間 —— 這就是『閘 + 範圍檢查』合起來才等於誠實截斷。",
+'超越函數塞進閘':"這頁是我們報告的重點 —— 不是教你怎麼做,是說清楚我們為什麼這樣選。\nHalo2 只有體的加跟乘,要在上面重建 exp、ln、erf,每個決定都被精度、體容量、電路次數三件事夾著走。我們有四個關鍵取捨。\n第一,用定點、不用浮點 —— 因為體裡根本沒有浮點,只能拿整數乘上 2 的 48 次方來模擬小數;代價是 pp 越大、中間值越容易撐爆體,這就逼出後面的截斷。\n第二,用 Minimax、不用 Taylor —— 這不是「比較好」,是「必要」。Taylor 在定點量化下會崩潰,pp=32、d=10 時 ln 只剩 4.4 個有效位;換成 Remez 算的 Minimax 就有 28.6 位。我們 13 個函數在最小的 degree 就做到 ULP=1。\n第三,用逐步截斷、不用延遲截斷 —— 有趣的是延遲截斷在低精度其實更省,但一到 pp 大於等於 32,中間值會膨脹到 2 的 352 次方、直接溢位 BN254。所以高精度只剩 per-step 一條路,這個邊界是我們第一個量化出來的。\n第四,一套通用 Horner kernel 加一張 ByteTable —— 換函數只要改那 d 個係數、放進 fixed 欄,電路結構完全不動,256 條目的表所有函數共用;加一個新函數,零電路重設計。\n目標效果一句話:做到金融精度 24 到 32 位、證明小於 10KB、驗證不到一秒,而且全程不揭露部位 —— 這就是從「能算一個函數」跨到「能證一個金融模型」。下一頁是想看公式的人用的細節。",
+'kernel 公式':"這頁是給想看公式的人 —— 上一頁第三個決定「逐步截斷」,具體就靠這條閘加查表逼出「誠實截斷」。聽不懂可以跳過,不影響主線。\n抓一個核心就好:每一步乘加完除以 S 取整,剩下的餘數一定要落在 0 到 S 之間 —— 餘數在範圍內,就等於你誠實做了截斷、沒有亂填一個數來湊。怎麼強制?一條閘把那條等式綁死,再用 ByteTable 把餘數拆成 byte、逐一查 0 到 255。換一個函數只換係數,電路一行都不動。\n以下是逐步公式,你抓動作就好。\n第一步,定點:沒有小數,就用一個大的縮放尺度 S 把實數乘上去變整數來模擬。\n第二步,逼近:用 Remez minimax 找一條多項式近似目標函數,讓整個區間的最大誤差最小,係數放進 fixed 欄。\n第三步,逐步截斷 Horner:每一步乘加之後除以 S 取整,維持定點。\n第四步,是讓它安全的關鍵:用一條閘強制『誠實截斷』,把取整剩下的餘數綁住。第五步,範圍檢查:用查表保證餘數落在合法範圍,也就是拆成 byte、每個 byte 都在 0 到 255。最漂亮的是,換一個函數只要換係數,電路一行都不用動。\n【被問『範圍檢查為什麼保證誠實截斷』就這樣一步步帶】\n① 截斷 acc_{k+1}=⌊(acc_k·R+c_k)/S⌋ 的『誠實』,等價於餘數 rem_k=acc_k·R+c_k−acc_{k+1}·S 落在 [0,S)。\n② 但閘只強制那條等式(acc_k·R+c_k=acc_{k+1}·S+rem_k);光這樣,prover 可亂選 acc_{k+1} 配一個超範圍的 rem 也讓等式成立。\n③ 補救:用查表強制 rem_k∈[0,S)。因 S=2⁴⁸=256⁶,把 rem 拆 6 個 byte、每個 byte 用 ByteTable 查它在 0–255。\n④ 一旦 rem 被鎖在 [0,S),acc_{k+1} 就唯一(真正的商),沒有作弊空間 —— 這就是『閘 + 範圍檢查』合起來才等於誠實截斷。",
 '用在哪 + 範例':"最後一部分,落地。\n這裡點出整份報告的骨架:前面 Part II 我們用數字、表格、圖,把同一個例子在『符號層』走完(算術化→多項式→整除→承諾→開啟→驗證);這一段,同一個 P(x)=2x³+3x²+4x+5,現場用 Rust 真的跑一次 —— 從符號變成會動的程式,prove + verify 當場給大家看。\n再加上業界把 Halo2 用在哪、我們論文的兩個真實電路 PF1/PF2。",
 '用在哪裡':"業界:Zcash 的 Orchard 用的是原版 IPA,不是 KZG,這點別搞混;Scroll、Taiko 這些 zkEVM 走的才是 PSE 的 KZG 路線。\n我們自己有兩個已經用 Rust 實作的電路:PF1 證明投組的淨 delta 在風險限額內,但不洩漏個別部位;PF2 處理狀態轉移。\n實測 proof 是 31,872 bytes、驗證約 8 毫秒。\n下面那句 Poseidon 的原文,是我們 Merkle 樹用的雜湊。\n接下來直接看 code,把這套方法搬上螢幕跑。",
 '程式碼 1':"進到 code。\n這張是電路的骨架:宣告四種欄,然後 create_gate 裡那一條 —— 就是整個電路唯一的約束:selector 乘上 acc 乘 x 加係數減下一列的 acc,等於零。\n注意 acc 用 Rotation::next 讀下一列。\n敘述很簡單:我知道一個秘密 x,讓這個三次多項式 P(x) 等於某個公開值;我們取 x 等於 3,P(3) 等於 98。",
