@@ -1916,15 +1916,15 @@ Stage 4 VERIFY       verified      1.96 ms
   // ===== presenter mode: synced notes popup (project main window; keep popup on laptop via extended display) =====
   let presenterWin=null;
   const PRESENTER_HTML='<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><title>簡報者 · Halo2</title>'+
-    '<style>body{margin:0;font-family:"Noto Sans TC",system-ui,sans-serif;background:#0f1117;color:#e8eaf0;padding:16px 22px 74px;line-height:1.75}'+
-    '.ptop{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #2a2f3a;padding-bottom:8px;margin-bottom:12px}'+
-    '#pPg{font-weight:800;color:#8ea2ff;font-size:1.02rem}#pTimer{font-variant-numeric:tabular-nums;color:#cdd3df;font-size:1.3rem;font-weight:700}'+
-    '#pTitle{font-size:1.55rem;font-weight:900;margin:0 0 12px;color:#fff;line-height:1.25}'+
-    '#pNote{font-size:1.16rem}#pNote .nt-p{margin:.32em 0}'+
-    '#pNote .nt-li{margin:.26em 0;padding-left:1.45em;position:relative}#pNote .nt-li::before{content:"\\2022";position:absolute;left:.4em;color:#8ea2ff;font-weight:800}'+
-    '#pNote .nt-sec{margin-top:.7rem;border-top:1px dashed #2a2f3a;padding-top:.5rem;color:#aeb6c6;font-size:.93em}'+
-    '#pNote .nt-h{font-weight:800;color:#ffd479;font-size:.92em;margin-bottom:.25rem}'+
-    '#pNext{position:fixed;left:0;right:0;bottom:0;background:#1a1f2b;border-top:1px solid #2a2f3a;padding:11px 22px;color:#9aa3b2;font-weight:700;font-size:1.02rem}'+
+    '<style>body{margin:0;font-family:"Noto Sans TC",system-ui,sans-serif;background:#fff;color:#111;padding:16px 22px 74px;line-height:1.85;font-weight:500}'+
+    '.ptop{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(124,58,237,.28);padding-bottom:8px;margin-bottom:12px}'+
+    '#pPg{font-weight:800;color:#4338ca;font-size:1.02rem}#pTimer{font-variant-numeric:tabular-nums;color:#111;font-size:1.3rem;font-weight:700}'+
+    '#pTitle{font-size:1.55rem;font-weight:900;margin:0 0 12px;color:#4338ca;line-height:1.25}'+
+    '#pNote{font-size:1.18rem;color:#111}#pNote .nt-p{margin:.32em 0}'+
+    '#pNote .nt-li{margin:.26em 0;padding-left:1.45em;position:relative}#pNote .nt-li::before{content:"\\2022";position:absolute;left:.4em;color:#4f46e5;font-weight:800}'+
+    '#pNote .nt-sec{margin-top:.7rem;border-top:1px dashed rgba(124,58,237,.32);padding-top:.5rem;font-size:.95em}'+
+    '#pNote .nt-h{font-weight:800;color:#4338ca;font-size:.92em;margin-bottom:.25rem}'+
+    '#pNext{position:fixed;left:0;right:0;bottom:0;background:#f3f0ff;border-top:1px solid rgba(124,58,237,.28);padding:11px 22px;color:#4338ca;font-weight:700;font-size:1.02rem}'+
     '</style></head><body><div class="ptop"><span id="pPg"></span><span id="pTimer">00:00</span></div>'+
     '<h2 id="pTitle"></h2><div id="pNote"></div><div id="pNext"></div>'+
     '<scr'+'ipt>var t0=Date.now();setInterval(function(){var s=Math.floor((Date.now()-t0)/1000),m=(""+Math.floor(s/60)).padStart(2,"0"),x=(""+(s%60)).padStart(2,"0"),e=document.getElementById("pTimer");if(e)e.textContent=m+":"+x;},1000);</scr'+'ipt></body></html>';
