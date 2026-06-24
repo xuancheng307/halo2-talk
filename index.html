@@ -861,7 +861,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="soulbox"><span class="tag">🎯 真正要驗的就這條</span>：\((X-z)\mid(f-v)\)（這裡 \(X^3-27\) 被 \(X-3\) 整除）⟺ \(f(3)=27\)，驗證落到一條配對 \(e(C-[v]_1,[1]_2)=e(\pi,[\tau]_2-[z]_2)\)。下面用具體數字走一遍。</div>
   <p class="muted" style="margin:0 0 .4rem;font-size:.96rem">要證「多項式 \(f\) 在 \(z\) 的值是 \(v\)」。用乾淨小例：取 \(f(X)=X^3,\ z=3,\ v=27\)。</p>
   <ol class="steps">
-    <li><b>靈魂恆等式</b>：\(f(z)=v\ \Longleftrightarrow\ (X-z)\mid\big(f(X)-v\big)\)。這裡 \(f-v=X^3-27\)。</li>
+    <li><b>靈魂恆等式</b>：\(f(z)=v\ \Longleftrightarrow\ (X-z)\mid\big(f(X)-v\big)\)。這裡 \(f-v=X^3-27\)。<span class="cmt"><b>為什麼這個等價成立？</b> 餘式定理：\(f(X)-v\) 除以 \((X-z)\) 的<b>餘數恰好 \(=f(z)-v\)</b>（一個常數）。所以 <b>餘數 \(=0\ \Leftrightarrow\ f(z)=v\ \Leftrightarrow\) 整除</b> —— 「能不能整除」本身就是一台測謊機。</span></li>
     <li><b>算商多項式 \(q\)（= 開啟證明的核心）</b>：\[ q(X)=\frac{X^3-27}{X-3}=X^2+3X+9 \]<span class="cmt">驗算：\((X^2+3X+9)(X-3)=X^3-27\ ✓\)。<b>能整除 ⟺ \(f(3)=27\) 真的成立。</b></span></li>
     <li><b>承諾 + 開啟</b>：\(C=[f(\tau)]_1\)；開啟證明 \(\pi=[q(\tau)]_1=[\tau^2+3\tau+9]_1\)，<b>單一群元素</b>。</li>
     <li><b>驗證（一條配對）</b>：\(e\big(C-[v]_1,[1]_2\big)\overset{?}{=}e\big(\pi,[\tau]_2-[z]_2\big)\)；雙線性下兩邊都 \(=e(g_1,g_2)^{\,f(\tau)-27}\)，相等就過。</li>
