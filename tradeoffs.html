@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我們論文的技術取捨 — 為什麼這樣選</title>
+<!-- Fonts + KaTeX vendored locally for offline USB (file://) — no network needed -->
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<script defer src="assets/katex/katex.min.js"></script>
+<script defer src="assets/katex/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false})"></script>
+<!-- no audio for this deck -->
+<script>window.AUDIO_MANIFEST=[];</script>
+<style>
+:root{
+  --bg:#ffffff; --surface:#f7f8fa; --surface-2:#eef0f4; --border:#d9dce3;
+  --text:#1a1a1f; --text-dim:#55596b; --text-faint:#8b94a3;
+  --accent:#4f46e5; --accent-light:#4338ca; --accent-glow:rgba(79,70,229,.12);
+  --green:#16a34a; --blue:#2563eb; --amber:#d97706; --red:#dc2626; --violet:#7c3aed;
+  --code-bg:#0d1117; --code-fg:#c9d1d9;
+  --font-sans:'Noto Sans TC','Inter',-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono','Fira Code',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;overflow:hidden}
+
+/* topbar */
+.topbar{position:fixed;top:0;left:0;right:0;height:56px;z-index:50;display:flex;align-items:center;gap:1rem;
+  padding:0 1.5rem;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.brand{font-weight:900;letter-spacing:-.02em;font-size:.95rem;white-space:nowrap}
+.brand .tag{color:var(--accent-light);font-weight:600;margin-left:.5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em}
+.pills{display:flex;gap:.25rem;flex:1;justify-content:center;overflow-x:auto;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill{font-size:.75rem;font-weight:600;padding:.35rem .7rem;border-radius:999px;color:var(--text-dim);
+  background:transparent;border:1px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s}
+.pill:hover{color:var(--text);background:var(--surface)}
+.pill.active{color:var(--accent-light);background:var(--accent-glow);border-color:rgba(99,102,241,.3)}
+.home-link{font-size:.72rem;font-weight:600;padding:.4rem .7rem;border-radius:8px;color:var(--text-dim);
+  background:var(--surface);border:1px solid var(--border);cursor:pointer;text-decoration:none;white-space:nowrap}
+.home-link:hover{color:var(--text);border-color:var(--accent)}
+
+/* right dots */
+.dots{position:fixed;top:56px;bottom:0;right:8px;z-index:40;display:flex;flex-direction:column;gap:4px;
+  padding:1rem 0;overflow-y:auto;scrollbar-width:none}
+.dots::-webkit-scrollbar{display:none}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .15s;flex-shrink:0}
+.dot:hover{background:var(--text-dim);transform:scale(1.3)}
+.dot.active{background:var(--accent);transform:scale(1.4);box-shadow:0 0 8px var(--accent-glow)}
+
+/* deck + slides */
+.deck{position:fixed;inset:56px 26px 0 0;overflow-y:scroll;scroll-snap-type:y proximity;scroll-behavior:smooth;counter-reset:pg}
+.slide{min-height:calc(100vh - 56px);scroll-snap-align:start;padding:3.4rem 5rem 4rem;display:flex;
+  flex-direction:column;justify-content:center;position:relative}
+.slide::after{counter-increment:pg;content:"p." counter(pg);position:absolute;left:5rem;bottom:1.3rem;
+  font-size:.72rem;font-weight:600;letter-spacing:.04em;color:var(--text-faint);opacity:.65;pointer-events:none}
+.slide-meta{position:absolute;top:1.2rem;left:5rem;display:flex;gap:.7rem;align-items:center;
+  font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--text-faint)}
+.slide-meta .part-label{color:var(--accent-light)}
+.slide h1{font-size:clamp(2rem,4.5vw,3.2rem);font-weight:900;letter-spacing:-.03em;line-height:1.15;margin-bottom:1.2rem}
+.slide h2{font-size:clamp(1.4rem,3vw,2.1rem);font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:1rem}
+.slide h2 .accent{color:var(--accent)}
+.slide h3{font-size:1.12rem;font-weight:700;margin-bottom:.5rem;color:var(--accent-light)}
+.slide p,.slide li{font-size:1.09rem;color:var(--text);max-width:1040px}
+.slide p+p,.slide p+ul,.slide ul+p{margin-top:.8rem}
+.slide ul{list-style:none;padding-left:0}
+.slide li{padding-left:1.4rem;position:relative;margin-top:.4rem;color:var(--text-dim)}
+.slide li::before{content:'▸';position:absolute;left:0;color:var(--accent)}
+.slide li b,.slide p b{color:var(--text)}
+em{font-style:normal;color:var(--accent);font-weight:700}
+.subtitle{color:var(--text-dim);font-size:1.1rem;margin-bottom:1.4rem;max-width:900px}
+.lead{font-size:1.2rem;color:var(--text);max-width:1000px;line-height:1.55;margin-bottom:.8rem}
+.muted{color:var(--text-faint)}
+
+.slide.title{justify-content:center;text-align:center;align-items:center;
+  background:radial-gradient(900px 480px at 78% -8%,#e0e7ff 0,transparent 60%),radial-gradient(700px 480px at -8% 108%,#ede9fe 0,transparent 55%)}
+.slide.title h1{font-size:clamp(2.6rem,6vw,4.6rem)}
+.slide.part-opener{background:linear-gradient(180deg,rgba(99,102,241,.07) 0%,transparent 55%);justify-content:center}
+.slide.part-opener .pnum{font-family:var(--font-mono);font-size:1rem;color:var(--accent);font-weight:700;letter-spacing:.2em}
+.slide.part-opener h1{color:var(--accent-light)}
+
+/* cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1rem 1.2rem;margin-top:.8rem}
+.card h3{margin-bottom:.4rem}
+.card.accent{border-color:rgba(99,102,241,.35);background:rgba(99,102,241,.06)}
+.card.green{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)}
+.card.amber{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.06)}
+.card.red{border-color:rgba(220,38,38,.3);background:rgba(220,38,38,.05)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.5rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:.5rem}
+
+/* verbatim source definition box */
+.defn{background:#f5f3ff;border-left:4px solid var(--violet);border-radius:0 8px 8px 0;padding:.7rem .95rem;margin:.6rem 0}
+.defn .dt{font-weight:800;color:#5b21b6;font-size:.86rem;letter-spacing:.05em;text-transform:uppercase;margin-right:.4rem}
+.defn .quote{font-family:'Inter',var(--font-sans);font-style:italic;color:#2b1769;font-size:1.06rem;line-height:1.6}
+.defn .gloss{font-size:.98rem;color:var(--text);margin-top:.4rem;font-style:normal;line-height:1.55}
+.defn .src{display:block;margin-top:.5rem;font-size:.82rem;color:#7c3aed;font-weight:600;text-decoration:none}
+.defn .src:hover{text-decoration:underline}
+.defn code{background:rgba(124,58,237,.1);padding:0 .25rem;border-radius:3px;font-family:var(--font-mono);font-size:.86em}
+
+.pill-tag{display:inline-block;font-size:.74rem;font-weight:700;padding:.14rem .55rem;border-radius:999px;
+  background:var(--accent-glow);color:var(--accent-light);margin:.12rem .25rem .12rem 0}
+.t-y{background:rgba(245,158,11,.14);color:#92400e}.t-g{background:rgba(34,197,94,.14);color:#15803d}
+.t-r{background:rgba(220,38,38,.12);color:#b91c1c}.t-b{background:rgba(37,99,235,.12);color:#1d4ed8}
+
+code.inl{font-family:var(--font-mono);font-size:.9em;background:var(--surface-2);color:var(--accent-light);padding:.06em .4em;border-radius:5px}
+pre{background:var(--code-bg);color:var(--code-fg);border-radius:12px;padding:.95rem 1.1rem;font-family:var(--font-mono);
+  font-size:.8rem;line-height:1.5;overflow:auto;border:1px solid #21262d;margin-top:.5rem}
+pre .k{color:#ff7b72}pre .c{color:#8b949e;font-style:italic}pre .s{color:#a5d6ff}pre .f{color:#d2a8ff}
+pre .n{color:#79c0ff}pre .ok{color:#3fb950;font-weight:700}pre .bad{color:#f85149;font-weight:700}pre .hl{color:#ffa657}
+
+table{border-collapse:collapse;width:100%;font-size:.99rem;margin-top:.4rem}
+th,td{border:1px solid var(--border);padding:.5rem .7rem;text-align:left;color:var(--text)}
+th{background:var(--surface);color:var(--text);font-weight:700}td b{color:var(--text)}
+tr.hl td{background:rgba(99,102,241,.07)}
+
+figure{margin-top:.7rem}
+figcaption{font-size:.87rem;color:var(--text-faint);margin-top:.45rem;text-align:center}
+svg{max-width:100%;height:auto;display:block;margin:0 auto}
+.kpi{display:flex;gap:2rem;flex-wrap:wrap;margin-top:.6rem}
+.kpi div{text-align:center}.kpi .v{font-size:1.9rem;font-weight:800;color:var(--accent)}
+.kpi .l{font-size:.78rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em}
+.foot{position:absolute;left:5rem;right:5rem;bottom:1.6rem;display:flex;justify-content:space-between;font-size:.74rem;color:var(--text-faint)}
+.hl-row{display:flex;gap:.6rem;align-items:baseline;margin-top:.5rem}
+.hl-row .num{font-size:1.4rem;font-weight:800;color:var(--accent);min-width:1.5em}
+
+@media(max-width:820px){.slide{padding:2.6rem 1.6rem 3rem}.slide-meta{left:1.6rem}.slide::after{left:1.6rem}.foot{left:1.6rem;right:1.6rem}
+  .grid-2,.grid-3{grid-template-columns:1fr}.deck{inset:56px 14px 0 0}}
+
+/* speaker notes (講稿) */
+.note-btn{position:fixed;right:18px;bottom:18px;z-index:45;background:var(--accent);color:#fff;border:none;
+  border-radius:999px;padding:.55rem 1rem;font-size:.82rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 16px rgba(79,70,229,.4);font-family:var(--font-sans)}
+.note-btn:hover{background:var(--accent-light)}
+.note-mask{display:none !important}
+/* teleprompter — docked bottom-right, semi-transparent, follows current section */
+.note-modal{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:61;display:none;
+  width:min(680px,80vw);height:46vh;max-height:46vh;background:rgba(255,255,255,.28);backdrop-filter:blur(1px);
+  border:1px solid rgba(124,58,237,.35);border-radius:14px;
+  box-shadow:0 14px 40px rgba(0,0,0,.22);flex-direction:column;overflow:hidden}
+.note-modal.open{display:flex}
+.note-head{display:flex;align-items:center;justify-content:space-between;padding:.55rem .85rem;border-bottom:1px solid rgba(124,58,237,.18);background:rgba(245,243,255,.7);cursor:move;user-select:none}
+.note-head h3::before{content:'⠿  ';color:var(--text-faint);font-weight:400}
+.note-head h3{font-size:.88rem;font-weight:800;color:var(--accent-light);margin:0}
+.note-head .tag{font-size:.74rem;color:var(--text-dim);font-weight:600}
+.note-close{background:none;border:none;font-size:1.4rem;color:var(--text-dim);cursor:pointer;line-height:1}
+.note-body{flex:1 1 auto;min-height:0;padding:.75rem 1rem;overflow-y:auto;font-size:1.02rem;line-height:1.85;color:#111;font-weight:500;white-space:pre-wrap;
+  text-shadow:0 0 4px #fff,0 0 4px #fff,0 0 8px #fff,0 1px 2px #fff}
+/* 編輯講稿：原地填滿面板，不縮小、不變動版面 */
+.note-item.editing{display:flex;flex-direction:column;height:100%}
+.note-item.editing .it-edit{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;gap:.3rem}
+.note-item.editing .it-edit textarea{flex:1 1 auto;min-height:0;resize:none}
+.note-item.editing .it-edit .it-btns{flex:0 0 auto}
+.minitab{border-collapse:collapse;font-size:.7rem;flex:0 0 auto;width:auto;margin:0}
+.minitab th,.minitab td{border:1px solid #d9dce3;padding:0 6px;text-align:center;color:var(--text);min-width:1.4em;line-height:1.45}
+.minitab th{background:#f3f0ff;font-weight:700;color:#5b21b6}
+.minitab tr.gate td{background:#ede9fe;font-weight:700}
+.soulbox{background:#f0fdf4;border:1.5px solid #86efac;border-left:5px solid #16a34a;border-radius:9px;padding:.28rem .7rem;margin:.05rem 0 .22rem;font-size:.92rem;line-height:1.45;color:var(--text)}
+.soulbox .tag{font-weight:800;color:#15803d}
+.soulbox b{color:#15803d}
+.ideabox{background:#eff6ff;border:1.5px solid #93c5fd;border-left:5px solid #2563eb;border-radius:9px;padding:.28rem .7rem;margin:.05rem 0 .22rem;font-size:.92rem;line-height:1.45;color:var(--text)}
+.ideabox .tag{font-weight:800;color:#1d4ed8}
+.ideabox b{color:#1d4ed8}
+.whybox{background:#fff7ed;border:1.5px solid #fdba74;border-left:5px solid #ea580c;border-radius:9px;padding:.28rem .7rem;margin:.05rem 0 .22rem;font-size:.92rem;line-height:1.45;color:var(--text)}
+.whybox .tag{font-weight:800;color:#c2410c}
+.whybox b{color:#c2410c}
+.note-foot{display:flex;align-items:center;justify-content:space-between;padding:.45rem .85rem;border-top:1px solid rgba(124,58,237,.18)}
+.note-nav{background:rgba(255,255,255,.7);border:1px solid var(--border);border-radius:8px;padding:.28rem .7rem;font-size:.78rem;font-weight:600;color:var(--text-dim);cursor:pointer}
+.note-nav:hover{border-color:var(--accent);color:var(--accent)}
+.note-idx{font-size:.76rem;color:var(--text-faint);font-family:var(--font-mono)}
+/* Q&A panel (可能被問) — reuses .note-* internals, amber accent, docked top-right */
+.qa-btn{bottom:62px;background:var(--amber)}
+.qa-btn:hover{background:#b45309}
+.note-modal.qa{left:auto;right:18px;top:74px;bottom:auto;transform:none;border-color:rgba(217,119,6,.4)}
+.note-modal.qa .note-head{background:rgba(254,243,199,.72);border-bottom-color:rgba(217,119,6,.22)}
+.note-modal.qa .note-head h3{color:#b45309}
+.note-modal.qa .note-foot{border-top-color:rgba(217,119,6,.18)}
+.qa-body{white-space:normal;font-size:.96rem;line-height:1.7}
+.qa-body .qa-item{margin:0 0 .8rem;padding-bottom:.6rem;border-bottom:1px dashed rgba(217,119,6,.25)}
+.qa-body .qa-item:last-child{border-bottom:none}
+.qa-body .qa-q{font-weight:800;color:#b45309;margin-bottom:.2rem}
+.qa-body .qa-a{color:#1a1a1f}
+.qa-body .qa-empty{color:var(--text-dim);font-style:italic}
+.qa-body .qa-sec{font-weight:800;color:#92400e;margin:.7rem 0 .5rem;padding-bottom:.18rem;border-bottom:2px solid rgba(217,119,6,.4);font-size:.9rem}
+.qa-body .qa-sec:first-child{margin-top:0}
+/* editable items: edit / mark / delete controls + formal line + export overlay */
+.qa-formal{color:#3730a3;margin-top:.2rem;font-size:.92rem}
+.it-ctl{float:right;display:inline-flex;gap:3px;margin-left:8px}
+.it-ctl button,.it-bar button{background:rgba(255,255,255,.55);border:1px solid var(--border);border-radius:6px;font-size:.78rem;line-height:1;padding:2px 5px;cursor:pointer}
+.it-ctl button:hover,.it-bar button:hover{border-color:var(--accent)}
+.qa-item.marked,.note-item.marked{background:rgba(251,191,36,.32);border-radius:8px;padding:.35rem .45rem;margin:.25rem -.25rem;box-shadow:inset 0 0 0 1px rgba(217,119,6,.4)}
+.note-item{position:relative;margin-bottom:.3rem}
+.note-item .it-bar{text-align:right;margin-bottom:.15rem}
+.note-text{white-space:normal}
+.note-text .nt-lead{white-space:normal}
+.note-text .nt-sec{margin-top:.55rem;border-top:1px dashed rgba(124,58,237,.32);padding-top:.4rem}
+.note-text .nt-h{font-weight:800;color:var(--accent-light);font-size:.9em;margin-bottom:.2rem;text-shadow:0 0 4px #fff,0 0 4px #fff}
+.note-text .nt-b{white-space:normal;font-size:.95em}
+.note-text .nt-p{margin:.22em 0}
+.note-text .nt-li{margin:.18em 0;padding-left:1.35em;position:relative}
+.note-text .nt-li::before{content:"•";position:absolute;left:.35em;top:-.02em;color:var(--accent);font-weight:800}
+.it-edit textarea{width:100%;min-height:3.6em;font:inherit;font-size:.9rem;margin:.1rem 0 .35rem;padding:.35rem;border:1px solid var(--border);border-radius:6px;box-sizing:border-box;background:rgba(255,255,255,.9);white-space:pre-wrap;text-shadow:none}
+.it-edit .it-lab{display:block;font-size:.76rem;font-weight:700;color:var(--text-dim);margin-top:.15rem}
+.it-edit .it-btns{display:flex;gap:6px}
+.it-edit .it-btns button{padding:.25rem .8rem;border-radius:6px;border:1px solid var(--border);cursor:pointer;font-weight:700;background:rgba(255,255,255,.8)}
+.it-edit .it-btns button[data-act=save]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.note-export{background:rgba(255,255,255,.6);border:1px solid var(--border);border-radius:7px;font-size:.74rem;font-weight:700;padding:.2rem .5rem;color:var(--text-dim);cursor:pointer;margin-left:auto;margin-right:8px}
+.note-export:hover{border-color:var(--accent);color:var(--accent)}
+#ovExport{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center}
+#ovExport .ov-card{width:min(680px,92vw);max-height:82vh;background:#fff;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+#ovExport .ov-head{display:flex;justify-content:space-between;align-items:center;padding:.6rem .9rem;font-weight:700;border-bottom:1px solid var(--border)}
+#ovExport .ov-head button{background:none;border:none;font-size:1.3rem;cursor:pointer;line-height:1}
+#ovExport textarea{flex:1;min-height:320px;border:none;padding:.8rem;font-family:var(--font-mono);font-size:.78rem;line-height:1.5;resize:none;white-space:pre;color:#111}
+#ovExport .ov-foot{display:flex;gap:10px;padding:.6rem .9rem;border-top:1px solid var(--border)}
+#ovExport .ov-foot button{padding:.4rem .9rem;border-radius:7px;border:1px solid var(--border);cursor:pointer;font-weight:700;background:var(--surface)}
+#savedBadge{position:fixed;left:14px;bottom:14px;z-index:70;background:rgba(22,163,74,.94);color:#fff;font-size:.78rem;font-weight:700;padding:.32rem .75rem;border-radius:999px;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 4px 14px rgba(22,163,74,.4)}
+/* pipeline locator rail (you-are-here) on mechanism slides */
+.flowrail{position:fixed;right:24px;top:64px;width:124px;z-index:42;display:none;flex-direction:column;font-family:var(--font-sans)}
+.flowrail.show{display:flex}
+.flowrail .fr-title{font-size:.66rem;font-weight:800;color:var(--text-faint);letter-spacing:.08em;margin-bottom:.35rem;padding-left:.1rem}
+.fr-stage{font-size:.71rem;font-weight:700;color:var(--text-dim);background:rgba(247,248,250,.92);border:1px solid var(--border);border-radius:9px;padding:.3rem .42rem;display:flex;align-items:center;gap:.3rem;line-height:1.12;cursor:pointer}
+.fr-stage:hover{border-color:var(--accent)}
+.fr-stage .fr-n{flex:0 0 auto;display:inline-flex;width:1.1rem;height:1.1rem;border-radius:50%;background:var(--text-faint);color:#fff;font-size:.64rem;align-items:center;justify-content:center}
+.fr-stage.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 3px 12px var(--accent-glow)}
+.fr-stage.active .fr-n{background:#fff;color:var(--accent)}
+.fr-arrow{font-size:.58rem;color:var(--text-faint);text-align:center;padding:.13rem .1rem;line-height:1.1}
+.slide.rail{padding-right:158px}
+/* audio tour playbar (time-synced narration) */
+#playbar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:60;display:none;align-items:center;gap:.6rem;background:rgba(26,26,31,.92);color:#fff;border-radius:999px;padding:.4rem .8rem;box-shadow:0 8px 28px rgba(0,0,0,.35);font-family:var(--font-sans);max-width:min(620px,92vw)}
+#playbar.show{display:flex}
+#playbar button{background:rgba(255,255,255,.14);border:none;color:#fff;width:2rem;height:2rem;border-radius:50%;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center}
+#playbar #pbSpeed{width:auto;min-width:2.7rem;padding:0 .5rem;border-radius:12px;font-size:.74rem;font-weight:700}
+#playbar button:hover{background:rgba(255,255,255,.28)}
+#playbar .pb-title{font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+#playbar .pb-idx{font-size:.72rem;color:#b9c0cf;font-family:var(--font-mono)}
+#playbar .pb-prog{flex:1;min-width:80px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden}
+#playbar .pb-prog>i{display:block;height:100%;width:0;background:var(--accent);border-radius:2px}
+.tour-btn{font-size:.72rem;font-weight:600;padding:.4rem .7rem;border-radius:8px;color:var(--text-dim);background:none;border:1px solid var(--border);cursor:pointer;font-family:var(--font-sans)}
+.tour-btn:hover{border-color:var(--accent);color:var(--accent)}
+@media(max-width:1180px){.flowrail{display:none!important}.slide.rail{padding-right:5rem}}
+@media(max-width:820px){.slide.rail{padding-right:1.6rem}}
+/* formula boxes */
+.fbox{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:.55rem .9rem;margin:.5rem 0}
+.fbox .lbl{font-size:.82rem;font-weight:700;color:var(--accent-light);margin-bottom:.1rem}
+.fbox .cmt{font-size:.86rem;color:var(--text);margin-top:.15rem}
+.katex{font-size:1.06em;color:var(--text)}
+.katex-display{margin:.35rem 0}
+.steps{counter-reset:st;list-style:none;padding-left:0}
+.steps li{padding-left:2rem;position:relative;margin:.5rem 0}
+.steps li::before{counter-increment:st;content:counter(st);position:absolute;left:0;top:.05rem;
+  width:1.4rem;height:1.4rem;border-radius:50%;background:var(--accent);color:#fff;font-size:.8rem;
+  font-weight:700;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">論文技術取捨<span class="tag">Why we chose this</span></div>
+  <div class="pills" id="pills"></div>
+  <button class="tour-btn" id="presBtn" title="簡報者模式：另開講稿視窗。投影機投主視窗（乾淨投影片），這個視窗留在你的筆電看講稿（需設「延伸顯示」）。翻頁會自動同步。">🖥 簡報者</button>
+  <a class="home-link" href="index.html">← 主報告</a>
+</div>
+<div class="dots" id="dots"></div>
+<div id="playbar"><button id="pbPrev" title="上一段">⏮</button><button id="pbPlay" title="播放/暫停">⏸</button><button id="pbNext" title="下一段">⏭</button><span class="pb-title" id="pbTitle">—</span><span class="pb-prog"><i id="pbProg"></i></span><span class="pb-idx" id="pbIdx">—</span><button id="pbSpeed" title="播放速度（點擊切換）">1×</button><button id="pbStop" title="結束導覽">✕</button></div>
+
+<button class="note-btn" id="noteBtn" title="講稿（按 n 鍵開關）">📝 講稿</button>
+<div class="note-mask" id="noteMask"></div>
+<div class="note-modal" id="noteModal" role="dialog" aria-modal="true" aria-label="講稿">
+  <div class="note-head"><h3>講稿 <span class="tag" id="noteTag"></span></h3><button class="note-close" id="noteClose" aria-label="關閉">×</button></div>
+  <div class="note-body" id="noteBody"></div>
+  <div class="note-foot"><button class="note-nav" id="notePrev">◀ 上一節</button><span class="note-idx" id="noteIdx">— / —</span><button class="note-nav" id="noteNext">下一節 ▶</button></div>
+</div>
+
+<button class="note-btn qa-btn" id="qaBtn" title="名詞解釋 + 可能被問（按 q 鍵開關）">❓ 名詞·問答</button>
+<div class="note-modal qa" id="qaModal" role="dialog" aria-modal="true" aria-label="名詞解釋與問答">
+  <div class="note-head"><h3>名詞 · 問答 <span class="tag" id="qaTag"></span></h3><button class="note-close" id="qaClose" aria-label="關閉">×</button></div>
+  <div class="note-body qa-body" id="qaBody"></div>
+  <div class="note-foot"><button class="note-nav" id="qaPrev">◀ 上一節</button><span class="note-idx" id="qaIdx">— / —</span><button class="note-nav" id="qaNext">下一節 ▶</button></div>
+</div>
+
+<div class="deck" id="deck">
+
+<!-- ===== 1 · COVER ===== -->
+<section class="slide title" data-part="" data-label="封面">
+  <div>
+    <div style="font-size:.82rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:.6rem">論文技術專題 · 設計取捨 Design Trade-offs</div>
+    <h1>我們論文的技術取捨</h1>
+    <p style="font-size:1.4rem;color:var(--text-dim);font-weight:600;margin-top:.4rem">為什麼這樣選 —— 一步一步說明 why</p>
+    <p style="margin-top:1.2rem;font-size:1.05rem;color:var(--text-dim)">這份不是教你怎麼做，是說清楚每個決定背後的取捨。<br>
+      <span class="muted">每一張都圍著一個問題：這條路換到什麼、別的路為什麼死。</span></p>
+    <div style="margin-top:1.4rem">
+      <span class="pill-tag">定點 pp=48</span><span class="pill-tag">Minimax</span><span class="pill-tag">逐步截斷</span><span class="pill-tag">通用 Horner + ByteTable</span>
+    </div>
+    <p style="margin-top:1.6rem;font-size:.8rem" class="muted">↓ 向下捲動 · 右側圓點可跳節 · 按 n 看講稿 · 按 q 看名詞·問答</p>
+  </div>
+</section>
+
+<!-- ===== 2 · THE PROBLEM ===== -->
+<section class="slide" data-part="" data-label="要解的問題">
+  <div class="slide-meta"><span class="part-label">取捨 1</span> · 問題從哪來</div>
+  <h2>要證「風險在限額內」，<span class="accent">卻不洩漏部位</span></h2>
+  <div class="whybox"><span class="tag">❓ 為什麼需要這篇論文</span>：金融法遵要證一件事 —— Delta 曝險 ≤ 門檻、組合違約機率 ≤ 監管上限；但傳統做法得把部位攤開給監管看，等於洩漏交易策略。ZK 正好對症：證對、不洩漏輸入。</div>
+  <div class="grid-2">
+    <div>
+      <div class="card accent"><h3>合規檢查背後是金融模型</h3>
+        <p>Black–Scholes、Merton 這些模型，全靠<b>超越函數</b> \( \ln,\ \exp,\ \mathrm{erf} \)。例如常態 CDF</p>
+        <div class="fbox"><div class="lbl">常態 CDF（風險計算的核心）</div>
+          \[ \Phi(x)=\tfrac12\big(1+\operatorname{erf}(x/\sqrt2)\big) \]
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card red"><h3>但 ZK 電路撞牆</h3>
+        <p>電路裡只有<b>有限體的加與乘</b>、<b>沒有原生浮點</b> —— \( \ln,\exp,\mathrm{erf} \) 根本算不出來。</p>
+      </div>
+      <div class="ideabox"><span class="tag">💡 一句話</span>：ZK 能證對、不洩漏輸入，但<b>一要用到金融，就撞上「電路算不了超越函數」這道牆</b>。整篇論文就在拆這道牆 —— 而每一步都是取捨。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 3 · TWO DEAD ENDS ===== -->
+<section class="slide" data-part="" data-label="兩條死路">
+  <div class="slide-meta"><span class="part-label">取捨 2</span> · 為什麼不能直接放</div>
+  <h2>兩條直覺的路，<span class="accent">都是死路</span></h2>
+  <div class="whybox"><span class="tag">❓ 為什麼不能直接放進去</span>：要在電路裡算 \( \ln,\exp,\mathrm{erf} \)，直覺只有兩條路 —— 查表、或多項式逼近。先看清楚兩條各死在哪，才知道我們的選擇是被逼出來的。</div>
+  <div class="grid-2">
+    <div class="card red"><h3>死路①　查表：爆量</h3>
+      <p>把每個輸入預先算好存表。精度一拉高，表就爆炸：</p>
+      <table style="font-size:.92rem">
+        <tr><th>精度 pp</th><th>表大小（每函數）</th></tr>
+        <tr><td>16</td><td>65,536</td></tr>
+        <tr><td>24</td><td>1,680 萬</td></tr>
+        <tr><td>28</td><td>2.68 億（已不切實際）</td></tr>
+        <tr class="hl"><td><b>32</b></td><td><b>43 億格</b></td></tr>
+      </table>
+      <p class="muted" style="margin-top:.4rem;font-size:.9rem">金融要 pp=24～32 —— 任何電路都裝不下。</p>
+    </div>
+    <div class="card red"><h3>死路②　多項式：兩個坑</h3>
+      <p><b>坑 A · Taylor 在定點崩潰</b>：pp=32、\( d{=}10 \) 時，\( \ln \) 只剩 <b>4.4 有效位</b>（約一位十進位），同條件 Minimax 有 <b>28.6 位</b>。</p>
+      <p style="margin-top:.5rem"><b>坑 B · Horner 中間值膨脹</b>：逐步乘下去，中間值脹成 \( S^{\,d+1} \)（\( S{=}2^{pp} \)）。pp=32、\( d{=}10 \) 約 \( 2^{352} \)，<b>溢位 BN254 的 253 位</b>。</p>
+    </div>
+  </div>
+  <div class="soulbox"><span class="tag">🎯 被逼出來的問題</span>：可行的只有「多項式逼近」這條，但要先<b>解掉 Taylor 崩潰</b>與<b>中間值溢位</b>兩個坑 —— 這正是後面四個設計決定要回答的。</div>
+</section>
+
+<!-- ===== 4 · FOUR DECISIONS ===== -->
+<section class="slide" data-part="" data-label="四個設計決定">
+  <div class="slide-meta"><span class="part-label">取捨 3</span> · 全部攤在一張表</div>
+  <h2>四個設計決定 —— <span class="accent">選了什麼、別的為什麼不行</span></h2>
+  <table style="font-size:.92rem">
+    <tr><th style="width:20%">設計決定</th><th>為什麼選這個 · 別的為什麼不行</th><th style="width:24%">換到的效果</th></tr>
+    <tr><td><b>① 定點 pp=48</b><br><span class="muted">不用浮點</span></td><td>體裡<b>根本沒有浮點</b>，只能拿整數乘 \( 2^{48} \) 模擬小數。代價：pp 越大、中間值越容易脹爆。</td><td>能在體上模擬高精度小數</td></tr>
+    <tr><td><b>② Minimax</b><br><span class="muted">不用 Taylor</span></td><td>Taylor 在定點下崩潰；Minimax（Remez）是<b>必要條件、不是「比較好」</b>。13 個函數在最小 degree 就到 ULP=1。</td><td>同 degree 多拿十幾位精度</td></tr>
+    <tr class="hl"><td><b>③ 逐步截斷</b><br><span class="muted">per-step，不用延遲</span></td><td>延遲在低 pp 精度較好（首選），但 pp≥32 時中間值 \( 2^{352} \) <b>溢位</b> → 高精度只剩 per-step <b>唯一可行</b>。</td><td>高精度下不溢位</td></tr>
+    <tr><td><b>④ 通用 Horner<br>+ ByteTable</b></td><td>換函數只改 \( d \) 個係數放進 fixed 欄；一張 256 表<b>全函數共用</b>。</td><td>加新函數<b>零電路重設計</b></td></tr>
+  </table>
+  <div class="soulbox"><span class="tag">🎯 目標效果（這四個決定一起換到的）</span>：金融精度 <b>24–32 bit</b>、proof <b>&lt;10KB</b>、verify <b>&lt;1 秒</b>、<b>不揭露部位</b>。下面四張，把每個決定背後的取捨一步步講開。</div>
+</section>
+
+<!-- ===== 5 · FREE SPACE (deferred vs per-step) ===== -->
+<section class="slide" data-part="" data-label="免費空間">
+  <div class="slide-meta"><span class="part-label">取捨 3 · 拆決定 ③</span> · 兩種截斷</div>
+  <h2>那塊「免費空間」紅利，<span class="accent">用光就得換路</span></h2>
+  <div class="whybox"><span class="tag">❓ 為什麼會有「延遲」和「逐步」兩種截斷</span>：兩者差在「中間值什麼時候除回去」。要懂為什麼要兩種，先看那塊紅利從哪來、什麼時候用光。</div>
+  <div class="grid-2">
+    <div>
+      <div class="ideabox"><span class="tag">💡 核心比喻</span>：ZK 的 254-bit 體，是<b>一個傳統 CPU 上不存在的免費資源 —— 暫存空間</b>。延遲截斷就是吃這塊紅利：把 \( d \) 次截斷併到<b>最後一次</b>（CPU 的 64-bit register 被迫一直截斷，做不到）。</div>
+      <div class="fbox"><div class="lbl">但有 bit-budget</div>
+        \[ (d+1)\cdot pp < 254 \]
+        <div class="cmt">pp≥32 時紅利<b>用光</b>、中間值溢位 → 被迫改 per-step。</div>
+      </div>
+    </div>
+    <div>
+      <table style="font-size:.93rem">
+        <tr><th>　</th><th>延遲截斷</th><th>逐步 per-step</th></tr>
+        <tr><td>查表數</td><td><b>多（12）</b></td><td>少（每步 2 bytes）</td></tr>
+        <tr><td>精度</td><td><b>2–7× 更好（達 ULP=1）</b></td><td>較差</td></tr>
+        <tr class="hl"><td>死在哪</td><td>pp≥32 溢位 \( 2^{352} \)</td><td>—（高 pp 唯一可行）</td></tr>
+      </table>
+      <p style="margin-top:.5rem;font-size:.95rem"><b>取捨：</b>延遲用「<b>更多查表</b>（12 vs 2）」換「<b>2–7× 精度</b>（達 ULP=1 的必要條件）」，但 pp≥32 會溢位；per-step 查表省、精度差，卻是高精度唯一的路。<b>這個 pp 邊界，是我們第一個量化出來的。</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 6 · QUANTIZATION SATURATION ===== -->
+<section class="slide" data-part="" data-label="量化飽和">
+  <div class="slide-meta"><span class="part-label">取捨 3 · 拆決定 ②</span> · degree 的甜蜜點</div>
+  <h2>degree 越高越準嗎？<span class="accent">反直覺：不是</span></h2>
+  <div class="whybox"><span class="tag">❓ 為什麼不能一路把 degree 加大</span>：多項式逼近的直覺是「次數越高越貼合」。在定點 ZK 裡，這個直覺<b>會反過來咬你</b>。</div>
+  <div class="grid-2">
+    <div>
+      <div class="soulbox"><span class="tag">🎯 量化飽和（quantization saturation）</span>：超過最佳 degree \( d^\* \) 之後，degree 再高<b>反而更差</b> —— 逼近誤差還在降，但<b>量化誤差被放大</b>、整體精度掉頭往下。</div>
+      <div class="card accent" style="margin-top:.6rem"><h3>數字</h3>
+        <p>pp=16、\( d\le 7 \) 就讓 <b>13 個函數全 ULP=1</b>。再往上加 degree，不會更好。</p>
+      </div>
+    </div>
+    <figure>
+      <svg viewBox="0 0 420 240" role="img" aria-label="精度隨 degree 先升後降，存在甜蜜點 d*">
+        <line x1="50" y1="200" x2="400" y2="200" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="50" y1="200" x2="50" y2="20" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="225" y="228" font-size="12" text-anchor="middle" fill="#55596b">degree d →</text>
+        <text x="18" y="110" font-size="12" text-anchor="middle" fill="#55596b" transform="rotate(-90 18 110)">有效精度</text>
+        <path d="M60,180 C120,120 150,60 200,58 C250,56 320,120 380,182" fill="none" stroke="#4f46e5" stroke-width="2.5"/>
+        <line x1="200" y1="58" x2="200" y2="200" stroke="#16a34a" stroke-width="1.4" stroke-dasharray="4 3"/>
+        <circle cx="200" cy="58" r="5" fill="#16a34a"/>
+        <text x="200" y="48" font-size="12.5" text-anchor="middle" fill="#15803d" font-weight="700">d* 甜蜜點</text>
+        <text x="330" y="150" font-size="11.5" fill="#b91c1c" font-weight="700">harmful</text>
+        <text x="330" y="166" font-size="11.5" fill="#b91c1c">degree</text>
+      </svg>
+      <figcaption>原始圖解（本報告自製）· 精度先升後降，有最佳點</figcaption>
+    </figure>
+  </div>
+  <p style="margin-top:.4rem"><b>取捨：</b>degree <b>不是免費</b>，有一個甜蜜點，盲目加只會更糟。<span class="muted">（這個「harmful degree」效應是我們首次在 ZK 文獻記錄的。）</span></p>
+</section>
+
+<!-- ===== 7 · FUNCTION & INTERVAL ===== -->
+<section class="slide" data-part="" data-label="函數與區間">
+  <div class="slide-meta"><span class="part-label">取捨 3 · 兩個更細的</span> · 函數 / 區間</div>
+  <h2>還有兩個更細的取捨：<span class="accent">函數本身 · 區間寬窄</span></h2>
+  <div class="grid-2">
+    <div class="card amber"><h3>① 係數條件數：函數自己決定地板</h3>
+      <p>同樣 pp、同樣 \( d \)，不同函數精度差很多 —— pp=48、\( d{=}14 \)：</p>
+      <table style="font-size:.92rem">
+        <tr><th>函數</th><th>精度</th></tr>
+        <tr><td>\( \ln \)</td><td>142 ULP</td></tr>
+        <tr class="hl"><td>\( \mathrm{erf} \)</td><td><b>15 ULP</b></td></tr>
+      </table>
+      <p class="muted" style="margin-top:.4rem;font-size:.9rem">函數本身的<b>係數結構</b>決定精度地板，<b>與 kernel 設計無關</b>。</p>
+    </div>
+    <div class="card amber"><h3>② 區間：精度 ↔ 覆蓋的拉鋸</h3>
+      <p>窄區間更準，但覆蓋變小：</p>
+      <table style="font-size:.9rem">
+        <tr><th>函數 · 區間</th><th>ULP</th></tr>
+        <tr><td>\( \ln \) on \( [0,\ln 2) \)</td><td><b>1</b></td></tr>
+        <tr><td>\( \ln \) on \( [0,e{-}1) \)</td><td>9</td></tr>
+        <tr><td>\( \mathrm{erf} \) on \( [0,1] \)</td><td><b>3</b></td></tr>
+        <tr><td>\( \mathrm{erf} \) on \( [0,2) \)</td><td>20</td></tr>
+      </table>
+      <p class="muted" style="margin-top:.4rem;font-size:.9rem">覆蓋變小要靠 <b>range reduction</b> 補回來。</p>
+    </div>
+  </div>
+  <div class="soulbox"><span class="tag">🎯 取捨</span>：<b>精度 ↔ 覆蓋範圍</b> 是一條拉鋸線；想又準又廣，得切段 + range reduction，而切段又會放大 proof（第 9 張會兌現這個代價）。</div>
+</section>
+
+<!-- ===== 8 · WHERE WE STAND (honest positioning) ===== -->
+<section class="slide" data-part="" data-label="我們站在哪">
+  <div class="slide-meta"><span class="part-label">取捨 4</span> · 誠實定位</div>
+  <h2>我們站在哪 —— <span class="accent">誠實講什麼是新的</span></h2>
+  <div class="whybox"><span class="tag">❓ 老師一定會問</span>：ezkl、zkLLM、ZKFixedPointChip 早就做了，你做什麼新的？我的原則是<b>寧可少吹</b>，也不被抓到不誠實。</div>
+  <div class="grid-2">
+    <div>
+      <div class="card accent"><h3>互補，不取代查表</h3>
+        <p>查表是 ZKML 在<b>大批次、低精度</b>的理性選擇，我不否定它。我們補的是它做不到的：<b>多函數共用、高精度、低頻呼叫</b> —— 金融合規正是這種需求。</p>
+      </div>
+      <div class="card red" style="margin-top:.6rem"><h3>誠實 · 什麼不是我們發明的</h3>
+        <ul style="font-size:.95rem">
+          <li>Minimax / Remez 是教科書（1853 / 1934）</li>
+          <li>FHE 2021 已用；ZKFixedPointChip 2023 已在 Halo2 用 Remez</li>
+          <li>「Minimax &gt; Taylor」本身也是<b>教科書事實</b>，不是發現</li>
+        </ul>
+      </div>
+    </div>
+    <div class="soulbox" style="font-size:.95rem"><span class="tag">🎯 真正的新，五項</span>
+      <ul style="margin-top:.3rem">
+        <li>① 首個<b>系統化</b> Minimax-vs-Taylor 量化比較 + 量化瓶頸</li>
+        <li>② Horner <b>鏈內</b>延遲截斷 + BN254 bit-budget 分析</li>
+        <li>③ 形式化誤差預算 + 窮舉驗證</li>
+        <li>④ 首個<b>有誤差分析</b>的 ZK \( \ln \) / \( \mathrm{erf} \) 多項式電路</li>
+        <li>⑤ 一張 256 表撐全函數</li>
+      </ul>
+      <p style="margin-top:.4rem"><b>一句話：</b>不是又一個 ZK 函數庫，是把「能算」升級成「<b>能證、有誤差保證、能落地金融</b>」。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 9 · RESULTS & LIMITS ===== -->
+<section class="slide" data-part="" data-label="成果與限界">
+  <div class="slide-meta"><span class="part-label">取捨 · 收尾</span> · 換到了什麼 · 代價是什麼</div>
+  <h2>成果 與 <span class="accent">誠實的限界</span></h2>
+  <div class="grid-2">
+    <div class="card green"><h3>成果（這些取捨換到的效果）</h3>
+      <ul style="font-size:.95rem">
+        <li><b>Scenario A</b>（B–S Delta, pp=24）：端到端 Delta <b>1 ULP</b>、比查表快 <b>26.3×</b>、pp≥24 唯一可行</li>
+        <li><b>Scenario C</b>（Merton 信用違約, pp=32）：<b>28.6–29.0 有效位</b>、7 個評等對到小數 8 位、proof ≈ 15,360 B / verify ≈ 33 ms</li>
+        <li><b>13 函數全 ULP=1</b>、proof <b>5.0–9.5 KB</b>、verify ≤ 5.1 ms</li>
+      </ul>
+    </div>
+    <div class="card red"><h3>誠實限界（代價）</h3>
+      <ul style="font-size:.95rem">
+        <li>\( \mathrm{erf} \) 要 <b>5 段 piecewise</b> 才覆蓋 \( [0,5] \)（proof ×2.2）</li>
+        <li>bit-budget \( (d+1)\cdot pp<254 \)（pp 上限 42 @ \( d{=}5 \)）</li>
+        <li>大批次比單函數查表<b>慢約 7.5×</b></li>
+        <li>proof 比查表大約 <b>6.8×</b>（但仍 &lt;5KB）</li>
+      </ul>
+    </div>
+  </div>
+  <div class="soulbox"><span class="tag">🎯 收尾一句</span>：把「能算一個函數」變成「<b>能證一個金融模型</b>」。</div>
+  <div class="foot"><span>論文技術取捨 · 完</span><span>↑ 回頂</span></div>
+</section>
+
+
+</div>
+
+<script>
+(function(){
+  const deck=document.getElementById('deck');
+  const slides=[...deck.querySelectorAll('.slide')];
+  const dots=document.getElementById('dots');
+  const pills=document.getElementById('pills');
+
+  slides.forEach((s,i)=>{const d=document.createElement('div');d.className='dot';d.title=s.dataset.label||('#'+(i+1));
+    d.onclick=()=>s.scrollIntoView({behavior:'smooth'});dots.appendChild(d);});
+  const dotEls=[...dots.children];
+
+  const parts=[];
+  slides.forEach((s,i)=>{const p=s.dataset.part;if(p&&!parts.find(x=>x.part===p))parts.push({part:p,idx:i});});
+  const partMap={};
+  parts.forEach(p=>{const b=document.createElement('div');b.className='pill';
+    b.textContent=(p.part==='收尾')?'收尾':('PART '+p.part);
+    b.onclick=()=>slides[p.idx].scrollIntoView({behavior:'smooth'});pills.appendChild(b);partMap[p.part]=b;});
+
+  const io=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting){
+      const i=slides.indexOf(e.target);
+      dotEls.forEach((d,x)=>d.classList.toggle('active',x===i));
+      const part=e.target.dataset.part;
+      Object.values(partMap).forEach(b=>b.classList.remove('active'));
+      if(part&&partMap[part])partMap[part].classList.add('active');
+    }});
+  },{root:deck,threshold:.5});
+  slides.forEach(s=>io.observe(s));
+
+  let cur=0;
+  deck.addEventListener('scroll',()=>{cur=Math.round(deck.scrollTop/deck.clientHeight);});
+  window.addEventListener('keydown',e=>{
+    if(e.key==='ArrowDown'||e.key==='PageDown'){e.preventDefault();cur=Math.min(slides.length-1,cur+1);slides[cur].scrollIntoView({behavior:'smooth'});}
+    if(e.key==='ArrowUp'||e.key==='PageUp'){e.preventDefault();cur=Math.max(0,cur-1);slides[cur].scrollIntoView({behavior:'smooth'});}
+    if(e.key==='Home'){e.preventDefault();slides[0].scrollIntoView({behavior:'smooth'});}
+    if(e.key==='End'){e.preventDefault();slides[slides.length-1].scrollIntoView({behavior:'smooth'});}
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const NOTES = {
+'封面':"大家好。\n這份報告只講一件事:我們論文裡的每一個技術決定,背後的取捨是什麼。\n所以它不是教學、不是教你怎麼一步步做;是把每個選擇攤開來說清楚 —— 為什麼選這條、別的路為什麼走不通、換到了什麼、又付出什麼代價。\n我會一張一張、一步一步把 why 講明白。我們開始。",
+'要解的問題':"先講我們到底在解什麼問題。\n金融法遵要機構證明一件事:風險在限額內 —— 對沖基金要證 Delta 曝險沒超門檻、信用衍生品要證組合違約機率沒超監管上限。麻煩在於,傳統做法得把部位全攤開給監管或對手方看,等於把交易策略洩漏出去。\nZK 正好對症:證明你算對了,卻不洩漏輸入。但真要套到金融,就撞上一道牆 —— 這些合規檢查背後是金融模型,Black-Scholes、Merton,全靠超越函數 ln、exp、erf;像風險計算核心的常態 CDF,就是用 erf 寫出來的。\n問題是,ZK 電路裡只有有限體的加跟乘、沒有原生浮點,這幾個函數根本算不出來。\n所以一句話:ZK 能證對、不洩漏輸入,但一要用到金融,就撞上『電路算不了超越函數』這道牆。整篇論文就在拆這道牆 —— 而拆牆的每一步,都是取捨。",
+'兩條死路':"那為什麼不能把超越函數直接放進去?直覺只有兩條路,我帶你看為什麼兩條都死。\n第一條,查表:把每個可能的輸入預先算好、存成一張表。低精度還行,pp=16 大概六萬格;但金融要 pp=24、pp=32,表就爆成一千六百多萬、四十三億格,而且每個函數一張 —— 任何電路都裝不下。\n第二條,多項式逼近:用一條低次多項式近似函數,再用 Horner 求值。這條可行,但有兩個坑。坑 A 是 Taylor 在定點量化下會崩潰,pp=32、d=10 時 ln 只剩 4.4 個有效位、約一位十進位;換成 L 無窮最佳的 Minimax 就有 28.6 位。坑 B 是溢位:Horner 一步步乘下去,中間值膨脹成 S 的 d+1 次方,pp=32、d=10 就到 2 的 352 次方,遠超 BN254 的 253 位。\n所以可行的只剩多項式這條,但得先解掉 Taylor 崩潰跟中間值溢位這兩個坑 —— 這正是接下來四個設計決定要回答的。",
+'四個設計決定':"這張把我們的四個關鍵決定一次攤在一張取捨表上:選了什麼、別的為什麼不行、換到什麼效果。\n第一,定點 pp=48、不用浮點 —— 因為體裡根本沒有浮點,只能拿整數乘上 2 的 48 次方來模擬小數;代價是 pp 越大、中間值越容易脹爆,這就逼出後面的截斷。\n第二,用 Minimax、不用 Taylor —— 這不是『比較好』,是『必要條件』。Taylor 在定點下崩潰,Minimax 才撐得住;13 個函數在最小的 degree 就做到 ULP=1。\n第三,逐步截斷、不用延遲 —— 延遲在低精度其實精度較好(是首選),但 pp 一到 32,中間值會膨脹到 2 的 352 次方、直接溢位;所以高精度只剩 per-step 一條路。\n第四,一套通用 Horner kernel 加一張 ByteTable —— 換函數只要改那 d 個係數放進 fixed 欄,電路結構完全不動;256 條目的表所有函數共用,加新函數零電路重設計。\n這四個決定一起換到的目標效果:金融精度 24 到 32 位、proof 小於 10KB、verify 不到一秒、全程不揭露部位。接下來四張,把每個決定背後的取捨一步步講開。",
+'免費空間':"先解釋為什麼會有『延遲』跟『逐步』兩種截斷,差別在中間值什麼時候除回去。\n核心是一個比喻:ZK 的 254-bit 體,是一個傳統 CPU 上不存在的免費資源 —— 暫存空間。延遲截斷就是吃這塊紅利:把 d 次截斷併到最後一次再做。一般 CPU 的 64-bit register 被迫每一步都截斷,根本做不到;但 ZK 體夠寬,可以先讓中間值脹著、最後一次清。\n代價跟好處要一起講:延遲截斷的查表反而比較多(12 個,per-step 只要 2 個),但換來的是大約兩到七倍的精度、達到 ULP=1 —— 這是一個『多花查表、換精度』的取捨。但它有 bit-budget —— d+1 乘上 pp 必須小於 254。一旦 pp 大於等於 32,這塊紅利就用光、中間值溢位,於是被迫改成逐步截斷。\n所以取捨很清楚:延遲精度好但查表多、而且有天花板;per-step 查表省、精度差,卻是高精度唯一可行的路。而這個 pp 邊界,是我們第一個量化出來的。",
+'量化飽和':"這張是個反直覺的結果。多項式逼近的直覺是『次數越高越貼合』,但在定點 ZK 裡,這個直覺會反過來咬你。\n現象叫量化飽和:超過一個最佳 degree d-star 之後,degree 再高反而更差。原因是兩股誤差在拉鋸 —— 逼近誤差確實還在降,但量化誤差被放大,過了甜蜜點之後,整體精度就掉頭往下。\n數字上,pp=16、degree 不超過 7,就讓 13 個函數全部做到 ULP=1;再往上加 degree,不會更好。\n所以取捨是:degree 不是免費的,它有一個甜蜜點,盲目加只會更糟。這個『harmful degree』效應,是我們首次在 ZK 文獻裡記錄的。",
+'函數與區間':"除了 degree,還有兩個更細的取捨,一個跟函數本身有關,一個跟區間有關。\n第一個,係數條件數:就算 pp 跟 degree 都一樣,不同函數的精度可以差很多。pp=48、degree=14 時,ln 是 142 個 ULP,erf 卻只有 15。這說明函數本身的係數結構,決定了精度地板,跟我們 kernel 怎麼設計無關 —— 有些函數天生就難逼近。\n第二個,區間的取捨:區間越窄越準,但覆蓋範圍就變小。ln 在 0 到 ln2 是 1 個 ULP,放寬到 0 到 e 減 1 就掉到 9;erf 在 0 到 1 是 3,放到 0 到 2 就變 20。窄區間換到精度,但覆蓋小了,得靠 range reduction 補回來。\n所以這張的取捨是一條拉鋸線:精度對覆蓋範圍。想又準又廣,就得切段加 range reduction,而切段又會放大 proof —— 這個代價,最後一張會兌現。",
+'我們站在哪':"這張是給老師看的誠實定位,很重要。老師一定會問:ZK 算超越函數早就有人做了,ezkl、zkLLM、ZKFixedPointChip 都有,你們做了什麼新的?我的原則是寧可少吹,也不要被抓到不誠實。\n先講互補,不是取代。查表是 ZKML 在大批次、低精度場景的理性選擇,我不否定它;我們補的是它做不到的地方:多函數共用同一張 256 表、高精度也撐得住、還有低頻呼叫 —— 金融合規正好就是這種需求。\n再來,誠實講什麼不是我們發明的:Minimax、Remez 是一百多年的教科書;FHE 從 2021 就在用;ZKFixedPointChip 2023 也已經在 Halo2 上用過 Remez;『Minimax 比 Taylor 好』本身也是教科書事實,不是我們的發現。\n那真正新的有五項:第一,第一個系統化地把 Minimax 跟 Taylor 在 ZK 定點下量化比較,並發現量化瓶頸;第二,把延遲截斷做在 Horner 鏈內這個粒度,還配上 BN254 的 bit-budget 分析;第三,形式化誤差預算加上窮舉驗證;第四,第一個有誤差分析的 ZK ln 和 erf 多項式電路;第五,不管什麼函數都只用一張 256 條目的表。\n一句話:我們不是又一個 ZK 函數庫,是把『能算』升級成『能證、有誤差保證、能落地金融』。",
+'成果與限界':"最後收尾,把這些取捨換到的成果跟代價一起講清楚。\n成果有三塊。Scenario A 是 Black-Scholes 的 Delta 對沖,pp=24:端到端 Delta 做到 1 個 ULP,比查表快 26.3 倍,而且 pp 大於等於 24 時這是唯一可行的路。Scenario C 是 Merton 信用違約,pp=32:做到 28.6 到 29 個有效位,7 個評等都對到小數第 8 位,proof 大約 15,360 bytes、verify 約 33 毫秒。整體 13 個函數全部 ULP=1,proof 落在 5 到 9.5 KB,verify 不超過 5.1 毫秒。\n代價也誠實講:erf 要用 5 段 piecewise 才能覆蓋 0 到 5,proof 因此乘上 2.2 倍;bit-budget 限制 d+1 乘 pp 小於 254,pp 上限在 degree=5 時是 42;大批次比單函數查表慢大約 7.5 倍;proof 比查表大約 6.8 倍 —— 但仍然小於 5KB。\n收尾一句話:這整篇論文,就是把『能算一個函數』,變成『能證一個金融模型』。謝謝大家,接下來問答。",
+  };
+
+  const deck=document.getElementById('deck');
+  const slides=[...deck.querySelectorAll('.slide')];
+  const labels=slides.map(s=>s.dataset.label||'');
+  let viewIdx=0;
+
+  // ===== glossary: define every term once, then map per slide =====
+  const GLOSS = {
+"超越函數":"非多項式、非代數的函數（exp、ln、erf…）；ZK 電路無原生支援，得用多項式逼近重建。",
+"exp / ln / erf":"指數、自然對數、誤差函數；金融模型（Black–Scholes、Merton）的核心，Halo2 無原生支援。",
+"erf (誤差函數)":"統計用函數；常態 CDF Φ(x)=½(1+erf(x/√2)) 就靠它，是風險/違約機率計算的核心。",
+"常態 CDF Φ":"標準常態分佈的累積機率；Φ(x)=½(1+erf(x/√2))，Black–Scholes 的 Delta、Merton 的違約機率都用到。",
+"Black–Scholes":"選擇權定價模型；其 Delta（對標的的敏感度）用到常態 CDF Φ，即超越函數。",
+"Merton 模型":"結構式信用風險模型；用公司資產的對數常態分佈算違約機率，需 ln 與 Φ。",
+"Delta 曝險":"投組對標的價格變動的一階敏感度；風險限額常以 |Σ wΔ|≤τ 形式管控。",
+"金融法遵 (compliance)":"向監管/對手方證明風險在限額內；難點是要證對又不能洩漏部位 → ZK 對症。",
+"有限體 (𝔽ᵣ)":"模一個大質數 r 的整數體；ZK 電路所有值都在此體內，只有加與乘、沒有小數。",
+"浮點":"IEEE 小數運算；有限體沒有原生支援，是 Halo2 的硬限制，逼出定點方案。",
+"零知識證明 (ZK)":"證明某敘述為真、卻不洩漏除『為真』以外任何資訊（這裡：證風險合規、不洩漏部位）。",
+"查表 (lookup)":"把每個輸入預先算好存表、查表取值；低精度便宜，但高精度時表會爆量。",
+"pp (定點精度)":"fixed-point precision；用尺度 S=2^pp 把實數編碼成整數模擬小數。pp 越大越準、中間值越易溢位。",
+"定點 pp=48":"用尺度 S=2^48 把實數編碼成整數來模擬小數；本論文 kernel 的預設精度。",
+"尺度 S=2^pp":"定點縮放因子；實數 v 編碼成 round(v·S)，截斷時除以 S。",
+"Taylor 展開":"在單點附近用導數逼近函數；定點量化下誤差大、會崩潰（pp=32,d=10 時 ln 僅 4.4 有效位）。",
+"Minimax / Remez":"求『整個區間最大誤差最小』(L∞) 的逼近多項式；Remez 是求其係數的演算法。對本論文是必要條件、非『較好』。",
+"ULP":"Unit in the Last Place；以末位為單位衡量誤差，ULP=1 表示準到定點能表示的最後一位。",
+"有效位 (有效數字)":"結果可信的十進位位數；pp=32,d=10 時 Taylor 的 ln 只剩 4.4 位、Minimax 有 28.6 位。",
+"Horner 法":"逐步求多項式值：acc←acc·x+係數，一層層算；中間值會隨步數膨脹。",
+"中間值膨脹":"Horner 逐步乘加時，未截斷的中間值脹成 S^(d+1)；pp=32,d=10 約 2^352，溢位 BN254。",
+"溢位 (overflow)":"中間值超過體可表示範圍（BN254 約 253 bit）；一旦溢位，模約化會毀掉數值意義。",
+"BN254":"配對友善橢圓曲線（約 128-bit 安全）；純量場約 254-bit，是中間值的硬天花板。",
+"degree (多項式次數 d)":"逼近多項式 P(x)=Σ cᵢxⁱ 的最高次；越大越貼合但閘越多，且過了甜蜜點反而更差。",
+"d* (最佳 degree)":"精度最高的那個 degree；超過它再加次數，量化誤差被放大、整體精度掉頭往下。",
+"量化飽和":"超過 d* 後 degree 再高反而更差的現象（逼近誤差續降、量化誤差被放大）；本論文首次在 ZK 文獻記錄。",
+"harmful degree":"超過甜蜜點 d* 之後『有害』的那些 degree；加了只會更糟。",
+"量化誤差":"把實數/係數塞進有限位定點時的捨入誤差；degree 越高被放大得越多。",
+"逼近誤差":"多項式與真函數的差距；degree 越高越小（但會被量化誤差反超）。",
+"延遲截斷 (deferred)":"把 d 次截斷併成最後一次做；查表反而較多（12 vs per-step 的 2），但換到 2–7× 精度、達 ULP=1；受 bit-budget (d+1)·pp<254 限制，pp≥32 溢位、改用 per-step。",
+"逐步截斷 (per-step)":"每一步乘加後立刻除以 S 取整；高精度（pp≥32）唯一可行，代價是每步都要查表。",
+"bit-budget":"延遲截斷的位元預算：(d+1)·pp<254；pp≥32 時用光、被迫改 per-step。",
+"暫存空間 (紅利)":"ZK 的 254-bit 體比 CPU register 寬，多出的位元可讓中間值先脹著、最後一次截斷 —— 延遲截斷吃的就是這塊。",
+"係數條件數":"逼近多項式係數對誤差的放大程度；由函數本身決定，使不同函數在同 pp/d 下精度差很多（ln 142 vs erf 15 ULP）。",
+"精度地板":"某函數在給定 pp/d 下能達到的最佳精度上限；由其係數結構決定，與 kernel 設計無關。",
+"區間 (interval)":"逼近多項式有效的輸入範圍；越窄越準（ln 在 [0,ln2) ULP=1）但覆蓋越小。",
+"range reduction":"把大區間的輸入先化簡到一個窄基準區間求值、再還原；用來補窄區間覆蓋不足。",
+"piecewise (分段)":"把區間切成多段、每段一條多項式；erf 用 5 段覆蓋 [0,5]，代價是 proof×2.2。",
+"通用 Horner kernel":"一套固定的 Horner 截斷電路；換函數只改 fixed 欄的 d 個係數，電路結構不動。",
+"ByteTable":"固定的 0–255 表；把截斷餘數拆 byte 逐一查表完成範圍檢查，全函數共用同一張。",
+"fixed 欄":"電路寫死的常數欄（這裡放逼近多項式的係數）；屬 verification key。",
+"proof (證明 π)":"證明者送給驗證者的證明物件；本論文 13 函數 proof 5.0–9.5 KB。",
+"verify (驗證)":"驗證者檢查 proof 是否接受；本論文 verify ≤5.1 ms。",
+"ezkl / zkLLM":"ZKML 工具/系統，走查表路線、大批次低精度；與我們的多項式高精度路線互補。",
+"ZKFixedPointChip":"2023 年在 Halo2 上的定點電路，已用 Remez —— 所以『在 ZK 用 Minimax』不是我們首創。",
+"FHE":"全同態加密；2021 年起已用 minimax 多項式逼近，故該技巧非 ZK 獨有、非我們發明。",
+"Scenario A":"Black–Scholes Delta 對沖情境，pp=24：端到端 Delta 1 ULP、比查表快 26.3×。",
+"Scenario C":"Merton 信用違約情境，pp=32：28.6–29.0 有效位、proof≈15,360 B、verify≈33 ms。",
+"誤差預算 (error budget)":"把總誤差拆給逼近/量化/截斷各部分、形式化界定上限；本論文配窮舉驗證。",
+"窮舉驗證":"對定點輸入空間逐一檢查實際誤差是否在界內，補上形式化誤差界的實證。",
+"Black–Scholes Delta":"選擇權對標的價格的一階敏感度，用常態 CDF Φ 計算；Scenario A 要證它在限額內。"
+  };
+  // formal / precise definitions — shown as 形式： under 白話 (only terms that have one)
+  const FORMAL = {
+"erf (誤差函數)":"erf(x)=(2/√π)∫₀ˣ e^(−t²)dt；常態 CDF Φ(x)=½(1+erf(x/√2))。",
+"常態 CDF Φ":"Φ(x)=½(1+erf(x/√2))=(1/√(2π))∫_{−∞}^x e^(−t²/2)dt。",
+"Minimax / Remez":"P* = argmin_{deg P≤d} max_{x∈[a,b]} |P(x)−f(x)|（L∞ / 等漣波最佳解）。",
+"Taylor 展開":"f(x)≈Σ_{k=0}^d f⁽ᵏ⁾(a)/k!·(x−a)ᵏ；僅在 a 附近最佳，全區間 L∞ 誤差大。",
+"Horner 法":"P(x)=(((c_d·x+c_{d−1})x+…)x+c₀)；逐步 acc_{k+1}=acc_k·x+c_k。",
+"中間值膨脹":"未截斷時 |acc| 量級 ~ S^(d+1)（S=2^pp）；pp=32,d=10 → ~2^352。",
+"bit-budget":"延遲截斷需 (d+1)·pp < log₂ r ≈ 254（BN254）；否則中間值溢位。",
+"逐步截斷 (per-step)":"acc_{k+1}=⌊(acc_k·x̂+ĉ_k)/S⌋，餘數 rem∈[0,S) 由閘+ByteTable 強制。",
+"尺度 S=2^pp":"S=2^pp（pp=48）；編碼 v̂=⌊v·S⌉，截斷除以 S。",
+"ULP":"以定點末位 2^(−pp) 為單位；誤差 = |結果−真值|·2^pp，ULP=1 即準到末位。",
+"degree (多項式次數 d)":"deg(P)=d；Remez 取最小 d 使 max|P−f|≤目標誤差；閘成本隨 d 增。",
+"量化飽和":"存在 d* 使精度 acc(d) 在 d<d* 遞增、d>d* 遞減（逼近誤差↓、量化誤差↑被放大）。",
+"BN254":"Barreto–Naehrig 曲線，嵌入次數 12，r、q 約 254-bit；type-3 配對 e:G₁×G₂→G_T。",
+"範圍檢查 (ByteTable)":"rem=Σ bᵢ·256ⁱ，∀i bᵢ∈{0,…,255}（lookup）⟹ rem∈[0,S=256⁶)。",
+"有限體 (𝔽ᵣ)":"GF(r)=ℤ/rℤ，r 大質數；電路所有值 ∈ 𝔽ᵣ，無小數、無浮點。",
+"piecewise (分段)":"f|[a,b] 切 m 段，每段一條 deg≤d 多項式；erf 在 [0,5] 用 m=5。"
+  };
+  const TERMS = {
+'封面':["零知識證明 (ZK)","超越函數","定點 pp=48","Minimax / Remez","逐步截斷 (per-step)","通用 Horner kernel","ByteTable"],
+'要解的問題':["金融法遵 (compliance)","Delta 曝險","Black–Scholes","Merton 模型","常態 CDF Φ","erf (誤差函數)","exp / ln / erf","超越函數","有限體 (𝔽ᵣ)","浮點","零知識證明 (ZK)"],
+'兩條死路':["查表 (lookup)","pp (定點精度)","Taylor 展開","Minimax / Remez","有效位 (有效數字)","Horner 法","中間值膨脹","溢位 (overflow)","BN254","尺度 S=2^pp","逐步截斷 (per-step)"],
+'四個設計決定':["定點 pp=48","浮點","Minimax / Remez","Taylor 展開","ULP","逐步截斷 (per-step)","延遲截斷 (deferred)","溢位 (overflow)","通用 Horner kernel","ByteTable","fixed 欄","proof (證明 π)","verify (驗證)"],
+'免費空間':["延遲截斷 (deferred)","逐步截斷 (per-step)","bit-budget","暫存空間 (紅利)","BN254","pp (定點精度)","degree (多項式次數 d)","中間值膨脹","溢位 (overflow)"],
+'量化飽和':["量化飽和","d* (最佳 degree)","harmful degree","degree (多項式次數 d)","量化誤差","逼近誤差","ULP","pp (定點精度)"],
+'函數與區間':["係數條件數","精度地板","區間 (interval)","range reduction","piecewise (分段)","ULP","erf (誤差函數)","exp / ln / erf","degree (多項式次數 d)"],
+'我們站在哪':["查表 (lookup)","ezkl / zkLLM","ZKFixedPointChip","FHE","Minimax / Remez","Taylor 展開","量化飽和","延遲截斷 (deferred)","bit-budget","誤差預算 (error budget)","窮舉驗證","ByteTable","exp / ln / erf"],
+'成果與限界':["Scenario A","Scenario C","Black–Scholes Delta","Merton 模型","ULP","有效位 (有效數字)","proof (證明 π)","verify (驗證)","piecewise (分段)","bit-budget","查表 (lookup)","range reduction"]
+  };
+
+  // ===== anticipated Q&A per slide (hidden ❓ panel; press q) =====
+  const QA = {
+'要解的問題':[
+ ["為什麼不乾脆不上 ZK，用傳統稽核+保密協議就好？","稽核要把部位給第三方看，洩漏風險與信任成本都在；ZK 讓你『不交出資料也能證明合規』，把信任從『相信機構誠實』換成『相信數學』。代價是要把金融模型搬進電路 —— 這正是這篇論文付的代價。"],
+ ["合規檢查不就是比大小嗎？哪裡需要超越函數？","門檻本身是比大小，但『風險值』要先算出來：Black–Scholes 的 Delta 用常態 CDF Φ、Merton 的違約機率用 ln 與 Φ。算這個風險值就得求 erf/ln/exp，這才是撞牆的地方。"]
+],
+'兩條死路':[
+ ["查表不能壓縮、或只存關鍵點再插值嗎？","插值等於又回到多項式逼近這條路（還多了查表開銷）；純壓縮也救不了 pp=32 的 43 億格量級。所以查表的死法是『精度一拉高就指數爆量』，這是結構性的，不是工程沒調好。"],
+ ["Taylor 崩潰，不能在多個點展開（分段 Taylor）補救嗎？","可以分段，但每段仍是『單點最佳』、全段 L∞ 誤差大，要逼到金融精度需要的段數遠多於 Minimax；Minimax 一條多項式就把全區間最大誤差壓到最小，這是本質差異，不是補丁能抹平的。"],
+ ["中間值溢位，把 BN254 換成更大的體不就好了？","換更大的體會推高每個運算的成本、且配對曲線選擇有限（要上鏈還得是以太坊 precompile 友善的 BN254）。所以我們選『在 BN254 內用 per-step 截斷把中間值壓住』，而不是換體 —— 這也是一個取捨。"]
+],
+'四個設計決定':[
+ ["這四個決定是獨立的，還是綁在一起？","綁在一起：選了高精度定點(①) → 中間值會脹 → 逼出逐步截斷(③)；選多項式逼近 → Taylor 崩潰 → 逼出 Minimax(②)；要能反覆換函數 → 逼出通用 kernel+ByteTable(④)。每個決定都是前一個決定的後果，不是四個獨立旋鈕。"],
+ ["pp 為什麼挑 48？不是越大越好嗎？","pp 越大精度上限越高，但中間值越易溢位、bit-budget (d+1)·pp<254 越快用光。48 是『精度夠金融用、又留得下 budget 給 degree』的平衡點；不是越大越好，是有上限的取捨。"]
+],
+'免費空間':[
+ ["既然延遲截斷精度更好，為什麼不全程用它、只在 pp≥32 才換？","因為它有天花板:bit-budget (d+1)·pp<254，pp≥32 時中間值溢位 BN254、根本算不出來。所以低 pp 用延遲(精度好、達 ULP=1，代價是查表較多)，高 pp 被迫改 per-step。這個切換邊界正是我們第一個量化出來的貢獻之一。"],
+ ["這塊『免費空間』真的免費嗎？有沒有隱藏成本？","不是字面免費 —— 它換來的是『少做幾次截斷/查表』，但代價是吃掉 bit-budget、限制了能用的 degree 與 pp。所以它是『把成本從 lookups 挪到 bit 預算』的搬移，pp 一高就還回去。"]
+],
+'量化飽和':[
+ ["量化飽和會不會只是某幾個函數的特例？","不是特例：它來自『逼近誤差隨 d 降、量化誤差隨 d 被放大』這兩股普遍力量的交叉，對定點下的多項式逼近是通則。我們在 13 個函數上都看到這個甜蜜點，並首次在 ZK 文獻系統記錄。"],
+ ["那實務上怎麼找到 d*？要不要每個函數都掃一遍？","對，我們用窮舉驗證掃 degree 找每個函數的 d*（搭配形式化誤差預算）。好消息是 d* 通常很小（pp=16 時 d≤7 就全 ULP=1），掃描成本可控。"]
+],
+'函數與區間':[
+ ["係數條件數差這麼多，能不能改寫多項式讓 ln 也變好？","可以用更好的基底/區間縮放改善條件數（我們就靠窄區間+range reduction 把 ln 拉到 ULP=1），但『地板由函數係數結構決定』這件事不會消失 —— 有些函數天生難逼近，這是要承認的限制。"],
+ ["窄區間更準，那為什麼不把所有函數都用超窄區間？","因為覆蓋會不夠，得靠 range reduction 把輸入化簡進窄區間、再還原 —— 這多出一段電路與額外誤差。所以是『精度 ↔ 覆蓋 + 額外電路成本』的三方取捨,不是越窄越好。"]
+],
+'我們站在哪':[
+ ["既然 ZKFixedPointChip 2023 已經用 Remez，你們到底新在哪？","他們把 Remez 用在定點電路，但沒有系統化的 Minimax-vs-Taylor 量化分析、沒有量化飽和的記錄、沒有 ln/erf 的誤差分析電路、也沒有 Horner 鏈內延遲截斷的 bit-budget 分析。我們新的是『分析+誤差保證+金融落地』那一層，不是『首次在 ZK 用 minimax』。"],
+ ["為什麼不直接說『我們比查表好』？","因為不誠實 —— 查表在大批次低精度其實更省、proof 更小;我們大批次比它慢約 7.5×、proof 大約 6.8×。我們贏的是『多函數高精度低頻』這個它做不到的場景,兩者互補。把共有或對方更強的點說成自己的優勢,會被當場抓到。"]
+],
+'成果與限界':[
+ ["proof 比查表大 6.8×、又慢 7.5×，那為什麼還說值得？","因為場景不同:查表在大批次低精度贏,但做不到金融要的 24–32 bit 高精度多函數;我們的 proof 仍 <5KB、verify 毫秒級,且 pp≥24 時查表根本不可行。值不值得取決於需求 —— 金融合規這種高精度低頻場景,我們是唯一可行解。"],
+ ["erf 要 5 段、proof×2.2，這算不算方法的失敗？","算誠實的限界,不算失敗:erf 在寬區間天生難逼近(係數條件數),切段是用 proof 大小換覆蓋與精度的明確取捨。我們把這個代價量化標出來,而不是藏起來 —— 這正是『有誤差保證』的一部分。"]
+]
+  };
+
+  // robust current-slide index: the slide spanning the viewport's vertical centre
+  function currentIdx(){
+    const dr=deck.getBoundingClientRect(), center=dr.top+dr.height/2;
+    for(let k=0;k<slides.length;k++){const r=slides[k].getBoundingClientRect();if(center>=r.top&&center<r.bottom)return k;}
+    return Math.max(0,Math.min(slides.length-1,Math.round(deck.scrollTop/deck.clientHeight)));
+  }
+
+  // ===== reusable sliding panel + drag (powers 講稿 and 問答) =====
+  function makeDraggable(modal){
+    const head=modal.querySelector('.note-head'); let dx=0,dy=0,drag=false;
+    const begin=(cx,cy)=>{const r=modal.getBoundingClientRect();modal.style.left=r.left+'px';modal.style.top=r.top+'px';modal.style.right='auto';modal.style.bottom='auto';modal.style.transform='none';dx=cx-r.left;dy=cy-r.top;drag=true;};
+    head.addEventListener('mousedown',e=>{if(e.target.closest('button'))return;begin(e.clientX,e.clientY);e.preventDefault();});
+    window.addEventListener('mousemove',e=>{if(!drag)return;const nx=Math.max(4,Math.min(window.innerWidth-modal.offsetWidth-4,e.clientX-dx)),ny=Math.max(60,Math.min(window.innerHeight-40,e.clientY-dy));modal.style.left=nx+'px';modal.style.top=ny+'px';});
+    window.addEventListener('mouseup',()=>drag=false);
+    head.addEventListener('touchstart',e=>{if(e.target.closest('button'))return;const t=e.touches[0];begin(t.clientX,t.clientY);},{passive:true});
+    window.addEventListener('touchmove',e=>{if(!drag)return;const t=e.touches[0];modal.style.left=Math.max(4,Math.min(window.innerWidth-modal.offsetWidth-4,t.clientX-dx))+'px';modal.style.top=Math.max(60,t.clientY-dy)+'px';},{passive:true});
+    window.addEventListener('touchend',()=>drag=false);
+  }
+  function setupPanel(o){
+    const modal=document.getElementById(o.modal), btn=document.getElementById(o.btn);
+    const bodyEl=document.getElementById(o.body), tagEl=document.getElementById(o.tag), idxEl=document.getElementById(o.idx);
+    let openIdx=0;
+    function render(keep){
+      const lab=labels[openIdx]||('#'+(openIdx+1));
+      tagEl.textContent='· '+lab;
+      const st=bodyEl.scrollTop;
+      if(o.html){bodyEl.innerHTML=o.get(lab);}else{bodyEl.textContent=o.get(lab);}
+      idxEl.textContent=(openIdx+1)+' / '+slides.length; bodyEl.scrollTop=keep?st:0;
+    }
+    const isOpen=()=>modal.classList.contains('open');
+    function open(i){openIdx=Math.max(0,Math.min(slides.length-1,i));render();modal.classList.add('open');btn.style.display='none';}
+    function close(){modal.classList.remove('open');btn.style.display='';}
+    btn.onclick=()=>open(currentIdx());
+    document.getElementById(o.close).onclick=close;
+    document.getElementById(o.prev).onclick=()=>open(openIdx-1);
+    document.getElementById(o.next).onclick=()=>open(openIdx+1);
+    makeDraggable(modal);
+    return {open,close,isOpen,toggle:()=>isOpen()?close():open(viewIdx),follow:()=>{if(isOpen()){openIdx=viewIdx;render();}},rerender:()=>render(true),body:bodyEl};
+  }
+  // ===== editable overlay (localStorage): edit / delete / mark + export for Claude to apply =====
+  const OVK='h2deck_ov'; let OV={edit:{},del:{},mark:{}};
+  // when opened via the local authoring server (http://localhost), edits also auto-save to a file Claude reads directly
+  const LOCAL=location.protocol==='http:'&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  try{const s=localStorage.getItem(OVK); if(s)OV=Object.assign({edit:{},del:{},mark:{}},JSON.parse(s));}catch(e){}
+  function flashSaved(){if(!LOCAL)return;let b=document.getElementById('savedBadge');if(!b){b=document.createElement('div');b.id='savedBadge';b.textContent='💾 已自動存檔（Claude 可直接讀）';document.body.appendChild(b);}b.style.opacity='1';clearTimeout(b._t);b._t=setTimeout(()=>{b.style.opacity='0';},1300);}
+  function saveOV(){try{localStorage.setItem(OVK,JSON.stringify(OV));}catch(e){}
+    if(LOCAL){fetch('/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(OV)}).then(()=>flashSaved()).catch(()=>{});}}
+  let editingId=null;
+  const SEP='~~';
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function ctl(id){return '<span class="it-ctl"><button data-act="edit" data-id="'+id+'" title="編輯">✏️</button><button data-act="mark" data-id="'+id+'" title="標記給 Claude 改">🚩</button><button data-act="del" data-id="'+id+'" title="刪除">🗑️</button></span>';}
+  function editForm(id,fields){let h='<div class="it-edit">';fields.forEach(f=>{h+='<label class="it-lab">'+f[1]+'</label><textarea data-f="'+f[0]+'">'+esc(f[2])+'</textarea>';});return h+'<div class="it-btns"><button data-act="save" data-id="'+id+'">儲存</button><button data-act="cancel" data-id="'+id+'">取消</button></div></div>';}
+  function termHTML(t){
+    const id='t'+SEP+t; if(OV.del[id])return '';
+    const e=OV.edit[id]||{}, p=('p'in e)?e.p:(GLOSS[t]||'（待補）'), f=('f'in e)?e.f:(FORMAL[t]||'');
+    if(editingId===id)return '<div class="qa-item editing" data-id="'+id+'"><div class="qa-q">'+esc(t)+'</div>'+editForm(id,[['p','白話',p],['f','形式（可留空）',f]])+'</div>';
+    let inner='<div class="qa-q">'+esc(t)+ctl(id)+'</div><div class="qa-a"><b>白話：</b>'+esc(p)+'</div>';
+    if(f)inner+='<div class="qa-a qa-formal"><b>形式：</b>'+esc(f)+'</div>';
+    return '<div class="qa-item'+(OV.mark[id]?' marked':'')+'" data-id="'+id+'">'+inner+'</div>';
+  }
+  function qaItemHTML(lab,i,pair){
+    const id='q'+SEP+lab+SEP+i; if(OV.del[id])return '';
+    const e=OV.edit[id]||{}, q=('q'in e)?e.q:pair[0], a=('a'in e)?e.a:pair[1];
+    if(editingId===id)return '<div class="qa-item editing" data-id="'+id+'">'+editForm(id,[['q','問題',q],['a','解答',a]])+'</div>';
+    return '<div class="qa-item'+(OV.mark[id]?' marked':'')+'" data-id="'+id+'"><div class="qa-q">Q：'+esc(q)+ctl(id)+'</div><div class="qa-a">'+esc(a)+'</div></div>';
+  }
+  function qaHTML(lab){
+    let h=''; const ts=TERMS[lab];
+    if(ts&&ts.length){const b=ts.map(termHTML).join(''); if(b)h+='<div class="qa-sec">📖 名詞（白話 + 形式）</div>'+b;}
+    const qs=QA[lab];
+    if(qs&&qs.length){const b=qs.map((p,i)=>qaItemHTML(lab,i,p)).join(''); if(b)h+='<div class="qa-sec">❓ 可能被問</div>'+b;}
+    return h||'<div class="qa-empty">（本節暫無預備內容，或已全部刪除）</div>';
+  }
+  // render a note as: prominent lead (一般介紹) on top, then 【...】 detail blocks split off below
+  function fmtLines(lines){
+    let out='';
+    for(const ln of lines){
+      const tt=ln.trim();
+      if(!tt) continue;
+      if(tt[0]==='·'||tt[0]==='•') out+='<div class="nt-li">'+esc(tt.replace(/^[·•]\s*/,''))+'</div>';
+      else out+='<div class="nt-p">'+esc(tt)+'</div>';
+    }
+    return out;
+  }
+  function renderNoteText(txt){
+    const lines=String(txt).split('\n');
+    const lead=[]; const secs=[]; let cur=null;
+    for(const ln of lines){
+      const m=ln.trim().match(/^【([^】]*)】(.*)$/);
+      if(m){ if(cur)secs.push(cur); cur={h:m[1], b:m[2]?[m[2]]:[]}; }
+      else if(cur){ cur.b.push(ln); }
+      else lead.push(ln);
+    }
+    if(cur)secs.push(cur);
+    let h='<div class="nt-lead">'+fmtLines(lead)+'</div>';
+    for(const s of secs) h+='<div class="nt-sec"><div class="nt-h">'+esc(s.h)+'</div><div class="nt-b">'+fmtLines(s.b)+'</div></div>';
+    return h;
+  }
+  function noteHTML(lab){
+    const id='n'+SEP+lab; if(OV.del[id])return '<div class="qa-empty">（本節講稿已刪除）</div>';
+    const e=OV.edit[id]||{}, txt=('text'in e)?e.text:(NOTES[lab]||'（本節暫無講稿）');
+    if(editingId===id)return '<div class="note-item editing" data-id="'+id+'">'+editForm(id,[['text','講稿',txt]])+'</div>';
+    return '<div class="note-item'+(OV.mark[id]?' marked':'')+'" data-id="'+id+'"><div class="it-bar">'+ctl(id)+'</div><div class="note-text">'+renderNoteText(txt)+'</div></div>';
+  }
+
+  const notesP=setupPanel({modal:'noteModal',btn:'noteBtn',body:'noteBody',tag:'noteTag',idx:'noteIdx',close:'noteClose',prev:'notePrev',next:'noteNext',get:noteHTML,html:true});
+  const qaP=setupPanel({modal:'qaModal',btn:'qaBtn',body:'qaBody',tag:'qaTag',idx:'qaIdx',close:'qaClose',prev:'qaPrev',next:'qaNext',get:qaHTML,html:true});
+
+  // ===== presenter mode: synced notes popup (project main window; keep popup on laptop via extended display) =====
+  let presenterWin=null;
+  const PRESENTER_HTML='<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><title>簡報者 · Halo2</title>'+
+    '<style>body{margin:0;font-family:"Noto Sans TC",system-ui,sans-serif;background:#fff;color:#111;padding:16px 22px 74px;line-height:1.85;font-weight:500}'+
+    '.ptop{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(124,58,237,.28);padding-bottom:8px;margin-bottom:12px}'+
+    '#pPg{font-weight:800;color:#4338ca;font-size:1.02rem}#pTimer{font-variant-numeric:tabular-nums;color:#111;font-size:1.3rem;font-weight:700}'+
+    '#pTitle{font-size:1.55rem;font-weight:900;margin:0 0 12px;color:#4338ca;line-height:1.25}'+
+    '#pNote{font-size:1.18rem;color:#111}#pNote .nt-p{margin:.32em 0}'+
+    '#pNote .nt-li{margin:.26em 0;padding-left:1.45em;position:relative}#pNote .nt-li::before{content:"\\2022";position:absolute;left:.4em;color:#4f46e5;font-weight:800}'+
+    '#pNote .nt-sec{margin-top:.7rem;border-top:1px dashed rgba(124,58,237,.32);padding-top:.5rem;font-size:.95em}'+
+    '#pNote .nt-h{font-weight:800;color:#4338ca;font-size:.92em;margin-bottom:.25rem}'+
+    '#pNext{position:fixed;left:0;right:0;bottom:0;background:#f3f0ff;border-top:1px solid rgba(124,58,237,.28);padding:11px 22px;color:#4338ca;font-weight:700;font-size:1.02rem}'+
+    '</style></head><body><div class="ptop"><span id="pPg"></span><span id="pTimer">00:00</span></div>'+
+    '<h2 id="pTitle"></h2><div id="pNote"></div><div id="pNext"></div>'+
+    '<scr'+'ipt>var t0=Date.now();setInterval(function(){var s=Math.floor((Date.now()-t0)/1000),m=(""+Math.floor(s/60)).padStart(2,"0"),x=(""+(s%60)).padStart(2,"0"),e=document.getElementById("pTimer");if(e)e.textContent=m+":"+x;},1000);</scr'+'ipt></body></html>';
+  function updatePresenter(){
+    if(!presenterWin||presenterWin.closed)return;
+    const i=currentIdx(), lab=labels[i]||'', d=presenterWin.document;
+    if(!d||!d.getElementById('pPg'))return;
+    d.getElementById('pPg').textContent='p.'+(i+1)+' / '+slides.length+(lab?'　·　'+lab:'');
+    d.getElementById('pTitle').textContent=lab;
+    d.getElementById('pNote').innerHTML=renderNoteText(NOTES[lab]||'（本節暫無講稿）');
+    const nx=labels[i+1];
+    d.getElementById('pNext').textContent=nx?('下一頁 ▸ '+nx):'（最後一頁）';
+  }
+  function openPresenter(){
+    if(presenterWin&&!presenterWin.closed){presenterWin.focus();updatePresenter();return;}
+    presenterWin=window.open('','halo2presenter','width=600,height=820');
+    if(!presenterWin){alert('簡報者視窗被瀏覽器擋住了。請允許這個頁面開啟彈出視窗，再按一次「🖥 簡報者」。');return;}
+    presenterWin.document.open();presenterWin.document.write(PRESENTER_HTML);presenterWin.document.close();
+    setTimeout(updatePresenter,80);
+  }
+  document.getElementById('presBtn').addEventListener('click',openPresenter);
+
+  // edit / mark / delete via event delegation on each panel body
+  function wire(panel){
+    panel.body.addEventListener('click',e=>{
+      const b=e.target.closest('button[data-act]'); if(!b)return; e.preventDefault();
+      const act=b.dataset.act, id=b.dataset.id;
+      if(act==='edit'){editingId=id;panel.rerender();}
+      else if(act==='cancel'){editingId=null;panel.rerender();}
+      else if(act==='save'){const box=b.closest('.it-edit'),obj=Object.assign({},OV.edit[id]);box.querySelectorAll('textarea[data-f]').forEach(t=>obj[t.dataset.f]=t.value);OV.edit[id]=obj;editingId=null;saveOV();panel.rerender();}
+      else if(act==='del'){OV.del[id]=true;if(editingId===id)editingId=null;saveOV();panel.rerender();}
+      else if(act==='mark'){OV.mark[id]?delete OV.mark[id]:OV.mark[id]=true;saveOV();panel.rerender();}
+    });
+  }
+  wire(notesP); wire(qaP);
+  // local authoring mode: seed overrides from the file so Claude's edits + your edits share one source of truth
+  if(LOCAL){fetch('/load').then(r=>r.ok?r.json():null).then(d=>{if(d&&typeof d==='object'){OV=Object.assign({edit:{},del:{},mark:{}},d);notesP.rerender();qaP.rerender();}}).catch(()=>{});}
+
+  // export the override layer so Claude can bake it into the source
+  function humanId(id){const p=id.split(SEP);if(p[0]==='t')return '名詞「'+p[1]+'」';if(p[0]==='q')return '問答「'+p[1]+'」#'+(parseInt(p[2],10)+1);if(p[0]==='n')return '講稿「'+p[1]+'」';return id;}
+  function buildExport(){
+    const L=['# Halo2 deck — 修改清單（複製貼給 Claude，我會直接改原始檔）'];
+    const mk=Object.keys(OV.mark), ed=Object.keys(OV.edit), dl=Object.keys(OV.del);
+    if(mk.length){L.push('','## 🚩 標記（請改這些）');mk.forEach(k=>L.push('- '+humanId(k)));}
+    if(ed.length){L.push('','## ✏️ 已編輯（新內容）');ed.forEach(k=>L.push('- '+humanId(k)+'：'+JSON.stringify(OV.edit[k])));}
+    if(dl.length){L.push('','## 🗑️ 已刪除');dl.forEach(k=>L.push('- '+humanId(k)));}
+    if(!mk.length&&!ed.length&&!dl.length)L.push('','（目前沒有任何標記 / 編輯 / 刪除）');
+    L.push('','---RAW（給程式解析，勿動）---',JSON.stringify(OV));
+    return L.join('\n');
+  }
+  function showExport(){
+    let ov=document.getElementById('ovExport');
+    if(!ov){ov=document.createElement('div');ov.id='ovExport';
+      ov.innerHTML='<div class="ov-card"><div class="ov-head"><span>修改清單 — 複製後貼給我</span><button id="ovX">×</button></div><textarea id="ovT" readonly></textarea><div class="ov-foot"><button id="ovC">📋 複製</button><button id="ovR">⚠️ 清空全部修改</button></div></div>';
+      document.body.appendChild(ov);
+      ov.querySelector('#ovX').onclick=()=>ov.style.display='none';
+      ov.querySelector('#ovC').onclick=()=>{const t=document.getElementById('ovT');t.select();try{document.execCommand('copy');}catch(e){}};
+      ov.querySelector('#ovR').onclick=()=>{if(confirm('清空所有編輯/刪除/標記？只影響你這台瀏覽器。')){OV={edit:{},del:{},mark:{}};saveOV();notesP.rerender();qaP.rerender();document.getElementById('ovT').value=buildExport();}};
+    }
+    document.getElementById('ovT').value=buildExport(); ov.style.display='flex';
+  }
+  ['noteModal','qaModal'].forEach(mid=>{const head=document.getElementById(mid).querySelector('.note-head');const eb=document.createElement('button');eb.className='note-export';eb.textContent='⤓ 匯出';eb.title='匯出修改清單給 Claude';eb.onclick=showExport;head.insertBefore(eb,head.querySelector('.note-close'));});
+
+  // teleprompter: while open, panels follow the slide you scroll to
+  // ===== pipeline locator rail: mark which stage we are on + the connecting action between steps =====
+  const STAGE={};
+  slides.forEach(s=>{if(STAGE[s.dataset.label])s.classList.add('rail');});
+  const rail=document.createElement('div'); rail.className='flowrail';
+  rail.innerHTML='<div class="fr-title">證明流程 · 你在這</div>'+[[1,'算術化 · 排表','填見證 + 加規則'],[2,'加約束 · 閘/複製/查表','每欄插值成多項式'],[3,'多項式 · 整除 Z_H','承諾每條多項式'],[4,'KZG 承諾','FS 抽隨機點 + 批次'],[5,'SHPLONK 批次開啟','在 ζ 開啟 + 配對'],[6,'隨機點驗證',null]].map(a=>'<div class="fr-stage" data-s="'+a[0]+'"><span class="fr-n">'+a[0]+'</span>'+a[1]+'</div>'+(a[2]?'<div class="fr-arrow">↓ '+a[2]+'</div>':'')).join('');
+  document.body.appendChild(rail);
+  rail.querySelectorAll('.fr-stage').forEach(n=>n.addEventListener('click',()=>{const s=+n.dataset.s;const t=slides.find(sl=>STAGE[sl.dataset.label]===s);if(t)t.scrollIntoView();}));
+  function updateRail(){const s=STAGE[labels[viewIdx]||''];if(s){rail.classList.add('show');rail.querySelectorAll('.fr-stage').forEach(n=>n.classList.toggle('active',+n.dataset.s===s));}else rail.classList.remove('show');}
+  deck.addEventListener('scroll',()=>{viewIdx=currentIdx();notesP.follow();qaP.follow();updateRail();updatePresenter();},{passive:true});
+  updateRail();
+
+  // ===== audio tour: play per-slide narration + auto-advance (time-synced) =====
+  const TOUR={items:(window.AUDIO_MANIFEST||[]),i:0,base:'assets/audio/'}; let AUD=null; let tourRate=1; const RATES=[1,1.25,1.5,1.75,2];
+  // no audio for this deck — AUDIO_MANIFEST is [] and we do not fall back to a manifest file
+  const pb=document.getElementById('playbar');
+  function pbIcon(p){document.getElementById('pbPlay').textContent=p?'⏸':'▶';}
+  function ensureAud(){if(AUD)return;AUD=new Audio();AUD.onended=()=>{if(TOUR.i<TOUR.items.length-1)tourPlay(TOUR.i+1);else tourStop();};AUD.ontimeupdate=()=>{const f=AUD.duration?AUD.currentTime/AUD.duration:0;document.getElementById('pbProg').style.width=(f*100)+'%';};AUD.onloadedmetadata=()=>{AUD.playbackRate=tourRate;};AUD.onplay=()=>pbIcon(true);AUD.onpause=()=>pbIcon(false);}
+  function tourPlay(k){
+    if(!TOUR.items.length){alert('語音檔尚未產生（等「小湯圓」聲音 id 確認後再生成）。');return;}
+    ensureAud();
+    TOUR.i=Math.max(0,Math.min(TOUR.items.length-1,k));
+    const it=TOUR.items[TOUR.i];
+    const sl=slides.find(s=>s.dataset.label===it.label); if(sl)sl.scrollIntoView();
+    AUD.src=TOUR.base+it.file; AUD.play().catch(()=>{}); AUD.playbackRate=tourRate;
+    document.getElementById('pbTitle').textContent=it.label;
+    document.getElementById('pbIdx').textContent=(TOUR.i+1)+' / '+TOUR.items.length;
+    pb.classList.add('show');
+  }
+  function tourStart(){const lab=labels[currentIdx()];const k=TOUR.items.findIndex(it=>it.label===lab);tourPlay(k>=0?k:0);}
+  function tourStop(){if(AUD)AUD.pause();pb.classList.remove('show');}
+  { const tb=document.getElementById('tourBtn'); if(tb) tb.onclick=tourStart; }
+  document.getElementById('pbPlay').onclick=()=>{if(!AUD||!AUD.src){tourStart();return;}AUD.paused?AUD.play():AUD.pause();};
+  document.getElementById('pbPrev').onclick=()=>tourPlay(TOUR.i-1);
+  document.getElementById('pbNext').onclick=()=>tourPlay(TOUR.i+1);
+  document.getElementById('pbSpeed').onclick=()=>{tourRate=RATES[(RATES.indexOf(tourRate)+1)%RATES.length];if(AUD)AUD.playbackRate=tourRate;document.getElementById('pbSpeed').textContent=tourRate+'×';};
+  document.getElementById('pbStop').onclick=tourStop;
+
+  window.addEventListener('keydown',e=>{
+    if(e.key==='n'||e.key==='N'){e.preventDefault();notesP.toggle();}
+    else if(e.key==='q'||e.key==='Q'){e.preventDefault();qaP.toggle();}
+    else if(e.key==='Escape'){notesP.close();qaP.close();}
+    else if((notesP.isOpen()||qaP.isOpen())&&(e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key==='ArrowUp')){e.preventDefault();e.stopPropagation();const d=(e.key==='ArrowRight'||e.key==='ArrowDown')?1:-1;const ni=Math.max(0,Math.min(slides.length-1,viewIdx+d));slides[ni].scrollIntoView();}
+  },true);
+})();
+</script>
+</body>
+</html>
