@@ -60,12 +60,24 @@ h2.sec{font-size:1.1rem;font-weight:800;margin:1.6rem 0 .7rem}
 code{font-family:var(--font-mono);background:var(--surface);padding:.05rem .3rem;border-radius:4px;font-size:.88em}
 .katex{font-size:1.0em;color:var(--text)}
 a.in{color:var(--accent);font-weight:700;text-decoration:none}
+/* 講稿 lecture notes */
+details.lecture{background:#f5f3ff;border:1px solid rgba(124,58,237,.28);border-left:4px solid var(--accent);border-radius:10px;margin:.1rem 0 1rem}
+details.lecture>summary{cursor:pointer;list-style:none;padding:.5rem .9rem;font-weight:800;font-size:.92rem;color:var(--accent-light);user-select:none}
+details.lecture>summary::-webkit-details-marker{display:none}
+details.lecture>summary::before{content:"▸ ";color:var(--accent)}
+details.lecture[open]>summary::before{content:"▾ "}
+details.lecture .body{padding:.1rem .95rem .85rem;font-size:.95rem;line-height:1.85;color:#1e1e24;white-space:pre-line}
+.notetoggle{font-size:.9rem;font-weight:700;color:#fff;background:var(--accent);border:none;border-radius:8px;padding:.35rem .8rem;cursor:pointer;white-space:nowrap}
+.notetoggle:hover{background:var(--accent-light)}
 </style>
 </head>
 <body>
 <header><div class="wrap">
   <h1>PLONKish <span class="sub">閘的例子集</span> — 同一張表、同一組欄，多種閘並存（＋複製 / 查表對照）</h1>
-  <a class="back" href="index.html">← 回報告</a>
+  <div style="display:flex;gap:.6rem;align-items:center">
+    <button class="notetoggle" id="toggleNotes">📝 全部講稿</button>
+    <a class="back" href="index.html">← 回報告</a>
+  </div>
 </div></header>
 
 <div class="wrap">
@@ -78,6 +90,11 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
   </div>
 
   <h2 class="sec">先搞懂：閘不是「某幾列」，是「蓋在<span style="border-bottom:2.5px solid var(--accent)">每一列</span>的一條規則」</h2>
+  <details class="lecture"><summary>📝 講稿</summary><div class="body">這頁要先打掉一個最常見的誤解。
+很多人以為一個閘就是表格裡「某幾列」。其實完全相反：閘是一條方程式，它往下蓋在每一列，每列各自代入自己那列的數字、都必須等於零。
+看這張圖：同一條式子 sel·(acc·x + coeff − 下一列 acc)，從上往下，第 0 列代 2、3、3、1 算出來是零，第 1 列代 9、3、4、1 也是零，一路到第 3 列 sel=0、整條乘零自動跳過。所以閘不是佔了哪幾列，是一條規則被檢查 n 次、每列一次；sel 只決定哪幾列這條規則生效。
+接著回答「填數字怎麼變成檢查約束」：prover 在電路外把答案算好、填進格子，這就是 witness；閘不負責算、只負責檢查 —— 它要求你填的數字讓方程式每列為零。把「每列為零」整理成一條多項式整除，就是 Z_H 整除 g、也就是存在商 t；驗證者不重算你的計算，只在一個隨機點 ζ 驗一條就信。
+最後那個洞察很重要：同一個格子可以同時被閘用、被複製約束綁、被查表檢查 —— 三種約束不是各佔不同列，是對同一批數字的三種不同檢查。</div></details>
   <div class="tablecap">你可能以為一個閘＝表格裡<b>某幾列</b>。其實相反：<b>閘是一條方程式</b>，它<b>往下蓋在每一列</b>，每列各代入<b>自己那列的數字</b>、都必須 = 0。<code>sel</code> 只決定<b>哪幾列這條規則生效</b>。</div>
   <div class="gitem" style="max-width:none;margin-bottom:.8rem">
     <svg viewBox="0 0 720 250" role="img" aria-label="一條閘方程式蓋在每一列" style="width:100%;max-width:740px;height:auto;display:block;margin:0 auto">
@@ -121,6 +138,10 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
   <div class="note"><b>同一格、三種鏡頭（回答你的洞察）：</b>同一個格子（例如 <code>x</code> 在第 1 列）<b>可以同時</b>被<b>閘</b>用（出現在方程式裡）、被<b>複製約束</b>綁（跟別列的 x 相等）、被<b>查表</b>範圍檢查（值 ∈ 表）。三種約束<b>不是各佔不同列</b>，是<b>對同一批數字的三種不同檢查</b> —— 閘看「本列＋鄰列」、複製看「任意兩格相等」、查表看「值在不在表裡」。</div>
 
   <h2 class="sec">一張通用表，多種閘靠 selector 切換</h2>
+  <details class="lecture"><summary>📝 講稿</summary><div class="body">這張表想說的是：PLONKish 只有一張表、一組固定的欄，所有閘共用同一組 advice 欄 a、b、c，每種閘配一個自己的 selector。
+看表：每一列只有一個 q 是 1（綠色），那條閘就在那列生效、讀同一組 a b c。第 0 列 q+ 開，驗加法 2+3−5=0；第 1 列 q× 開，驗乘法；第 2 列 q⁵；第 3 列布林。
+第 4 列最值得講：qΣ 在那列生效，但它靠 rotation 往下讀黃框三格 a —— 本列 2、下列 3、下下列 4，加起來等於 b=9。第 5、6 列本身沒有閘生效，它們的 a 只是被第 4 列讀走。
+所以結論：不是每個閘自己一套欄，是大家共用一組；多出來的不是欄，是同一條式子用 ω 指到下面的列（a(X) 本列、a(ωX) 下列、a(ω²X) 下下列）。</div></details>
   <div class="tablecap"><b>同一組欄</b> <code>a b c</code>（advice）＋ 每種閘一個 <code>q*</code>（selector）。每列只有一個 <code>q*</code>=1（綠色），那條閘就在該列生效、讀同一組 <code>a b c</code>；<code>·</code>＝該列用不到的格子。</div>
   <div class="utab-wrap"><table class="utab">
     <thead><tr>
@@ -141,6 +162,9 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
   <div class="note">看懂三件事：<b>(1)</b> 欄位固定就這幾個，每條閘都讀<b>同一組</b> <code>a b c</code>；<b>(2)</b> 每列只有一個 <code>q*</code>=1，決定那列驗哪條閘；<b>(3)</b> 第 4 列的 qΣ 只在那列生效，卻靠 <b>rotation</b> 往下讀<b style="color:#92400e">黃框那三格 a</b>（第 4/5/6 列＝2,3,4）—— 方程式裡 <code>a(X)</code>=本列、<code>a(ωX)</code>=下列、<code>a(ω²X)</code>=下下列。<b>不是多了欄，是同一條式子用 ω 指向下面的列。</b></div>
 
   <h2 class="sec">每條閘長什麼樣（都跑在上面那張表）</h2>
+  <details class="lecture"><summary>📝 講稿</summary><div class="body">這裡把六條閘並排，全都跑在剛剛那張表上。
+加法 degree 1、乘法 degree 2 —— 乘法就是 R1CS 的上限，它只能到兩格相乘。高次那條一條約束做五次方，Poseidon 的 S-box 就靠它，R1CS 得拆三條乘。布林逼一格成 0 或 1，再配一條就成 2-路 MUX、做分支。跨列那條次數只有 1，特別在它引用相鄰列。最後一條是我們論文 PF1 的核心 Horner 閘，乘加再讀下一列。
+關鍵一句：這六條都是「閘」 —— 多項式等於零、每列檢查（⑤⑥ 靠 rotation 讀鄰列）。但複製約束和查表根本不是閘，它們是另外兩套平行的約束，下一段講。</div></details>
   <div class="glist">
     <div class="gitem"><div class="gt">① 加法 <span class="badge">deg 1</span></div><div class="eq">\(q_{+}\cdot(a+b-c)=0\)</div><p>純加法、最低次。上表第 0 列。</p></div>
     <div class="gitem"><div class="gt">② 乘法 <span class="badge">deg 2</span></div><div class="eq">\(q_{\times}\cdot(a\cdot b-c)=0\)</div><p>兩格相乘 —— <b>R1CS 的上限就停在這</b>。第 1 列。</p></div>
@@ -152,6 +176,11 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
   <div class="note">注意：上面六條<b>都是「閘」</b>（多項式＝0，每列檢查；⑤⑥ 靠 <b>rotation</b> 讀鄰列）。但<b>複製約束</b>和<b>查表</b><b style="color:#b91c1c">根本不是閘</b> —— 它們是另外兩套平行的約束，看下面。</div>
 
   <h2 class="sec">三種約束機制 —— 只有第 ① 種叫「閘」</h2>
+  <details class="lecture"><summary>📝 講稿</summary><div class="body">這張表把三種約束擺在一起對照，重點是只有第一種叫「閘」。
+自訂閘：用 create_gate 寫一條多項式等於零，能讀本列加固定偏移的鄰列，固定結構烤進 vk，本身不另外造多項式。
+複製約束：用 enable_equality 加 constrain_equal，能綁任意兩格、相隔多遠都行，結構是置換 σ，但每次證明會臨時造一條 grand-product Z_P。
+查表：用 meta.lookup，逐列把值丟進表，表存在 fixed 欄，每次證明也造一條 grand-product。
+底下那條時間線是回答「約束什麼時候做的」：configure 宣告三種 → keygen 把固定結構烤進 vk·pk → prove 才臨時生出那幾條 grand-product 並承諾（它們不在 pk）→ 最後 verify 把閘項、置換項、查表項全用 α 的次方折成一條 G、一次驗完 —— 那才是三種約束真正「被檢查」的一刻。</div></details>
   <div class="tablecap">很多人以為所有約束都寫進 gate。其實 PLONKish 有<b>三種平行的約束</b>，宣告方式、能跨幾列、結構存哪、何時被檢查都不同。</div>
   <div class="utab-wrap"><table class="utab">
     <thead><tr><th>機制</th><th>怎麼宣告（halo2 API）</th><th>能跨幾列</th><th>固定結構存哪</th><th>每次證明額外產生</th></tr></thead>
@@ -164,6 +193,10 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
   <div class="note"><b>時間線（回答「什麼時候做的約束」）：</b><b>configure</b> 把三種全宣告 → <b>keygen</b> 把固定結構（selector / \(\sigma\) / 表）烤進 <b>vk·pk</b> → <b>prove</b> prover 臨時造出 <b>grand-product \(Z_P\) / \(Z\)</b> 並承諾（這幾條<b style="color:#b91c1c">不在 pk</b>，每次證明才生）→ <b>verify</b> 最終 <b>\(G(\zeta)=t(\zeta)\,Z_H(\zeta)\)</b> 裡，<b>閘項＋置換項＋查表項全用 \(\alpha\) 的次方折成一條 \(G\)</b>，一次驗完 —— 這才是三種約束真正「被檢查」的一刻。</div>
 
   <h2 class="sec">② 複製 與 ③ 查表 長什麼樣（不是閘，補上視覺）</h2>
+  <details class="lecture"><summary>📝 講稿</summary><div class="body">這兩張圖把「不是閘」的那兩種補上視覺。
+複製約束：把相隔很遠的任意兩格綁成相等 —— 圖裡是 a 欄第 0 列等於 c 欄第 3 列，rotation 搆不到的距離就靠它。demo 裡每列的 x 都綁成同一個 3，就是它做的。
+查表：不是等式，是「值必須落在預定義的表裡」。圖裡三個待查值 13、250、7 都要落在 ByteTable 0 到 255 裡。範圍檢查、SHA、定點截斷的餘數都靠它。
+這兩個的數學，接下來兩段分別拆開講。</div></details>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
     <div class="gitem">
       <div class="gt">② 複製約束（permutation）<span class="badge">任意兩格 = 相等</span></div>
@@ -217,6 +250,11 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
   </div>
 
   <h2 class="sec">複製的數學 —— 排列大乘積怎麼把「兩格相等」變成多項式</h2>
+  <details class="lecture"><summary>📝 講稿</summary><div class="body">複製約束怎麼把「兩格相等」變成多項式？用一個排列 σ 加一條連乘積。
+核心構造：把每個格子編碼成一對（值, 位置），用兩個隨機挑戰 β、γ 壓成一個指紋，逐格累乘成一條跑動積 Z，要求 Z 從 1 出發、繞一圈回到 1。分子把每個值配它自己的位置，分母配 σ 重排後的位置。
+為什麼這保證相等：Z 回到 1 等價於分子連乘等於分母連乘，等價於兩個多重集合相等；位置被 σ 重排了、兩堆卻還相等，唯一可能就是 σ 串在一起的那些格子值都一樣。
+看那張環圖：demo 三個 x 都要等於 3，σ 把它們的位置串成一個環 0→1→2→0，Z 繞完回到 1 就證明了三個 x 相等。
+最後對照前面那張表：σ 的承諾在 keygen 烤進 vk·pk，Z 每次證明才生。出處是 PLONK（2019/953）的排列論證。</div></details>
   <div class="tablecap">「這兩格要相等」也不像方程式。<b>複製約束</b>用一個<b>排列 σ</b> ＋ 一條<b>連乘積</b>，把它變成「兩個多重集合相等」的隨機點檢查。</div>
 
   <div class="cc">
@@ -251,6 +289,11 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
   </div>
 
   <h2 class="sec">查表的數學 —— logUp 怎麼把「值 ∈ 表」變成多項式</h2>
+  <details class="lecture"><summary>📝 講稿</summary><div class="body">查表怎麼把「值 ∈ 表」變成多項式？用 logUp 一條對數導數恆等式：左邊每個查值一項 1/(X+f)，右邊每個表值一項 m/(X+t)，m 是那個表值被查到的次數。等式成立等價於每個查值都在表裡。
+用「極點」看最清楚：左邊在 X=−f 有極點、右邊在 X=−t 有重數 m 的極點，兩個有理函數相等就是極點位置跟重數完全對上。
+最容易卡的點：表那麼大、查的那麼少，兩邊怎麼會相等？關鍵在 m —— 沒被查到的表值 m=0、那一整項消失。把表縮成 0 到 5、查 3、3、0，兩邊最後都化簡成 1/(X+0)+2/(X+3)，當然相等。要是偷查一個表裡沒有的 9，左邊多一個 X=−9 的極點、右邊湊不出來，等式就不成立、作弊被抓。
+那 1/(X+f) 怎麼承諾？關鍵：它不是多項式、不能直接承諾。第一步把 X 固定成隨機數 β，1/(β+f) 就只是一個具體數字，prover 算得出來、填成一欄、再插值承諾。注意兩個不同的變數：X 是看極點用、固定成 β；Y 是插值位置、跑遍 H。承諾的是 u(Y) 這種「欄多項式」，不是 1/(X+f)。
+剩下就是逆元對、表側、累加、邊界四條低次閘，折進 G、除以 Z_H、在 ζ 一次驗完。出處是 logUp（Haböck，2022/1530），不是 plookup。</div></details>
   <div class="tablecap">「值要落在表裡」聽起來不像方程式。<b>logUp</b> 用一條漂亮的恆等式，把它變成可在隨機點抽查的多項式約束。</div>
 
   <div class="cc">
@@ -323,6 +366,12 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
   </div>
 
   <h2 class="sec">收尾全景：三種約束 → 折成 G → KZG 承諾 → 在 ζ 驗一條</h2>
+  <details class="lecture"><summary>📝 講稿</summary><div class="body">最後把這幾天問通的串成一張圖，照四個階段走。
+第一階段，算術化層：自訂閘變成每列為零的 gⱼ、複製變成 Z_P、查表變成 Z／m／u。
+第二階段，用 α 的次方把它們全折成一條 G，再化成 G 等於商 t 乘 Z_H。
+第三階段，KZG 承諾：每條多項式壓成一個群元素；固定的 sel／σ／表在 keygen 烤進 vk·pk，活的 a／Z_P／Z／m／u／t 每次證明才承諾，承諾把多項式鎖死、事後改不了。
+第四階段，抽隨機點 ζ 開啟所有多項式、用 SHPLONK 批成兩個元素，驗一條 G(ζ)=t(ζ)·Z_H(ζ) 加邊界規則，兩次配對，輸出接受或拒絕。
+一句話：昂貴的「算」全在 prover，驗證者只在一個點 ζ 驗一條等式加兩次配對，三種約束同時驗完。</div></details>
   <div class="tablecap">把這幾天問通的串成一張圖：<b>算術化層</b>（左）產生的多項式，全進<b>承諾層 KZG</b>（右），最後濃縮成「一個點 ζ 上的一條等式」。</div>
   <div class="gitem" style="max-width:none">
     <svg viewBox="0 0 1120 322" role="img" aria-label="從約束到 KZG 承諾與驗證的全景流程" style="width:100%;max-width:1120px;height:auto;display:block;margin:0 auto">
@@ -381,5 +430,8 @@ a.in{color:var(--accent);font-weight:700;text-decoration:none}
     <a class="in" href="index.html">← 回報告</a>
   </div>
 </div>
+<script>
+(function(){var b=document.getElementById('toggleNotes'),shown=false;if(!b)return;b.onclick=function(){shown=!shown;document.querySelectorAll('details.lecture').forEach(function(d){d.open=shown;});b.textContent=shown?'📝 收合講稿':'📝 全部講稿';};})();
+</script>
 </body>
 </html>
