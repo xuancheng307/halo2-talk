@@ -256,6 +256,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="brand">Halo2 技術專題<span class="tag">ZK Proof System</span></div>
   <div class="pills" id="pills"></div>
   <button class="tour-btn" id="tourBtn" title="語音導覽：自動播放講稿並按時間滑動">▶ 語音導覽</button>
+  <button class="tour-btn" id="presBtn" title="簡報者模式：另開講稿視窗。投影機投主視窗（乾淨投影片），這個視窗留在你的筆電看講稿（需設「延伸顯示」）。翻頁會自動同步。">🖥 簡報者</button>
   <a class="home-link" href="https://github.com/xuancheng307/halo2-talk" target="_blank" rel="noopener">原始碼 ↗</a>
 </div>
 <div class="dots" id="dots"></div>
@@ -1913,6 +1914,40 @@ Stage 4 VERIFY       verified      1.96 ms
   const notesP=setupPanel({modal:'noteModal',btn:'noteBtn',body:'noteBody',tag:'noteTag',idx:'noteIdx',close:'noteClose',prev:'notePrev',next:'noteNext',get:noteHTML,html:true});
   const qaP=setupPanel({modal:'qaModal',btn:'qaBtn',body:'qaBody',tag:'qaTag',idx:'qaIdx',close:'qaClose',prev:'qaPrev',next:'qaNext',get:qaHTML,html:true});
 
+  // ===== presenter mode: synced notes popup (project main window; keep popup on laptop via extended display) =====
+  let presenterWin=null;
+  const PRESENTER_HTML='<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><title>簡報者 · Halo2</title>'+
+    '<style>body{margin:0;font-family:"Noto Sans TC",system-ui,sans-serif;background:#0f1117;color:#e8eaf0;padding:16px 22px 74px;line-height:1.75}'+
+    '.ptop{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #2a2f3a;padding-bottom:8px;margin-bottom:12px}'+
+    '#pPg{font-weight:800;color:#8ea2ff;font-size:1.02rem}#pTimer{font-variant-numeric:tabular-nums;color:#cdd3df;font-size:1.3rem;font-weight:700}'+
+    '#pTitle{font-size:1.55rem;font-weight:900;margin:0 0 12px;color:#fff;line-height:1.25}'+
+    '#pNote{font-size:1.16rem}#pNote .nt-p{margin:.32em 0}'+
+    '#pNote .nt-li{margin:.26em 0;padding-left:1.45em;position:relative}#pNote .nt-li::before{content:"\\2022";position:absolute;left:.4em;color:#8ea2ff;font-weight:800}'+
+    '#pNote .nt-sec{margin-top:.7rem;border-top:1px dashed #2a2f3a;padding-top:.5rem;color:#aeb6c6;font-size:.93em}'+
+    '#pNote .nt-h{font-weight:800;color:#ffd479;font-size:.92em;margin-bottom:.25rem}'+
+    '#pNext{position:fixed;left:0;right:0;bottom:0;background:#1a1f2b;border-top:1px solid #2a2f3a;padding:11px 22px;color:#9aa3b2;font-weight:700;font-size:1.02rem}'+
+    '</style></head><body><div class="ptop"><span id="pPg"></span><span id="pTimer">00:00</span></div>'+
+    '<h2 id="pTitle"></h2><div id="pNote"></div><div id="pNext"></div>'+
+    '<scr'+'ipt>var t0=Date.now();setInterval(function(){var s=Math.floor((Date.now()-t0)/1000),m=(""+Math.floor(s/60)).padStart(2,"0"),x=(""+(s%60)).padStart(2,"0"),e=document.getElementById("pTimer");if(e)e.textContent=m+":"+x;},1000);</scr'+'ipt></body></html>';
+  function updatePresenter(){
+    if(!presenterWin||presenterWin.closed)return;
+    const i=currentIdx(), lab=labels[i]||'', d=presenterWin.document;
+    if(!d||!d.getElementById('pPg'))return;
+    d.getElementById('pPg').textContent='p.'+(i+1)+' / '+slides.length+(lab?'　·　'+lab:'');
+    d.getElementById('pTitle').textContent=lab;
+    d.getElementById('pNote').innerHTML=renderNoteText(NOTES[lab]||'（本節暫無講稿）');
+    const nx=labels[i+1];
+    d.getElementById('pNext').textContent=nx?('下一頁 ▸ '+nx):'（最後一頁）';
+  }
+  function openPresenter(){
+    if(presenterWin&&!presenterWin.closed){presenterWin.focus();updatePresenter();return;}
+    presenterWin=window.open('','halo2presenter','width=600,height=820');
+    if(!presenterWin){alert('簡報者視窗被瀏覽器擋住了。請允許這個頁面開啟彈出視窗，再按一次「🖥 簡報者」。');return;}
+    presenterWin.document.open();presenterWin.document.write(PRESENTER_HTML);presenterWin.document.close();
+    setTimeout(updatePresenter,80);
+  }
+  document.getElementById('presBtn').addEventListener('click',openPresenter);
+
   // edit / mark / delete via event delegation on each panel body
   function wire(panel){
     panel.body.addEventListener('click',e=>{
@@ -1963,7 +1998,7 @@ Stage 4 VERIFY       verified      1.96 ms
   document.body.appendChild(rail);
   rail.querySelectorAll('.fr-stage').forEach(n=>n.addEventListener('click',()=>{const s=+n.dataset.s;const t=slides.find(sl=>STAGE[sl.dataset.label]===s);if(t)t.scrollIntoView();}));
   function updateRail(){const s=STAGE[labels[viewIdx]||''];if(s){rail.classList.add('show');rail.querySelectorAll('.fr-stage').forEach(n=>n.classList.toggle('active',+n.dataset.s===s));}else rail.classList.remove('show');}
-  deck.addEventListener('scroll',()=>{viewIdx=currentIdx();notesP.follow();qaP.follow();updateRail();},{passive:true});
+  deck.addEventListener('scroll',()=>{viewIdx=currentIdx();notesP.follow();qaP.follow();updateRail();updatePresenter();},{passive:true});
   updateRail();
 
   // ===== audio tour: play per-slide narration + auto-advance (time-synced) =====
