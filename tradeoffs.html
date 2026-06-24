@@ -331,7 +331,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     </div>
     <div class="card"><h3>為什麼 KZG，不是 IPA / FRI</h3>
       <p>合規要 <b>proof 小、驗證便宜</b> → <b>KZG</b>：proof 常數大小、配對驗證便宜，BN254 是以太坊內建 precompile（EVM 友善）。代價：<b>一次性可信設定</b>。</p>
-      <p style="margin-top:.4rem" class="muted">對照：IPA（原版 Halo2）免設定，但驗證<b>線性</b>、proof 大；FRI（STARK）免設定、<b>抗量子</b>，但 proof 偏大（hash-based）。</p>
+      <p style="margin-top:.4rem" class="muted">對照：IPA（原版 Halo2）免設定，但<b>驗證線性（慢）</b>、proof 為 O(log n)；FRI（STARK）免設定、<b>抗量子</b>，但 <b>proof 偏大</b>（hash-based、驗證仍 succinct）。</p>
     </div>
   </div>
   <div class="soulbox" style="margin-top:.5rem"><span class="tag">🎯 取捨一句</span>：方法可移植，但選 <b>PLONKish + KZG/BN254</b>，是為了「<b>閘 + 查表正好合身</b>」加「<b>驗證輕量</b>（proof 常數、配對便宜）」—— 代價是一次性可信設定。</div>
@@ -675,8 +675,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 "PLONKish":"Halo2 的算術化：自訂閘 + 原生查表 + 通用可更新 setup；正好是本論文 kernel（Horner 閘 + ByteTable）的天然載體。",
 "Groth16 / R1CS":"R1CS 只有 degree-2 乘法約束、無原生 lookup；Groth16 證明最小但每電路要專屬可信設定、表達力受限 → 做不了我們的 kernel。",
 "KZG 承諾":"把多項式壓成一個群元素的承諾；proof 常數大小、配對驗證便宜，但需一次性可信設定。PSE Halo2 用的承諾層。",
-"IPA (內積論證)":"原版 Halo2 的承諾：免可信設定，但驗證時間線性、proof 較大 → 不利輕量／上鏈驗證。",
-"FRI / STARK":"hash-based 承諾：免設定、抗量子，但 proof 偏大；對需要輕量驗證的合規場景較不划算。",
+"IPA (內積論證)":"原版 Halo2 的承諾：免可信設定、proof 為 O(log n)（短）；真正的弱點是驗證時間線性（慢）→ 不利輕量／上鏈驗證。",
+"FRI / STARK":"hash-based 承諾：免設定、抗量子；驗證仍 succinct（polylog），但 proof 偏大 → 大 proof 對上鏈／頻寬較不划算。",
 "可信設定 (trusted setup)":"產生公共參數 SRS 的一次性儀式；KZG 需要（通用可更新版做一次、全電路共用，一人誠實即安全），IPA／FRI 不需要。"
   };
   // formal / precise definitions — shown as 形式： under 白話 (only terms that have one)
