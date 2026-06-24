@@ -390,13 +390,30 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       </div>
     </div>
     <div>
-      <table style="font-size:.93rem">
-        <tr><th>　</th><th>延遲截斷</th><th>逐步 per-step</th></tr>
-        <tr><td>查表數</td><td><b>多（12）</b></td><td>少（每步 2 bytes）</td></tr>
-        <tr><td>精度</td><td><b>2–7× 更好（達 ULP=1）</b></td><td>較差</td></tr>
-        <tr class="hl"><td>死在哪</td><td>pp≥32 溢位 \( 2^{352} \)</td><td>—（高 pp 唯一可行）</td></tr>
-      </table>
-      <p style="margin-top:.5rem;font-size:.95rem"><b>取捨：</b>延遲用「<b>更多查表</b>（12 vs 2）」換「<b>2–7× 精度</b>（達 ULP=1 的必要條件）」，但 pp≥32 會溢位；per-step 查表省、精度差，卻是高精度唯一的路。<b>這個 pp 邊界，是我們第一個量化出來的。</b></p>
+      <figure style="margin:.1rem 0 0">
+        <svg viewBox="0 0 380 215" role="img" aria-label="延遲截斷的中間值隨 pp 升高，pp≥32 撞 254 天花板溢位" style="width:100%;max-width:440px;height:auto;display:block;margin:0 auto">
+          <defs><marker id="ah" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#d97706"/></marker></defs>
+          <rect x="50" y="20" width="305" height="56" fill="#fef2f2"/>
+          <text x="120" y="36" font-size="10.5" text-anchor="middle" fill="#b91c1c" font-weight="700">溢位區（&gt; 254 bit）</text>
+          <line x1="50" y1="185" x2="355" y2="185" stroke="#94a3b8" stroke-width="1.4"/>
+          <line x1="50" y1="20" x2="50" y2="185" stroke="#94a3b8" stroke-width="1.4"/>
+          <text x="205" y="209" font-size="11" text-anchor="middle" fill="#55596b">定點精度 pp →</text>
+          <text x="15" y="105" font-size="11" text-anchor="middle" fill="#55596b" transform="rotate(-90 15 105)">中間值位元數</text>
+          <g font-size="10" fill="#8b94a3" text-anchor="middle"><text x="50" y="197">16</text><text x="126" y="197">24</text><text x="202" y="197">32</text><text x="355" y="197">48</text></g>
+          <line x1="50" y1="76" x2="355" y2="76" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="5 3"/>
+          <text x="353" y="71" font-size="10.5" text-anchor="end" fill="#dc2626" font-weight="700">254-bit · BN254 天花板</text>
+          <line x1="202" y1="76" x2="202" y2="185" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="3 2"/>
+          <text x="202" y="183" font-size="9.5" text-anchor="middle" fill="#6b7280">pp≥32 換路</text>
+          <polyline points="50,130 126,102 202,75 300,40 355,22" fill="none" stroke="#4f46e5" stroke-width="2.6"/>
+          <text x="246" y="48" font-size="11" fill="#4338ca" font-weight="700">延遲 (d+1)·pp</text>
+          <polyline points="50,171 355,144" fill="none" stroke="#16a34a" stroke-width="2.4"/>
+          <text x="235" y="145" font-size="11" text-anchor="middle" fill="#15803d" font-weight="700">per-step ~2·pp</text>
+          <line x1="80" y1="126" x2="80" y2="80" stroke="#d97706" stroke-width="1.3" marker-end="url(#ah)"/>
+          <text x="86" y="104" font-size="10" fill="#b45309">紅利·還塞得下</text>
+        </svg>
+        <figcaption>原始圖解（本報告自製）· 延遲截斷中間值隨 pp 升高，pp≥32 撞 254 天花板溢位</figcaption>
+      </figure>
+      <p style="margin-top:.3rem;font-size:.9rem"><b>取捨：</b>延遲吃滿紅利 → <b>精度好</b>（2–7×、達 ULP=1），但<b>查表多</b>（12）；pp≥32 溢位 → 改 <b>per-step</b>：查表少（2）、精度差，卻是高 pp 唯一可行。<b>這個 pp 邊界是我們第一個量化的。</b></p>
     </div>
   </div>
 </section>
