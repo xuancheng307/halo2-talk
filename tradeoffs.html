@@ -321,20 +321,18 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 2.5 · CORE TOOLS (why Halo2 + KZG) ===== -->
 <section class="slide" data-part="" data-label="核心工具">
-  <div class="slide-meta"><span class="part-label">底層工具</span> · 為什麼這個平台</div>
-  <h2>先選對工具：為什麼 <span class="accent">Halo2 + KZG</span></h2>
-  <div class="whybox"><span class="tag">❓ 在算函數之前</span>：得先選證明系統 + 承諾方案。老實說 —— <b>方法本身不綁 Halo2</b>，理論上能搬到別的系統；但這個底層對我們<b>最合身</b>，兩個原因：</div>
-  <div class="grid-2">
-    <div class="card"><h3>為什麼 Halo2（PLONKish），不是 Groth16</h3>
-      <p>我們的 kernel 要兩樣東西：<b>自訂閘</b>（逐步 Horner + 截斷）＋ <b>原生查表</b>（ByteTable 範圍檢查）。</p>
-      <p style="margin-top:.4rem">R1CS（Groth16）只有 <b>degree-2 乘法</b>、<b>沒有原生 lookup</b> → 做這套 kernel 得拆成一大堆約束，又貴又笨。<b>PLONKish</b> 給自訂閘（degree≤~6）＋原生查表＋通用可更新 setup，<b>正好合身</b>。</p>
-    </div>
-    <div class="card"><h3>為什麼 KZG，不是 IPA / FRI</h3>
-      <p>合規要 <b>proof 小、驗證便宜</b> → <b>KZG</b>：proof 常數大小、配對驗證便宜，BN254 是以太坊內建 precompile（EVM 友善）。代價：<b>一次性可信設定</b>。</p>
-      <p style="margin-top:.4rem" class="muted">對照：IPA（原版 Halo2）免設定，但<b>驗證線性（慢）</b>、proof 為 O(log n)；FRI（STARK）免設定、<b>抗量子</b>，但 <b>proof 偏大</b>（hash-based、驗證仍 succinct）。</p>
-    </div>
-  </div>
-  <div class="soulbox" style="margin-top:.5rem"><span class="tag">🎯 取捨一句</span>：方法可移植，但選 <b>PLONKish + KZG/BN254</b>，是為了「<b>閘 + 查表正好合身</b>」加「<b>驗證輕量</b>（proof 常數、配對便宜）」—— 代價是一次性可信設定。</div>
+  <div class="slide-meta"><span class="part-label">底層工具</span> · 為什麼不用更快的 Groth16</div>
+  <h2>為什麼不用<span class="accent">最快最小</span>的 Groth16？</h2>
+  <div class="whybox"><span class="tag">❓ 直覺會問</span>：Groth16 proof 最小（3 群元素）、驗證最快 —— 那為什麼不用它？因為<b>「快」不等於「合用」</b>。論文裡寫了四個理由：</div>
+  <table style="font-size:.9rem">
+    <tr><th>維度</th><th>Halo2 + KZG（我們）</th><th>Groth16</th><th>STARK（FRI）</th></tr>
+    <tr class="hl"><td><b>自訂閘 + 查表</b><br><span class="muted" style="font-size:.85em">kernel 必需</span></td><td><b style="color:#15803d">✓</b>（截斷閘＋ByteTable）</td><td><b style="color:#b91c1c">✗ R1CS 只 deg-2、無 lookup</b></td><td>✓</td></tr>
+    <tr><td>設定</td><td>通用·可更新（做一次）</td><td><b style="color:#b91c1c">每電路一次</b>（模型更新就重辦）</td><td>免</td></tr>
+    <tr><td>proof 大小</td><td>數 KB（與組合大小無關）</td><td><b>最小</b>（~128–192 B）</td><td><b style="color:#b91c1c">偏大</b>（hash-based）</td></tr>
+    <tr><td>驗證</td><td>數 ms（2 配對）</td><td>最快（3 配對）</td><td>succinct（polylog）</td></tr>
+    <tr><td>抗量子</td><td>✗</td><td>✗</td><td><b style="color:#15803d">✓</b></td></tr>
+  </table>
+  <div class="soulbox" style="margin-top:.45rem"><span class="tag">🎯 四個理由</span>：① Groth16 <b>每電路 setup</b>（金融模型會更新→不可行）② R1CS <b>做不了我們的閘／查表</b>——快但表達不了＝沒用 ③ STARK 抗量子、表達力夠，但 <b>proof 偏大</b>（小 portfolio 吃虧）④ <b>工程成熟度</b>：halo2_proofs v0.3.0 穩，Jolt 等 API 常動，金融要長期穩定。代價：一次性可信設定。</div>
 </section>
 
 <!-- ===== 3 · TWO DEAD ENDS ===== -->
@@ -601,7 +599,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <script>
 (function(){
   const NOTES = {
-'核心工具':"在講我們怎麼算函數之前,先回答一個更上游的問題:為什麼整套東西建在 Halo2 加 KZG 上?我先誠實說,我們的方法本身不綁死 Halo2 —— 換個證明系統理論上也能搬;但這個底層對我們最合身,有兩個原因。\n第一,為什麼是 Halo2、不是 Groth16。我們的 kernel 需要兩樣東西:自訂閘 —— 就是逐步 Horner 加截斷那條;還有原生查表 —— ByteTable 範圍檢查。Groth16 用的 R1CS 只有 degree-2 的乘法約束、也沒有原生 lookup,要做我們這套 kernel 得拆成一大堆約束,又貴又笨。PLONKish 剛好給你自訂閘、原生查表、加上通用可更新的設定,正好合身。\n第二,為什麼承諾方案用 KZG、不是 IPA 或 FRI。合規這場景要 proof 小、驗證便宜。KZG 的 proof 是常數大小、用配對驗證很便宜,而且 BN254 的配對是以太坊內建的 precompile,上鏈友善。代價是要一次性的可信設定。對照一下:原版 Halo2 用的 IPA 免設定,但驗證是線性的、proof 也大;STARK 用的 FRI 免設定、還抗量子,但 proof 偏大,因為是 hash-based。\n所以一句話:方法可以移植,但我們選 PLONKish 加 KZG over BN254,是為了閘跟查表正好合身、加上驗證又輕,代價就是那一次性的可信設定。\n平台選定了,真正的難題才開始 —— 在這個底層上,超越函數到底怎麼算?下一張就看兩條直覺的路怎麼死。",
+'核心工具':"在講我們怎麼算函數之前,先回答一個老師一定會問的上游問題:Groth16 的 proof 最小、驗證最快,你們為什麼不用最快的?\n我的答案是:快不等於合用。論文裡寫了四個理由。\n第一,通用設定。Groth16 每換一個電路就要重辦一次可信設定;我們的金融模型會更新,等於每次更新都要重辦儀式,根本不可行。Halo2 用的 KZG 是通用、可更新的 SRS,做一次、所有電路共用。\n第二,表達力,這是最關鍵的。我們的 kernel 需要自訂閘 —— 逐步 Horner 加截斷;還有原生查表 —— ByteTable 範圍檢查。Groth16 的 R1CS 只有 degree-2 乘法、沒有原生 lookup,要做我們這套 kernel 得拆成一大堆約束,又貴又笨。PLONKish 兩樣都給,本電路大概 83 個 lookup 加 degree-6 的閘,PLONKish 最省。所以 Groth16 再快,表達不了我們的電路就等於沒用。\n第三,proof 跟驗證夠用就好。我們 proof 數 KB、驗證數毫秒,而且不隨投資組合大小變。STARK 雖然免設定又抗量子,但 proof 偏大,小型 portfolio 反而吃虧。\n第四,工程成熟度。halo2_proofs v0.3.0 已經穩定;Jolt 這些新工具還在快速演化、API 常動,金融應用需要長期穩定。\n四個綜合下來,Halo2 加 KZG 最匹配,代價就是那一次性的可信設定。\n再補一句承諾方案:Halo2 原版用的是 IPA,免設定但驗證線性、proof 是 O(log n);我們的 PSE 版換成 KZG,proof 常數、配對驗證快、BN254 又是以太坊內建 —— 這層也是為了輕驗證。\n平台選定了,真正的難題才開始 —— 在這個底層上,超越函數到底怎麼算?下一張就看兩條直覺的路怎麼死。",
 '封面':"大家好。\n這份報告只講一件事:我們論文裡的每一個技術決定,背後的取捨是什麼。\n所以它不是教學、不是教你怎麼一步步做;是把每個選擇攤開來說清楚 —— 為什麼選這條、別的路為什麼走不通、換到了什麼、又付出什麼代價。\n我會一張一張、一步一步把 why 講明白。我們開始。",
 '要解的問題':"先講我們到底在解什麼問題。\n金融法遵要機構證明一件事:風險在限額內 —— 對沖基金要證 Delta 曝險沒超門檻、信用衍生品要證組合違約機率沒超監管上限。麻煩在於,傳統做法得把部位全攤開給監管或對手方看,等於把交易策略洩漏出去。\nZK 正好對症:證明你算對了,卻不洩漏輸入。但真要套到金融,就撞上一道牆 —— 這些合規檢查背後是金融模型,Black-Scholes、Merton,全靠超越函數 ln、exp、erf;像風險計算核心的常態 CDF,就是用 erf 寫出來的。\n問題是,ZK 電路裡只有有限體的加跟乘、沒有原生浮點,這幾個函數根本算不出來。\n所以一句話:ZK 能證對、不洩漏輸入,但一要用到金融,就撞上『電路算不了超越函數』這道牆。整篇論文就在拆這道牆,每一步都是取捨。但拆牆之前,得先選對底層工具 —— 證明系統跟承諾方案。",
 '兩條死路':"那為什麼不能把超越函數直接放進去?直覺只有兩條路,我帶你看為什麼兩條都死。\n第一條,查表:把每個可能的輸入預先算好、存成一張表。低精度還行,pp=16 大概六萬格;但金融要 pp=24、pp=32,表就爆成一千六百多萬、四十三億格,而且每個函數一張 —— 任何電路都裝不下。\n第二條,多項式逼近:用一條低次多項式近似函數,再用 Horner 求值。這條可行,但有兩個坑。坑 A 是 Taylor 在定點量化下會崩潰,pp=32、d=10 時 ln 只剩 4.4 個有效位、約一位十進位;換成 L 無窮最佳的 Minimax 就有 28.6 位。坑 B 是溢位:Horner 一步步乘下去,中間值膨脹成 S 的 d+1 次方,pp=32、d=10 就到 2 的 352 次方,遠超 BN254 的 253 位。\n所以可行的只剩多項式這條,但得先解掉 Taylor 崩潰跟中間值溢位這兩個坑 —— 這正是接下來四個設計決定要回答的。",
