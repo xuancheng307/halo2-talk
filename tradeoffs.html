@@ -371,7 +371,48 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <tr class="hl"><td><b>③ 逐步截斷</b><br><span class="muted">per-step，不用延遲</span></td><td>延遲在低 pp 精度較好（首選），但 pp≥32 時中間值 \( 2^{352} \) <b>溢位</b> → 高精度只剩 per-step <b>唯一可行</b>。</td><td>高精度下不溢位</td></tr>
     <tr><td><b>④ 通用 Horner<br>+ ByteTable</b></td><td>換函數只改 \( d \) 個係數放進 fixed 欄；一張 256 表<b>全函數共用</b>。</td><td>加新函數<b>零電路重設計</b></td></tr>
   </table>
-  <div class="soulbox"><span class="tag">🎯 目標效果（這四個決定一起換到的）</span>：金融精度 <b>24–32 bit</b>、proof <b>&lt;10KB</b>、verify <b>&lt;1 秒</b>、<b>不揭露部位</b>。下面三張，把其中三個決定背後的取捨一步步講開。</div>
+  <div class="soulbox"><span class="tag">🎯 目標效果（這四個決定一起換到的）</span>：金融精度 <b>24–32 bit</b>、proof <b>&lt;10KB</b>、verify <b>&lt;1 秒</b>、<b>不揭露部位</b>。下面先看 kernel <b>怎麼算、怎麼保證沒亂算</b>，再逐一拆每個決定背後的取捨。</div>
+</section>
+
+<!-- ===== CORE KERNEL (how we evaluate + honest truncation) ===== -->
+<section class="slide" data-part="" data-label="核心 kernel">
+  <div class="slide-meta"><span class="part-label">核心電路</span> · 怎麼算、又怎麼保證沒亂算</div>
+  <h2>核心 kernel：逐步 <span class="accent">Horner ＋ 誠實截斷</span></h2>
+  <div class="whybox"><span class="tag">❓ 核心公式</span>：選了定點 + Minimax 之後，電路裡<b>到底怎麼把多項式算出來</b>、又<b>怎麼保證 prover 沒亂填</b>？這頁是整個 kernel 的核心。</div>
+  <div class="grid-2">
+    <div class="card"><h3>① 怎麼算：pre-scaled 逐步 Horner</h3>
+      <p>係數先<b>非均勻預縮放</b> \( D_i=\lfloor c_i\, S^{\,d+1-i}\rceil \)（\(S{=}2^{pp}\)），再逐步遞推：</p>
+      <div class="fbox" style="margin:.3rem 0"><div class="cmt">\[ H_d=D_d,\quad H_k=D_k+R\,H_{k+1},\quad w=\tfrac{R\,H_1}{S^{\,d}} \]</div></div>
+      <p class="muted" style="font-size:.9rem">預縮放讓每次 ×R <b>自然進位一個 S</b> → 中間不用重縮放，最後除一次 \(S^{d}\)。</p>
+    </div>
+    <div class="card"><h3>② 怎麼保證：截斷靠閘 + 查表</h3>
+      <p>電路算不了「除法取整」⌊·⌋。改讓 prover 填商 \(H\) 與餘數 rem，閘<b>鎖死</b>：</p>
+      <div class="fbox" style="margin:.3rem 0"><div class="cmt">\[ D_k+R\,H_{k+1}=H_k\, S+\mathrm{rem},\quad \mathrm{rem}\in[0,S) \]</div></div>
+      <p class="muted" style="font-size:.9rem">rem 拆 byte、用 <b>ByteTable</b> 查 0–255 → 餘數落在範圍 ⟺ <b>誠實做了除法</b>，亂填會被抓。</p>
+    </div>
+  </div>
+  <div class="soulbox" style="margin-top:.45rem"><span class="tag">🎯 一句</span>：用預縮放係數 + 逐步 Horner 把多項式算出來；每次截斷都用「<b>商×S＋餘數</b>」的閘 ＋ ByteTable 鎖住餘數 —— <b>算得對、也沒有亂算的空間</b>。</div>
+</section>
+
+<!-- ===== ExplicitRC (input soundness) ===== -->
+<section class="slide" data-part="" data-label="ExplicitRC">
+  <div class="slide-meta"><span class="part-label">核心電路</span> · 連輸入都騙不了</div>
+  <h2>ExplicitRC：連<span class="accent">輸入</span>都騙不了</h2>
+  <div class="whybox"><span class="tag">❓ 為什麼可以信</span>：輸入 \(R\) 是 prover 私下給的。多項式逼近<b>只在選定區間內準</b>；他若餵一個超範圍的 \(R\)，輸出是垃圾、卻仍能過證明。怎麼擋？</div>
+  <div class="grid-2">
+    <div>
+      <div class="fbox"><div class="lbl">gap decomposition 約束</div>
+        \[ \mathrm{gap}_{\mathrm{lo}}+\mathrm{gap}_{\mathrm{hi}}\cdot 256 + R = R_{\max} \]
+        <div class="cmt">\(\mathrm{gap}_{\mathrm{lo}},\mathrm{gap}_{\mathrm{hi}}\) 用<b>共用的 ByteTable</b> 查 byte（不需新表）。</div>
+      </div>
+      <p style="margin-top:.4rem;font-size:.92rem">成本：<b>只多 1 個 gate</b>。</p>
+    </div>
+    <div class="card"><h3>為什麼確定性擋住</h3>
+      <p>若 prover 餵 \(R>R_{\max}\)：\(\mathrm{gap}=R_{\max}-R\) 是<b>負的</b> → 在有限體裡 <b>wrap 成超大數</b> → <b>拆不成兩個 byte</b> → byte-check 確定性失敗。</p>
+      <p style="margin-top:.4rem">合法的 \(R\in[0,R_{\max}]\)：gap <b>唯一</b>拆成兩個 byte。</p>
+    </div>
+  </div>
+  <div class="soulbox" style="margin-top:.45rem"><span class="tag">🎯 一句</span>：超範圍的輸入<b>在數學上湊不出</b>合法的 gap 分解 —— 不是「機率上難」，是「<b>根本不可能</b>」。<span class="muted">（也試過用單調性省檢查的 ORV，但 13 個函數有 7 個有 security gap → 改用 ExplicitRC。）</span></div>
 </section>
 
 <!-- ===== 5 · FREE SPACE (deferred vs per-step) ===== -->
@@ -446,6 +487,20 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     </figure>
   </div>
   <p style="margin-top:.4rem"><b>取捨：</b>degree <b>不是免費</b>，有一個甜蜜點，盲目加只會更糟。<span class="muted">（這現象在 DSP／硬體早有討論〔de Dinechin 2015〕；我們是<b>首次在 ZK 定點下量化、刻畫</b>它 —— 是測量，不是發明。）</span></p>
+</section>
+
+<!-- ===== ERROR BUDGET (the precision guarantee) ===== -->
+<section class="slide" data-part="" data-label="誤差預算">
+  <div class="slide-meta"><span class="part-label">誤差保證</span> · 為什麼結果可信</div>
+  <h2>誤差預算：精度<span class="accent">可信到一個明確的界</span></h2>
+  <div class="whybox"><span class="tag">❓ 為什麼敢說「準」</span>：我們憑什麼說「準到 ULP=1」？不是測幾個點就喊 —— 是把總誤差<b>拆成三源、各給上界</b>，再用窮舉壓在界內。</div>
+  <div class="soulbox"><span class="tag">🎯 核心公式</span>：\[ \mathrm{ULP}_{\mathrm{total}} \le \varepsilon_{\mathrm{approx}}+\varepsilon_{\mathrm{quant}}+\varepsilon_{\mathrm{trunc}} \]</div>
+  <div class="grid-3" style="margin-top:.3rem">
+    <div class="card"><h3>\(\varepsilon_{\mathrm{approx}}\) 逼近</h3><p style="font-size:.9rem">Remez 的 \(L^\infty\) 逼近誤差 —— degree-\(d\) 在該區間<b>不可再降</b>的部分。</p></div>
+    <div class="card"><h3>\(\varepsilon_{\mathrm{quant}}\) 量化</h3><p style="font-size:.9rem">係數 \(D_i\) 取整的誤差；高次係數在較高 scale、相對誤差小。</p></div>
+    <div class="card"><h3>\(\varepsilon_{\mathrm{trunc}}\) 截斷</h3><p style="font-size:.9rem">最後 \(\div S^{d}\) 的截斷；<b>延遲截斷下 ≤ 1 ULP</b>。</p></div>
+  </div>
+  <div class="ideabox" style="margin-top:.4rem"><span class="tag">💡 順手解釋了量化飽和</span>：\(d\!\uparrow\) 讓 \(\varepsilon_{\mathrm{approx}}\!\downarrow\) 但 \(\varepsilon_{\mathrm{quant}}\!\uparrow\)；\(\varepsilon_{\mathrm{quant}}\) 一主導，加 degree <b>反而有害</b> —— 上一張的甜蜜點，根就在這條公式。再加窮舉驗證 \(\mathrm{ULP}_{\mathrm{max}}\le\mathrm{ULP}_{\mathrm{total}}\)（每個可表示輸入都查過），<b>這才是能拿去做金融合規的底氣</b>。</div>
 </section>
 
 <!-- ===== 7 · FUNCTION & INTERVAL ===== -->
@@ -603,9 +658,12 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '封面':"大家好。\n這份報告只講一件事:我們論文裡的每一個技術決定,背後的取捨是什麼。\n所以它不是教學、不是教你怎麼一步步做;是把每個選擇攤開來說清楚 —— 為什麼選這條、別的路為什麼走不通、換到了什麼、又付出什麼代價。\n我會一張一張、一步一步把 why 講明白。我們開始。",
 '要解的問題':"先講我們到底在解什麼問題。\n金融法遵要機構證明一件事:風險在限額內 —— 對沖基金要證 Delta 曝險沒超門檻、信用衍生品要證組合違約機率沒超監管上限。麻煩在於,傳統做法得把部位全攤開給監管或對手方看,等於把交易策略洩漏出去。\nZK 正好對症:證明你算對了,卻不洩漏輸入。但真要套到金融,就撞上一道牆 —— 這些合規檢查背後是金融模型,Black-Scholes、Merton,全靠超越函數 ln、exp、erf;像風險計算核心的常態 CDF,就是用 erf 寫出來的。\n問題是,ZK 電路裡只有有限體的加跟乘、沒有原生浮點,這幾個函數根本算不出來。\n所以一句話:ZK 能證對、不洩漏輸入,但一要用到金融,就撞上『電路算不了超越函數』這道牆。整篇論文就在拆這道牆,每一步都是取捨。但拆牆之前,得先選對底層工具 —— 證明系統跟承諾方案。",
 '兩條死路':"那為什麼不能把超越函數直接放進去?直覺只有兩條路,我帶你看為什麼兩條都死。\n第一條,查表:把每個可能的輸入預先算好、存成一張表。低精度還行,pp=16 大概六萬格;但金融要 pp=24、pp=32,表就爆成一千六百多萬、四十三億格,而且每個函數一張 —— 任何電路都裝不下。\n第二條,多項式逼近:用一條低次多項式近似函數,再用 Horner 求值。這條可行,但有兩個坑。坑 A 是 Taylor 在定點量化下會崩潰,pp=32、d=10 時 ln 只剩 4.4 個有效位、約一位十進位;換成 L 無窮最佳的 Minimax 就有 28.6 位。坑 B 是溢位:Horner 一步步乘下去,中間值膨脹成 S 的 d+1 次方,pp=32、d=10 就到 2 的 352 次方,遠超 BN254 的 253 位。\n所以可行的只剩多項式這條,但得先解掉 Taylor 崩潰跟中間值溢位這兩個坑 —— 這正是接下來四個設計決定要回答的。",
-'四個設計決定':"這張把我們的四個關鍵決定一次攤在一張取捨表上:選了什麼、別的為什麼不行、換到什麼效果。\n第一,定點 pp=48、不用浮點 —— 因為體裡根本沒有浮點,只能拿整數乘上 2 的 48 次方來模擬小數;代價是 pp 越大、中間值越容易脹爆,這就逼出後面的截斷。\n第二,用 Minimax、不用 Taylor —— 這不是『比較好』,是『必要條件』。Taylor 在定點下崩潰,Minimax 才撐得住;13 個函數在最小的 degree 就做到 ULP=1。\n第三,逐步截斷、不用延遲 —— 延遲在低精度其實精度較好(是首選),但 pp 一到 32,中間值會膨脹到 2 的 352 次方、直接溢位;所以高精度只剩 per-step 一條路。\n第四,一套通用 Horner kernel 加一張 ByteTable —— 換函數只要改那 d 個係數放進 fixed 欄,電路結構完全不動;256 條目的表所有函數共用,加新函數零電路重設計。\n這四個決定一起換到的目標效果:金融精度 24 到 32 位、proof 小於 10KB、verify 不到一秒、全程不揭露部位。接下來三張,把其中三個決定背後的取捨一步步講開。",
+'四個設計決定':"這張把我們的四個關鍵決定一次攤在一張取捨表上:選了什麼、別的為什麼不行、換到什麼效果。\n第一,定點 pp=48、不用浮點 —— 因為體裡根本沒有浮點,只能拿整數乘上 2 的 48 次方來模擬小數;代價是 pp 越大、中間值越容易脹爆,這就逼出後面的截斷。\n第二,用 Minimax、不用 Taylor —— 這不是『比較好』,是『必要條件』。Taylor 在定點下崩潰,Minimax 才撐得住;13 個函數在最小的 degree 就做到 ULP=1。\n第三,逐步截斷、不用延遲 —— 延遲在低精度其實精度較好(是首選),但 pp 一到 32,中間值會膨脹到 2 的 352 次方、直接溢位;所以高精度只剩 per-step 一條路。\n第四,一套通用 Horner kernel 加一張 ByteTable —— 換函數只要改那 d 個係數放進 fixed 欄,電路結構完全不動;256 條目的表所有函數共用,加新函數零電路重設計。\n這四個決定一起換到的目標效果:金融精度 24 到 32 位、proof 小於 10KB、verify 不到一秒、全程不揭露部位。下面先看 kernel 本體怎麼算、怎麼保證沒亂算,再回頭逐一拆每個決定背後的取捨。",
+'核心 kernel':"前面選了定點跟 Minimax,這張回答最實在的問題:在電路裡到底怎麼把多項式算出來,又怎麼保證 prover 沒有亂填。\n先講怎麼算。我們把係數先做非均勻的預縮放,第 i 個係數放在 S 的 d+1−i 次方這個尺度;然後逐步 Horner 遞推:H 從最高次的 D_d 開始,每一步是 D_k 加上 R 乘前一個 H。妙處在預縮放 —— 每乘一次 R 剛好把尺度往上推一個 S,所以中間完全不用重縮放,到最後除一次 S 的 d 次方就好。\n再講怎麼保證算得對。電路本身算不了「除法取整」這個動作,所以我們換個做法:讓 prover 自己填商跟餘數,再用一條閘把它們鎖死 —— D_k 加 R 乘 H,必須等於商乘 S 加餘數,而且餘數一定要落在 0 到 S 之間。餘數怎麼保證在範圍內?拆成 byte、用 ByteTable 查 0 到 255。餘數在範圍 ⟺ 他誠實做了除法,亂填一個數會被當場抓出來。\n一句話:預縮放係數加逐步 Horner 把值算出來,每次截斷都用『商乘 S 加餘數』的閘加 ByteTable 鎖住 —— 算得對,也沒有亂算的空間。下一張看一個更基本的問題:連輸入本身,怎麼保證沒被動手腳。",
+'ExplicitRC':"剛剛保證了「算的過程」沒亂來,但還有一個洞:輸入本身。\n輸入 R 是 prover 私下給的 witness。我們的多項式只在選定的區間裡準,區間外是垃圾。要是他故意餵一個超出範圍的 R,輸出根本沒意義,卻還是能產生一個通得過的證明。所以一定要在電路裡擋住超範圍的輸入。\n我們的做法叫 ExplicitRC,核心就一條約束:gap_lo 加 gap_hi 乘 256,再加 R,要等於 R_max;而 gap_lo、gap_hi 兩個都用共用的那張 ByteTable 查 byte,不需要新表。\n為什麼這樣就確定性擋住?如果他餵的 R 超過 R_max,那 gap 等於 R_max 減 R 是負數,在有限體裡會 wrap 成一個超大的數,根本拆不成兩個 byte,byte 檢查就確定性地失敗。反過來,合法的 R 落在 0 到 R_max,gap 唯一拆成兩個 byte。成本只多一個閘。\n關鍵是:這不是「機率上難偽造」,是「數學上根本湊不出來」。我們也試過用單調性省掉這個檢查的 ORV 方案,但 13 個函數裡有 7 個有安全漏洞,所以改用 ExplicitRC。下一張回到截斷:什麼時候截斷,有兩種策略的取捨。",
+'誤差預算':"前面講了一堆取捨,這張回答最關鍵的一個問題:我們憑什麼說結果準到 ULP=1、可以拿去做金融合規?\n答案不是「測幾個點看起來對」,是把總誤差拆成三個來源、每一個都給出解析上界。公式就是 ULP 總量小於等於三項相加:逼近誤差、量化誤差、截斷誤差。\n第一項,逼近誤差,是 Remez 多項式跟真函數的 L 無窮距離 —— 這是 degree-d 在這個區間裡不可能再降的部分。第二項,量化誤差,是把係數取整造成的;高次係數放在比較高的尺度,相對誤差比較小。第三項,截斷誤差,是最後除以 S 的 d 次方那一步,在延遲截斷下頂多 1 個 ULP。\n這條公式還順手解釋了前面的量化飽和:degree 加大會讓逼近誤差往下,但量化誤差往上;一旦量化誤差主導,加 degree 反而有害 —— 那個甜蜜點的根,就在這條公式裡。\n最後我們不只給上界,還用窮舉驗證:對每一個可表示的輸入都實際算一遍,確認實測的最大 ULP 真的壓在解析上界之內。三源拆解加窮舉驗證 —— 這才是『有誤差保證』四個字的底氣,也是金融合規敢用的理由。",
 '免費空間':"先解釋為什麼會有『延遲』跟『逐步』兩種截斷,差別在中間值什麼時候除回去。\n核心是一個比喻:ZK 的 254-bit 體,是一個傳統 CPU 上不存在的免費資源 —— 暫存空間。延遲截斷就是吃這塊紅利:把 d 次截斷併到最後一次再做。一般 CPU 的 64-bit register 被迫每一步都截斷,根本做不到;但 ZK 體夠寬,可以先讓中間值脹著、最後一次清。\n代價跟好處要一起講:延遲截斷的查表反而比較多(12 個,per-step 只要 2 個),但換來的是大約兩到七倍的精度、達到 ULP=1 —— 這是一個『多花查表、換精度』的取捨。但它有 bit-budget —— d+1 乘上 pp 必須小於 254。一旦 pp 大於等於 32,這塊紅利就用光、中間值溢位,於是被迫改成逐步截斷。\n所以取捨很清楚:延遲精度好但查表多、而且有天花板;per-step 查表省、精度差,卻是高精度唯一可行的路。而這個 pp 邊界,是我們第一個量化出來的。\n這是『什麼時候截斷』的取捨;下一張換個更反直覺的 —— degree 是不是越高越好?",
-'量化飽和':"這張是個反直覺的結果。多項式逼近的直覺是『次數越高越貼合』,但在定點 ZK 裡,這個直覺會反過來咬你。\n現象叫量化飽和:超過一個最佳 degree d-star 之後,degree 再高反而更差。原因是兩股誤差在拉鋸 —— 逼近誤差確實還在降,但量化誤差被放大,過了甜蜜點之後,整體精度就掉頭往下。\n數字上,pp=16、degree 不超過 7,就讓 13 個函數全部做到 ULP=1;再往上加 degree,不會更好。\n所以取捨是:degree 不是免費的,它有一個甜蜜點,盲目加只會更糟。這個『harmful degree』效應,是我們首次在 ZK 文獻裡記錄的。\ndegree 之外,還有兩個更細的取捨 —— 函數本身的條件數、跟區間的寬窄,下一張一起看。",
+'量化飽和':"這張是個反直覺的結果。多項式逼近的直覺是『次數越高越貼合』,但在定點 ZK 裡,這個直覺會反過來咬你。\n現象叫量化飽和:超過一個最佳 degree d-star 之後,degree 再高反而更差。原因是兩股誤差在拉鋸 —— 逼近誤差確實還在降,但量化誤差被放大,過了甜蜜點之後,整體精度就掉頭往下。\n數字上,pp=16、degree 不超過 7,就讓 13 個函數全部做到 ULP=1;再往上加 degree,不會更好。\n所以取捨是:degree 不是免費的,它有一個甜蜜點,盲目加只會更糟。這個『harmful degree』效應,是我們首次在 ZK 文獻裡記錄的。\n那 degree 為什麼會有甜蜜點?根其實在一條誤差公式 —— 下一張把它寫出來,順便講清楚我們憑什麼說結果可信。",
 '函數與區間':"除了 degree,還有兩個更細的取捨,一個跟函數本身有關,一個跟區間有關。\n第一個,係數條件數:就算 pp 跟 degree 都一樣,不同函數的精度可以差很多。pp=48、degree=14 時,ln 是 142 個 ULP,erf 卻只有 15。這說明函數本身的係數結構,決定了精度地板,跟我們 kernel 怎麼設計無關 —— 有些函數天生就難逼近。\n第二個,區間的取捨:區間越窄越準,但覆蓋範圍就變小。ln 在 0 到 ln2 是 1 個 ULP,放寬到 0 到 e 減 1 就掉到 9;erf 在 0 到 1 是 3,放到 0 到 2 就變 20。窄區間換到精度,但覆蓋小了,得靠 range reduction 補回來。\n所以這張的取捨是一條拉鋸線:精度對覆蓋範圍。想又準又廣,就得切段加 range reduction,而切段又會放大 proof —— 這個代價,成果那頁會兌現。\n我們自己的取捨講完了;接下來誠實面對一個問題:這些,別人不是早就做了嗎?",
 '我們站在哪':"這張是給老師看的誠實定位,很重要。老師一定會問:ZK 算超越函數早就有人做了,ezkl、zkLLM、ZKFixedPointChip 都有,你們做了什麼新的?我的原則是寧可少吹,也不要被抓到不誠實。\n先講互補,不是取代。查表是 ZKML 在大批次、低精度場景的理性選擇,我不否定它;我們補的是它做不到的地方:多函數共用同一張 256 表、高精度也撐得住、還有低頻呼叫 —— 金融合規正好就是這種需求。\n再來,誠實講什麼不是我們發明的:Minimax、Remez 是一百多年的教科書;FHE 從 2021 就在用;ZKFixedPointChip 2023 也已經在 Halo2 上用過 Remez;『Minimax 比 Taylor 好』本身也是教科書事實,不是我們的發現。\n那真正新的有五項:第一,第一個系統化地把 Minimax 跟 Taylor 在 ZK 定點下量化比較,並發現量化瓶頸;第二,把延遲截斷做在 Horner 鏈內這個粒度,還配上 BN254 的 bit-budget 分析;第三,形式化誤差預算加上窮舉驗證;第四,第一個有誤差分析的 ZK ln 和 erf 多項式電路;第五,不管什麼函數都只用一張 256 條目的表。\n一句話:我們不是又一個 ZK 函數庫,是把『能算』升級成『能證、有誤差保證、能落地金融』。",
 '成果與限界':"最後收尾,把這些取捨換到的成果跟代價一起講清楚。\n成果有三塊。Scenario A 是 Black-Scholes 的 Delta 對沖,pp=24:端到端 Delta 做到 1 個 ULP,比查表快 26.3 倍,而且 pp 大於等於 24 時這是唯一可行的路。Scenario C 是 Merton 信用違約,pp=32:做到 28.6 到 29 個有效位,7 個評等都對到小數第 8 位,proof 大約 15,360 bytes、verify 約 33 毫秒。整體 13 個函數全部 ULP=1,proof 落在 5 到 9.5 KB,verify 不超過 5.1 毫秒。\n代價也誠實講:erf 要用 5 段 piecewise 才能覆蓋 0 到 5,proof 因此乘上 2.2 倍;bit-budget 限制 d+1 乘 pp 小於 254,pp 上限在 degree=5 時是 42;大批次比單函數查表慢大約 7.5 倍;proof 比查表大約 6.8 倍 —— 但仍然小於 5KB。\n收尾一句話:這整篇論文,就是把『能算一個函數』,變成『能證一個金融模型』。最後一頁,附上所有出處與先行工作。",
@@ -676,7 +734,11 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 "KZG 承諾":"把多項式壓成一個群元素的承諾；proof 常數大小、配對驗證便宜，但需一次性可信設定。PSE Halo2 用的承諾層。",
 "IPA (內積論證)":"原版 Halo2 的承諾：免可信設定、proof 為 O(log n)（短）；真正的弱點是驗證時間線性（慢）→ 不利輕量／上鏈驗證。",
 "FRI / STARK":"hash-based 承諾：免設定、抗量子；驗證仍 succinct（polylog），但 proof 偏大 → 大 proof 對上鏈／頻寬較不划算。",
-"可信設定 (trusted setup)":"產生公共參數 SRS 的一次性儀式；KZG 需要（通用可更新版做一次、全電路共用，一人誠實即安全），IPA／FRI 不需要。"
+"可信設定 (trusted setup)":"產生公共參數 SRS 的一次性儀式；KZG 需要（通用可更新版做一次、全電路共用，一人誠實即安全），IPA／FRI 不需要。",
+"預縮放係數 (pre-scaled)":"D_i=⌊c_i·S^(d+1−i)⌉，把第 i 個係數放在 S 的 d+1−i 次方尺度；讓 Horner 每乘一次 R 自然進位一個 S → 中間不用重縮放，支援延遲截斷。",
+"商餘分解 (quotient-remainder)":"電路算不了 ⌊·⌋ 除法；改讓 prover 填商 H 與餘數 rem，閘鎖 D_k+R·H_{k+1}=H_k·S+rem、rem∈[0,S)（ByteTable 查）→ 強制誠實截斷。",
+"ExplicitRC":"輸入範圍驗證：gap_lo+gap_hi·256+R=R_max（gap 用共用 ByteTable 查 byte），確定性擋住超範圍輸入——超範圍時 gap 為負、體裡 wrap、拆不成 byte 即失敗。成本 1 gate。",
+"誤差預算公式":"ULP_total ≤ ε_approx+ε_quant+ε_trunc（逼近+量化+截斷三源各給上界）；再用窮舉驗證 ULP_max ≤ ULP_total。整篇『有誤差保證』的數學核心。"
   };
   // formal / precise definitions — shown as 形式： under 白話 (only terms that have one)
   const FORMAL = {
@@ -703,6 +765,9 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '核心工具':["PLONKish","自訂閘 (custom gate)","查表 (lookup)","Groth16 / R1CS","KZG 承諾","IPA (內積論證)","FRI / STARK","可信設定 (trusted setup)","BN254","通用 Horner kernel","ByteTable"],
 '兩條死路':["查表 (lookup)","pp (定點精度)","Taylor 展開","Minimax / Remez","有效位 (有效數字)","Horner 法","中間值膨脹","溢位 (overflow)","BN254","尺度 S=2^pp","逐步截斷 (per-step)"],
 '四個設計決定':["定點 pp=48","浮點","Minimax / Remez","Taylor 展開","ULP","逐步截斷 (per-step)","延遲截斷 (deferred)","溢位 (overflow)","通用 Horner kernel","ByteTable","fixed 欄","proof (證明 π)","verify (驗證)"],
+'核心 kernel':["通用 Horner kernel","預縮放係數 (pre-scaled)","商餘分解 (quotient-remainder)","ByteTable","Horner 法","尺度 S=2^pp","延遲截斷 (deferred)","逐步截斷 (per-step)","fixed 欄"],
+'ExplicitRC':["ExplicitRC","ByteTable","有限體 (𝔽ᵣ)","溢位 (overflow)","區間 (interval)","range reduction"],
+'誤差預算':["誤差預算公式","誤差預算 (error budget)","窮舉驗證","ULP","Minimax / Remez","量化誤差","逼近誤差","量化飽和","延遲截斷 (deferred)","degree (多項式次數 d)"],
 '免費空間':["延遲截斷 (deferred)","逐步截斷 (per-step)","bit-budget","暫存空間 (紅利)","BN254","pp (定點精度)","degree (多項式次數 d)","中間值膨脹","溢位 (overflow)"],
 '量化飽和':["量化飽和","d* (最佳 degree)","harmful degree","degree (多項式次數 d)","量化誤差","逼近誤差","ULP","pp (定點精度)"],
 '函數與區間':["係數條件數","精度地板","區間 (interval)","range reduction","piecewise (分段)","ULP","erf (誤差函數)","exp / ln / erf","degree (多項式次數 d)"],
