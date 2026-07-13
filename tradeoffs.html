@@ -577,32 +577,46 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="" data-label="量化飽和">
   <div class="slide-meta"><span class="part-label">取捨 3 · 拆決定 ②</span> · degree 的甜蜜點</div>
   <h2>degree 越高越準嗎？<span class="accent">反直覺：不是</span></h2>
-  <div class="whybox"><span class="tag">❓ 為什麼不能一路把 degree 加大</span>：多項式逼近的直覺是「次數越高越貼合」。在定點 ZK 裡，這個直覺<b>會反過來咬你</b>。</div>
+  <div class="whybox"><span class="tag">❓ 為什麼不能一路把 degree 加大</span>：多項式逼近的直覺是「次數越高越貼合」。在定點 ZK 裡，這個直覺<b>過了甜蜜點就失效</b> —— 這次不畫示意圖，直接放實測。</div>
   <div class="grid-2">
     <div>
-      <div class="soulbox"><span class="tag">🎯 量化飽和（quantization saturation）</span>：超過最佳 degree \( d^\* \) 之後，degree 再高<b>反而更差</b> —— 逼近誤差還在降，但<b>量化誤差被放大</b>、整體精度掉頭往下。</div>
-      <div class="card accent" style="margin-top:.6rem"><h3>數字</h3>
-        <p>pp=16、\( d\le 7 \) 就讓 <b>13 個函數全 ULP=1</b>。再往上加 degree，不會更好。</p>
+      <div class="soulbox"><span class="tag">🎯 量化飽和（quantization saturation）</span>：過了最佳 degree \( d^\* \)，逼近誤差已壓到底，總誤差被<b>量化／截斷的「地板」接管</b> —— 加 degree <b>買不到精度</b>，只多付 rows 和 lookups；極高 d 還出現輕微反轉（1.24→1.25）。</div>
+      <div class="card accent" style="margin-top:.55rem"><h3>實測數字（右圖的點）</h3>
+        <ul style="font-size:.93rem">
+          <li>延遲<span class="rg rg-e">🅔</span>（ln、pp=32、4 段）：d=4 誤差 <b>1058.67</b> → d=6 <b>3.44</b> → d=8 起<b>釘死在 1.24</b>（量化地板），d≥12 微升 1.25。</li>
+          <li>per-step（ln、pp=32、單段）：d=7 <b>105</b> → d=9 <b>4</b> → d≥10 <b>釘死在 3</b>（截斷地板）—— 地板比延遲高，正是上一張的價差。</li>
+          <li>pp=16<span class="rg rg-e">🅔</span>：\( d^\*\le7 \) 已讓 13 函數全 ULP≤1（延遲）—— 再加 degree 不會更好。</li>
+        </ul>
       </div>
-      <div class="ideabox" style="margin-top:.5rem"><span class="tag">💡 為什麼會放大</span>：degree 越高 → 係數越多、各自量化（誤差累加）＋ 高次項 \( x^d \) 放大輸入誤差；過了 \( d^\* \) 就蓋過逼近誤差的下降。</div>
+      <div class="ideabox" style="margin-top:.5rem"><span class="tag">💡 為什麼有地板</span>：係數量化（每個 \(c_i\) 取整）與截斷（每步 floor）的誤差<b>不隨 degree 下降</b>；逼近誤差一旦壓過它們，總誤差就貼著地板走。</div>
     </div>
     <figure>
-      <svg viewBox="0 0 420 240" role="img" aria-label="精度隨 degree 先升後降，存在甜蜜點 d*" style="width:100%;max-width:360px;height:auto;display:block;margin:0 auto">
-        <line x1="50" y1="200" x2="400" y2="200" stroke="#94a3b8" stroke-width="1.5"/>
-        <line x1="50" y1="200" x2="50" y2="20" stroke="#94a3b8" stroke-width="1.5"/>
-        <text x="225" y="228" font-size="12" text-anchor="middle" fill="#55596b">degree d →</text>
-        <text x="18" y="110" font-size="12" text-anchor="middle" fill="#55596b" transform="rotate(-90 18 110)">有效精度</text>
-        <path d="M60,180 C120,120 150,60 200,58 C250,56 320,120 380,182" fill="none" stroke="#4f46e5" stroke-width="2.5"/>
-        <line x1="200" y1="58" x2="200" y2="200" stroke="#16a34a" stroke-width="1.4" stroke-dasharray="4 3"/>
-        <circle cx="200" cy="58" r="5" fill="#16a34a"/>
-        <text x="200" y="48" font-size="12.5" text-anchor="middle" fill="#15803d" font-weight="700">d* 甜蜜點</text>
-        <text x="330" y="150" font-size="11.5" fill="#b91c1c" font-weight="700">harmful</text>
-        <text x="330" y="166" font-size="11.5" fill="#b91c1c">degree</text>
+      <svg viewBox="0 0 460 260" role="img" aria-label="真實 degree 掃描：延遲截斷降到 1.24 後平台；per-step 降到 3 後平台" style="width:100%;max-width:480px">
+        <line x1="55" y1="210" x2="435" y2="210" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="55" y1="210" x2="55" y2="30" stroke="#94a3b8" stroke-width="1.5"/>
+        <g stroke="#e5e7eb" stroke-width="1"><line x1="55" y1="200" x2="435" y2="200"/><line x1="55" y1="150" x2="435" y2="150"/><line x1="55" y1="100" x2="435" y2="100"/><line x1="55" y1="50" x2="435" y2="50"/></g>
+        <g font-size="9.5" fill="#8b94a3" text-anchor="end"><text x="50" y="203">1</text><text x="50" y="153">10</text><text x="50" y="103">100</text><text x="50" y="53">1000</text></g>
+        <g font-size="10" fill="#8b94a3" text-anchor="middle"><text x="55" y="224">4</text><text x="118" y="224">6</text><text x="182" y="224">8</text><text x="245" y="224">10</text><text x="308" y="224">12</text><text x="372" y="224">14</text><text x="435" y="224">16</text></g>
+        <text x="245" y="244" font-size="11.5" text-anchor="middle" fill="#55596b">degree d →</text>
+        <text x="16" y="120" font-size="11.5" text-anchor="middle" fill="#55596b" transform="rotate(-90 16 120)">max ULP（log 刻度）</text>
+        <!-- deferred (exp12 pp32, 4-seg): 1058.67, 3.44, 1.24, 1.24, 1.25, 1.25, 1.25 -->
+        <polyline points="55,49 118,173 182,195 245,195 308,195 372,195 435,195" fill="none" stroke="#2563eb" stroke-width="2.4"/>
+        <g fill="#2563eb"><circle cx="55" cy="49" r="4"/><circle cx="118" cy="173" r="4"/><circle cx="182" cy="195" r="4"/><circle cx="245" cy="195" r="4"/><circle cx="308" cy="195" r="4"/><circle cx="372" cy="195" r="4"/><circle cx="435" cy="195" r="4"/></g>
+        <g font-size="9.5" fill="#1d4ed8" font-weight="700"><text x="63" y="46">1058.67</text><text x="126" y="170">3.44</text><text x="182" y="188" text-anchor="middle">1.24</text><text x="308" y="188" text-anchor="middle">1.25</text></g>
+        <text x="99" y="120" font-size="10.5" fill="#1d4ed8" font-weight="700">延遲 🅔（4 段）</text>
+        <!-- per-step (exp09 pp32, single seg): 105, 15, 4, 3, 3 -->
+        <polyline points="150,99 182,141 213,170 245,176 308,176" fill="none" stroke="#16a34a" stroke-width="2.4" stroke-dasharray="7 3"/>
+        <g fill="#16a34a"><circle cx="150" cy="99" r="4"/><circle cx="182" cy="141" r="4"/><circle cx="213" cy="170" r="4"/><circle cx="245" cy="176" r="4"/><circle cx="308" cy="176" r="4"/></g>
+        <g font-size="9.5" fill="#15803d" font-weight="700"><text x="158" y="96">105</text><text x="190" y="138">15</text><text x="221" y="167">4</text><text x="251" y="173">3</text><text x="314" y="173">3</text></g>
+        <text x="255" y="155" font-size="10.5" fill="#15803d" font-weight="700">per-step（單段）</text>
+        <!-- floors -->
+        <text x="433" y="191" font-size="9" text-anchor="end" fill="#1d4ed8">量化地板 1.24</text>
+        <text x="360" y="172" font-size="9" fill="#15803d">截斷地板 3</text>
       </svg>
-      <figcaption>原始圖解（本報告自製）· 精度先升後降，有最佳點</figcaption>
+      <figcaption>真實量測（非示意）· ln(1+x)、pp=32：藍＝exp12/ln_degree_sweep.json（4 段、延遲／模擬）；綠＝exp09/ln_sweep_output.txt（單段、per-step）。分段設定不同 → 比形狀與地板高度，不比兩線的絕對差。</figcaption>
     </figure>
   </div>
-  <p style="margin-top:.4rem"><b>取捨：</b>degree <b>不是免費</b>，有一個甜蜜點，盲目加只會更糟。<span class="muted">（這現象在 DSP／硬體早有討論〔de Dinechin 2015〕；我們是<b>首次在 ZK 定點下量化、刻畫</b>它 —— 是測量，不是發明。）</span></p>
+  <p style="margin-top:.4rem"><b>取捨：</b>degree <b>不是免費</b> —— 甜蜜點之後每加一次 d 都是白付的 rows/lookups；「更差」的反轉在這組量測裡很輕微（exp12：1.24→1.25），主現象是<b>飽和</b>。<span class="muted">（DSP／硬體早有相關討論〔de Dinechin 2015〕；我們是首次在 ZK 定點下量測它 —— 是測量，不是發明。）</span></p>
 </section>
 
 <!-- ===== ERROR BUDGET (the precision guarantee) ===== -->
