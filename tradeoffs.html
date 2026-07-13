@@ -316,6 +316,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <p>Black–Scholes、Merton 這些模型，全靠<b>超越函數</b> \( \ln,\ \exp,\ \mathrm{erf} \)。例如常態 CDF</p>
         <div class="fbox"><div class="lbl">常態 CDF（風險計算的核心）</div>
           \[ \Phi(x)=\tfrac12\big(1+\operatorname{erf}(x/\sqrt2)\big) \]
+          <div class="cmt muted" style="font-size:.86rem">白話：Φ 就是「虧損跌破某條線的機率」要查的那張常態機率表，它的核心是 erf —— 電路算不出 erf，整條風險計算就斷在這裡。</div>
         </div>
       </div>
     </div>
@@ -332,7 +333,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <section class="slide" data-part="" data-label="核心工具">
   <div class="slide-meta"><span class="part-label">底層工具</span> · 為什麼不用更快的 Groth16</div>
   <h2>為什麼不用<span class="accent">最快最小</span>的 Groth16？</h2>
-  <div class="whybox"><span class="tag">❓ 直覺會問</span>：Groth16 proof 最小（3 群元素）、驗證最快 —— 那為什麼不用它？因為<b>「快」不等於「合用」</b>。論文裡寫了四個理由：</div>
+  <div class="whybox"><span class="tag">❓ 直覺會問</span>：Groth16 proof 最小（3 群元素）、驗證最快 —— 那為什麼不用它？因為<b>「快」不等於「合用」</b>。論文裡寫了四個理由。<span class="muted">（名詞速記：proof＝算完後交出的一小份「可公開查驗的收據」；verify＝任何人幾毫秒核對這張收據；lookup＝「證明某個值出現在一張公開表裡」的約束。）</span></div>
   <table style="font-size:.9rem">
     <tr><th>維度</th><th>Halo2 + KZG（我們）</th><th>Groth16</th><th>STARK（FRI）</th></tr>
     <tr class="hl"><td><b>自訂閘 + 查表</b><br><span class="muted" style="font-size:.85em">kernel 必需</span></td><td><b style="color:#15803d">✓</b>（截斷閘＋ByteTable）</td><td><b style="color:#b91c1c">✗ R1CS 只 deg-2、無 lookup</b></td><td>✓</td></tr>
@@ -341,7 +342,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <tr><td>驗證</td><td>數 ms（2 配對）</td><td>最快（3 配對）</td><td>succinct（polylog）</td></tr>
     <tr><td>抗量子</td><td>✗</td><td>✗</td><td><b style="color:#15803d">✓</b></td></tr>
   </table>
-  <div class="soulbox" style="margin-top:.45rem"><span class="tag">🎯 四個理由</span>：① Groth16 <b>每電路 setup</b>（金融模型會更新→不可行）② R1CS <b>做不了我們的閘／查表</b>——快但表達不了＝沒用 ③ STARK 抗量子、表達力夠，但 <b>proof 偏大</b>（小 portfolio 吃虧）④ <b>工程成熟度</b>：halo2_proofs v0.3.0 穩，Jolt 等 API 常動，金融要長期穩定。代價：一次性可信設定。</div>
+  <div class="soulbox" style="margin-top:.45rem"><span class="tag">🎯 四個理由</span>：① Groth16 <b>每電路 setup</b>（金融模型會更新→不可行）② R1CS <b>做不了我們的閘／查表</b>——快但表達不了＝沒用 ③ STARK 抗量子、表達力夠，但 <b>proof 偏大</b>（小 portfolio 吃虧）④ <b>工程成熟度</b>：halo2_proofs v0.3.0 穩，Jolt 等 API 常動，金融要長期穩定。代價：一次性可信設定。<b>所以呢</b>：平台就位 —— 但真正的難題（超越函數）才要開始，下一張看兩條直覺的路怎麼死。</div>
 </section>
 
 <!-- ===== 3 · TWO DEAD ENDS ===== -->
@@ -351,7 +352,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="whybox"><span class="tag">❓ 為什麼不能直接放進去</span>：要在電路裡算 \( \ln,\exp,\mathrm{erf} \)，直覺只有兩條路 —— 查表、或多項式逼近。先看清楚兩條各死在哪，才知道我們的選擇是被逼出來的。</div>
   <div class="grid-2">
     <div class="card red"><h3>死路①　查表：爆量</h3>
-      <p>把每個輸入預先算好存表。精度一拉高，表就爆炸：</p>
+      <p>把每個輸入預先算好存表。<span class="muted" style="font-size:.9rem">（pp＝小數保留幾個二進位位；輸入有 2^pp 種，表就要 2^pp 格。）</span>精度一拉高，表就爆炸：</p>
       <table style="font-size:.92rem">
         <tr><th>精度 pp</th><th>表大小（每函數）</th></tr>
         <tr><td>16</td><td>65,536</td></tr>
@@ -362,8 +363,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <p class="muted" style="margin-top:.4rem;font-size:.9rem">金融要 pp=24～32 —— 任何電路都裝不下。</p>
     </div>
     <div class="card red"><h3>死路②　多項式：兩個坑</h3>
-      <p><b>坑 A · Taylor 在定點崩潰</b>：pp=32、\( d{=}10 \)（<span class="rg rg-c">🅒 配置</span>）時，\( \ln \) 只剩 <b>4.4 有效位</b>（約一位十進位），同條件 Minimax 有 <b>28.6 位</b>。</p>
-      <p style="margin-top:.5rem"><b>坑 B · Horner 中間值不截斷會膨脹</b>：一路乘下去不清尺度，中間值脹成 \( S^{\,d+1} \)（\( S{=}2^{pp} \)）。pp=32、\( d{=}10 \) 約 \( 2^{352} \)，<b>溢位 BN254 的 253 位</b>；出貨的 pp=48、\( d{=}12 \) 更是 \( 2^{624} \)。</p>
+      <p><b>坑 A · Taylor 在定點崩潰</b>：pp=32、\( d{=}10 \)（<span class="rg rg-c">🅒 配置</span>；d＝多項式最高次方，也是求值的步數）時，\( \ln \) 只剩 <b>4.4 有效位</b>（約一位十進位），同條件 Minimax 有 <b>28.6 位</b>。</p>
+      <p style="margin-top:.5rem"><b>坑 B · Horner 中間值不截斷會膨脹</b>：Horner＝「乘 x、加下一個係數」一路捲下來的求值法。若一路乘不清小數尺度，中間值脹成 \( S^{\,d+1} \)（\( S{=}2^{pp} \)）—— pp=32、\( d{=}10 \) 約 \( 2^{352} \)。<span class="muted" style="font-size:.9rem">白話：每乘一步數字就變長 pp 位，乘到第 d+1 步就<b>塞不進 BN254 這個 254 位的保險箱</b>；出貨的 pp=48、d=12 更要 2⁶²⁴。</span></p>
     </div>
   </div>
   <div class="soulbox"><span class="tag">🎯 被逼出來的問題</span>：可行的只有「多項式逼近」這條，但要先<b>解掉 Taylor 崩潰</b>與<b>中間值溢位</b>兩個坑 —— 這正是後面四個設計決定要回答的。</div>
@@ -375,9 +376,9 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <h2>四個設計決定 —— <span class="accent">選了什麼、別的為什麼不行</span></h2>
   <table style="font-size:.92rem">
     <tr><th style="width:20%">設計決定</th><th>為什麼選這個 · 別的為什麼不行</th><th style="width:24%">換到的效果</th></tr>
-    <tr><td><b>① 定點 pp=48</b><br><span class="muted">不用浮點</span></td><td>體裡<b>根本沒有浮點</b>，只能拿整數乘 \( 2^{48} \) 模擬小數。代價：pp 越大、中間值越容易脹爆。</td><td>能在體上模擬高精度小數</td></tr>
-    <tr><td><b>② Minimax</b><br><span class="muted">不用 Taylor</span></td><td>Taylor 在定點下崩潰；Minimax（Remez）是<b>必要條件、不是「比較好」</b>。<span class="rg rg-e">🅔</span>延遲截斷下 13 函數在最小 degree 全達 ULP≤1（per-step 則要用 degree 換，見「逐步的代價」）。</td><td>同 degree 多拿十幾位精度</td></tr>
-    <tr class="hl"><td><b>③ 逐步截斷</b><br><span class="muted">per-step，不用延遲</span></td><td>延遲在低 pp 精度較好，但受 \( (d{+}1)\cdot pp<254 \) 限制：pp=48 只容 \( d\le4 \)，管線要 \( d{=}12 \) → per-step 是<b>唯一可行</b>、不是「比較好」。代價：精度（<span class="rg rg-e">🅔</span> d* 時 ULP 2–7）。</td><td>中間值恆 ~2·pp bit，任何 pp 都不溢位</td></tr>
+    <tr><td><b>① 定點 pp=48</b><br><span class="muted">不用浮點</span></td><td>體裡<b>根本沒有浮點</b>，只能像「用『分』記帳、不用『元』」—— 整數乘 \( 2^{48} \) 把小數變整數。代價：pp 越大、中間值越容易脹爆。</td><td>能在體上模擬高精度小數</td></tr>
+    <tr><td><b>② Minimax</b><br><span class="muted">不用 Taylor</span></td><td>Taylor 在定點下崩潰；Minimax（Remez）是<b>必要條件、不是「比較好」</b>。<span class="rg rg-e">🅔</span>延遲截斷下 13 函數在最小 degree 全達 ULP≤1（ULP＝最後一位小數的「一格刻度」；ULP≤1 即準到最後一位。per-step 則要用 degree 換，見「逐步的代價」）。</td><td>同 degree 多拿十幾位精度</td></tr>
+    <tr class="hl"><td><b>③ 逐步截斷</b><br><span class="muted">per-step，不用延遲</span></td><td>延遲在低 pp 精度較好，但受 \( (d{+}1)\cdot pp<254 \) 限制（每乘一步長 pp 位、超過保險箱 254 位就裝不下）：pp=48 只容 \( d\le4 \)，管線要 \( d{=}12 \) → per-step 是<b>唯一可行</b>、不是「比較好」。代價：精度（<span class="rg rg-e">🅔</span> d* 時 ULP 2–7）。</td><td>中間值恆 ~2·pp bit，任何 pp 都不溢位</td></tr>
     <tr><td><b>④ 通用 Horner<br>+ ByteTable</b></td><td>換函數只改 \( d \) 個係數放進 fixed 欄；一張 256 表<b>全函數共用</b>。</td><td>加新函數<b>零電路重設計</b></td></tr>
   </table>
   <div class="soulbox"><span class="tag">🎯 目標效果（這四個決定一起換到的）</span>：金融精度 <b>24–48 bit</b>、proof 單函數 <b>5.0–9.5 KB</b><span class="rg rg-e">🅔</span>／全組合 <b>34,368 B</b><span class="rg rg-p">🅟</span>、verify <b>毫秒級</b>、<b>不揭露部位</b>。數字掛的徽章是什麼意思？下一張先把三個量測基準講清楚。</div>
@@ -405,7 +406,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <p style="font-size:.88rem;margin-top:.35rem" class="muted">出自這裡：proof 34,368 B（任何 N）、verify ≈10 ms、exp kernel 2.81 ULP、Delta 端到端 7 ULP。</p>
     </div>
   </div>
-  <div class="soulbox"><span class="tag">🎯 一句</span>：🅔 是<b>做研究的顯微鏡</b>（低 pp、延遲截斷、單函數），🅟 是<b>真的出貨的機器</b>（pp=48、per-step、整個投組一張 proof），🅒 在中間第一次驗證 per-step 上高精度可行。<b>拿 🅔 的精度替 🅟 背書、或拿 🅟 的 proof 大小去比 🅔，都是張冠李戴</b> —— 這份報告不這樣做。</div>
+  <div class="soulbox"><span class="tag">🎯 一句</span>：🅔 是<b>做研究的顯微鏡</b>（低 pp、延遲截斷、單函數），🅟 是<b>真的出貨的機器</b>（pp=48、per-step、整個投組一張 proof），🅒 在中間第一次驗證 per-step 上高精度可行。<b>拿 🅔 的精度替 🅟 背書、或拿 🅟 的 proof 大小去比 🅔，都是張冠李戴</b> —— 這份報告不這樣做。<b>所以呢</b>：基準講清楚了，接下來進出貨 kernel 的本體。</div>
 </section>
 
 <!-- ===== CORE KERNEL (how we evaluate + honest truncation) ===== -->
@@ -416,13 +417,15 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="grid-2">
     <div class="card"><h3>① 怎麼算：per-step Horner，每步除回去</h3>
       <p>每一步乘完 \(R\)、加上係數，<b>立刻</b>除以 \(S{=}2^{pp}\) 取整：</p>
-      <div class="fbox" style="margin:.3rem 0"><div class="cmt">\[ \mathrm{acc}_{i+1}=\Big\lfloor \tfrac{\mathrm{acc}_i\cdot R + c_i}{S} \Big\rfloor \]</div></div>
-      <p class="muted" style="font-size:.9rem">係數存成 <b>addends 格式</b>（\(c_i\) 放在 \(S^2\) 尺度），<b>不是</b>延遲版的整條預縮放 \(D_i=c_i S^{d+1-i}\)。因為每步清尺度，中間值恆 \(\approx 2\cdot pp\) bit（pp=48 → 96 bit）—— <b>d 加多大都不會溢位</b>。</p>
+      <div class="fbox" style="margin:.3rem 0"><div class="cmt">\[ \mathrm{acc}_{i+1}=\Big\lfloor \tfrac{\mathrm{acc}_i\cdot R + c_i}{S} \Big\rfloor \]
+        <div class="cmt muted" style="font-size:.86rem">白話：乘完、加完，把小數點右邊多出來的位數<b>剪掉</b>，回到固定的小數位數（除以尺度 \(S\)＝「把分換回元」再無條件捨去）。</div></div>
+      <p class="muted" style="font-size:.9rem">係數存成 <b>addends 格式</b>（\(c_i\) 放在 \(S^2\) 尺度），<b>不是</b>延遲版的整條預縮放 \(D_i=c_i S^{d+1-i}\)。因為每步清尺度，中間值恆 \(\approx 2\cdot pp\) bit（pp=48 → 96 bit）—— <b>d 加多大都塞得進 254 位保險箱</b>。</p>
     </div>
     <div class="card"><h3>② 怎麼保證：每步一條閘 + byte 查表</h3>
-      <p>電路算不了 ⌊·⌋。讓 prover 填商 \(\mathrm{acc}_{i+1}\) 與餘數 rem，閘<b>鎖死</b>：</p>
-      <div class="fbox" style="margin:.3rem 0"><div class="cmt">\[ \mathrm{acc}_i R + c_i = \mathrm{acc}_{i+1} S + \mathrm{rem},\ \ \mathrm{rem}\in[0,S) \]</div></div>
-      <p class="muted" style="font-size:.9rem">rem 拆 <b>6 個 byte</b>（\(S=2^{48}=256^6\)）、逐一查同一張 <b>256 條目 ByteTable</b> → 餘數在範圍 ⟺ <b>誠實做了除法</b>。</p>
+      <p>電路算不了 ⌊·⌋。讓 prover 自己填商 \(\mathrm{acc}_{i+1}\) 與餘數 rem（witness＝prover 填進電路的數字），再用一條閘（gate＝電路裡強制成立的等式）<b>鎖死</b>：</p>
+      <div class="fbox" style="margin:.3rem 0"><div class="cmt">\[ \mathrm{acc}_i R + c_i = \mathrm{acc}_{i+1} S + \mathrm{rem},\ \ \mathrm{rem}\in[0,S) \]
+        <div class="cmt muted" style="font-size:.86rem">白話：像收銀機找零 —— 商×S 加零錢必須<b>湊回原金額</b>；而且零錢還限定只能拆成 0–255 的「合法硬幣」。</div></div>
+      <p class="muted" style="font-size:.9rem">rem 拆 <b>6 個 byte</b>（\(S=2^{48}=256^6\)）、逐一查同一張 <b>256 條目 ByteTable</b>（只存 0–255 的表＝合法硬幣面額清單）→ 餘數在範圍 ⟺ <b>誠實做了除法</b>。</p>
     </div>
   </div>
   <div class="ideabox" style="margin-top:.45rem"><span class="tag">💡 帳單 <span class="rg rg-p">🅟</span></span>：每次 kernel 呼叫（d=12）＝ <b>3 種 gate</b>（horner_per_step／R 拆 byte／W 拆 byte）、<b>14 rows</b>（d+2）、<b>84 個 byte-lookup</b>（(d+2)×6）—— 全部查<b>同一張</b> 256 表。<span class="muted">（出處：kernel.rs 檔頭與 gate 定義）</span></div>
@@ -453,7 +456,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
           <li>巨數<b>拆不成 byte</b> → ByteTable 查不到 → 證明<b>確定性失敗</b>。</li>
         </ol>
       </div>
-      <div class="soulbox" style="margin-top:.5rem"><span class="tag">🎯 一句</span>：作弊不是「機率上難」，是<b>湊不出合法的 byte 分解</b>。負數在體裡自動變巨數，正是我們的守門員。<span class="muted">（witness 端用 div_euclid／rem_euclid，保證 rem 永遠非負 —— kernel.rs）</span></div>
+      <div class="soulbox" style="margin-top:.5rem"><span class="tag">🎯 一句</span>：作弊不是「機率上難」，是<b>湊不出合法的硬幣分解</b>。負數在體裡自動變巨數，正是我們的守門員。<span class="muted">（witness 端用 div_euclid／rem_euclid，保證 rem 永遠非負 —— kernel.rs）</span><b>所以呢</b>：算的<b>過程</b>鎖死了；那<b>輸入</b>本身會不會被動手腳？下一張。</div>
     </div>
   </div>
 </section>
@@ -468,6 +471,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <div class="fbox"><div class="lbl">gap decomposition 約束</div>
         \[ \mathrm{gap}_{\mathrm{lo}}+\mathrm{gap}_{\mathrm{hi}}\cdot 256 + R = R_{\max} \]
         <div class="cmt">\(\mathrm{gap}_{\mathrm{lo}},\mathrm{gap}_{\mathrm{hi}}\) 用<b>共用的 ByteTable</b> 查 byte（不需新表）。</div>
+        <div class="cmt muted" style="font-size:.86rem">白話：prover 得交出「離上限還差多少」這筆<b>找零</b>，而且找零同樣只能用 0–255 的合法硬幣拼 —— 真的沒超界，找零才拼得出來。</div>
       </div>
       <p style="margin-top:.4rem;font-size:.92rem">成本：<b>只多 1 個 gate</b>。</p>
     </div>
@@ -476,7 +480,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <p style="margin-top:.4rem">合法的 \(R\in[0,R_{\max}]\)：gap <b>唯一</b>拆成兩個 byte。</p>
     </div>
   </div>
-  <div class="soulbox" style="margin-top:.45rem"><span class="tag">🎯 一句</span>：超範圍的輸入<b>在數學上湊不出</b>合法的 gap 分解 —— 不是「機率上難」，是「<b>根本不可能</b>」。<span class="muted">（也試過用單調性省檢查的 ORV，但 13 個函數有 7 個有 security gap → 改用 ExplicitRC。）</span></div>
+  <div class="soulbox" style="margin-top:.45rem"><span class="tag">🎯 一句</span>：超範圍的輸入<b>在數學上湊不出</b>合法的 gap 分解 —— 不是「機率上難」，是「<b>根本不可能</b>」。<span class="muted">（也試過用單調性省檢查的 ORV，但 13 個函數有 7 個有 security gap → 改用 ExplicitRC。）</span><b>所以呢</b>：過程與輸入都鎖死了；接下來回到「什麼時候截斷」這個最大的取捨。</div>
 </section>
 
 <!-- ===== 5 · FREE SPACE (deferred vs per-step) ===== -->
@@ -489,9 +493,11 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <div class="ideabox"><span class="tag">💡 核心比喻</span>：ZK 的 254-bit 體，是<b>傳統 CPU 上不存在的免費資源 —— 暫存空間</b>。延遲截斷吃這塊紅利：把 \( d \) 次截斷併到<b>最後一次</b>（CPU 的 64-bit register 被迫一直截斷，做不到）。</div>
       <div class="fbox" style="margin:.4rem 0"><div class="lbl">延遲版的玩法（🅔 低 pp 專用）</div>
         <div class="cmt">係數整條<b>預縮放</b> \( D_i=\lfloor c_i S^{\,d+1-i}\rceil \)，Horner 遞推 \( H_k=D_k+R\,H_{k+1} \) 中間<b>完全不截斷</b>，最後除一次 \( S^{d} \)。</div>
+        <div class="cmt muted" style="font-size:.86rem">白話：先把每個係數墊到剛好的高度，讓中間<b>一路只乘加、不用剪小數</b>，帳留到最後一次結清 —— 只截一次，誤差最小。</div>
       </div>
       <div class="fbox"><div class="lbl">但有 bit-budget</div>
         \[ (d+1)\cdot pp < 254 \]
+        <div class="cmt muted" style="font-size:.86rem">白話：每乘一步數字變長 pp 位，乘到第 d+1 步、長度超過保險箱的 254 位就裝不下。</div>
         <div class="cmt">pp=48 只容 \( d\le 4 \)；管線要 \( d{=}12 \)（中間值會到 \( 2^{624} \)）→ per-step 是<b>唯一可行</b>。</div>
       </div>
     </div>
@@ -550,6 +556,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
           <li>🅟 pp=48、d=12：延遲要 (12+1)×48 = <b>624 bit</b>；per-step 中間值恆 ≈96 bit（exp09「max addend bits」表）。</li>
           <li>pp=48 延遲上限 d≤4（254/48−1≈4.3）—— 但 ln 在 pp=48、d=4 誤差 6.9×10⁷ ULP（exp12）→ 紅利區在高 pp <b>沒有可用的精度</b>。</li>
         </ul>
+        <p style="margin-top:.35rem;font-size:.9rem"><b>所以呢</b>：換到 per-step 這條道，代價是精度 —— 下一張把這筆帳一項項攤開。</p>
       </div>
     </div>
   </div>
@@ -570,7 +577,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <div class="soulbox"><span class="tag">🎯 讀法</span>：同一組係數、同一個 d*，<b>延遲 13/13 達 ULP≤1，per-step 0/13</b>（差 2–7×）。所以「13 函數全 ULP=1」永遠要掛 <span class="rg rg-e">🅔</span>＋「延遲截斷」兩個標籤。</div>
     <div class="ideabox"><span class="tag">💡 那出貨怎麼辦</span>：🅟 在 pp=48 用 <b>degree 贖精度</b>：d 從 d*≈5 拉到 <b>12</b>，exp kernel 實測 <b>2.81 ULP</b>、Delta 端到端 <b>7 ULP</b>（pf1_results.md）—— 高 pp 下每個 ULP 只有 2⁻⁴⁸，7 ULP ≈ 2.5×10⁻¹⁴，遠小於金融門檻。</div>
   </div>
-  <p class="muted" style="margin-top:.35rem;font-size:.85rem">資料：exp03_deferred_truncation/results/full13_summary.md（2026-03-14，pp=16）。</p>
+  <p class="muted" style="margin-top:.35rem;font-size:.85rem">資料：exp03_deferred_truncation/results/full13_summary.md（2026-03-14，pp=16）。<b style="color:var(--text)">所以呢</b>：per-step 的價要用 degree 贖 —— 那 degree 是不是加越多越好？下一張看實測。</p>
 </section>
 
 <!-- ===== 6 · QUANTIZATION SATURATION ===== -->
@@ -616,7 +623,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <figcaption>真實量測（非示意）· ln(1+x)、pp=32：藍＝exp12/ln_degree_sweep.json（4 段、延遲／模擬）；綠＝exp09/ln_sweep_output.txt（單段、per-step）。分段設定不同 → 比形狀與地板高度，不比兩線的絕對差。</figcaption>
     </figure>
   </div>
-  <p style="margin-top:.4rem"><b>取捨：</b>degree <b>不是免費</b> —— 甜蜜點之後每加一次 d 都是白付的 rows/lookups；「更差」的反轉在這組量測裡很輕微（exp12：1.24→1.25），主現象是<b>飽和</b>。<span class="muted">（DSP／硬體早有相關討論〔de Dinechin 2015〕；我們是首次在 ZK 定點下量測它 —— 是測量，不是發明。）</span></p>
+  <p style="margin-top:.4rem"><b>取捨：</b>degree <b>不是免費</b> —— 甜蜜點之後每加一次 d 都是白付的 rows/lookups；「更差」的反轉在這組量測裡很輕微（exp12：1.24→1.25），主現象是<b>飽和</b>。<span class="muted">（DSP／硬體早有相關討論〔de Dinechin 2015〕；我們是首次在 ZK 定點下量測它 —— 是測量，不是發明。）</span><b>所以呢</b>：地板是什麼、從哪來？下一張用一條公式拆給你看。</p>
 </section>
 
 <!-- ===== ERROR BUDGET (the precision guarantee) ===== -->
@@ -624,7 +631,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="slide-meta"><span class="part-label">誤差保證</span> · 為什麼結果可信</div>
   <h2>誤差預算：精度<span class="accent">可信到一個明確的界</span></h2>
   <div class="whybox"><span class="tag">❓ 為什麼敢說「準」</span>：我們憑什麼說「準到 ULP=1」？不是測幾個點就喊 —— 是把總誤差<b>拆成三源、各給上界</b>，再用窮舉壓在界內。</div>
-  <div class="soulbox"><span class="tag">🎯 核心公式</span>：\[ \mathrm{ULP}_{\mathrm{total}} \le \varepsilon_{\mathrm{approx}}+\varepsilon_{\mathrm{quant}}+\varepsilon_{\mathrm{trunc}} \]</div>
+  <div class="soulbox"><span class="tag">🎯 核心公式</span>：\[ \mathrm{ULP}_{\mathrm{total}} \le \varepsilon_{\mathrm{approx}}+\varepsilon_{\mathrm{quant}}+\varepsilon_{\mathrm{trunc}} \]
+  <span class="muted" style="font-size:.9rem">白話：總誤差不會超過三種來源各自的上限相加 —— 多項式本身不完美（逼近）＋係數塞進定點的捨入（量化）＋每次剪小數（截斷）。三筆帳分開算、各自封頂。</span></div>
   <div class="grid-3" style="margin-top:.3rem">
     <div class="card"><h3>\(\varepsilon_{\mathrm{approx}}\) 逼近</h3><p style="font-size:.9rem">Remez 的 \(L^\infty\) 逼近誤差 —— degree-\(d\) 在該區間<b>不可再降</b>的部分。</p></div>
     <div class="card"><h3>\(\varepsilon_{\mathrm{quant}}\) 量化</h3><p style="font-size:.9rem">係數 \(D_i\) 取整的誤差；高次係數在較高 scale、相對誤差小。</p></div>
@@ -642,7 +650,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <h2>還有兩個更細的取捨：<span class="accent">函數本身 · 區間寬窄</span></h2>
   <div class="grid-2">
     <div class="card amber"><h3>① 係數條件數：函數自己決定地板</h3>
-      <p>同一個 per-step kernel、同 pp=48、同 \( d{=}14 \)（ch4 量測）：</p>
+      <p>條件數＝函數的<b>係數結構</b>對誤差的放大倍率。同一個 per-step kernel、同 pp=48、同 \( d{=}14 \)（ch4 量測）：</p>
       <table style="font-size:.92rem">
         <tr><th>函數</th><th>精度</th><th>有效位</th></tr>
         <tr><td>\( \ln(1{+}x) \)</td><td>142 ULP</td><td>40.8</td></tr>
@@ -659,7 +667,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <tr><td>\( \mathrm{erf} \) on \( [0,1] \)</td><td><b>3</b></td><td rowspan="2">40.7×</td></tr>
         <tr><td>\( \mathrm{erf} \) on \( [0,2.5] \)</td><td>122</td></tr>
       </table>
-      <p class="muted" style="margin-top:.4rem;font-size:.9rem">覆蓋變小要靠 <b>range reduction／分段</b>補回來：🅟 的 erf 切 <b>12 段</b>（每段寬 0.5）、ln 切 <b>4 段</b>。</p>
+      <p class="muted" style="margin-top:.4rem;font-size:.9rem">覆蓋變小要靠 <b>range reduction</b>（先把輸入摺回小區間、算完再還原）或<b>分段</b>（大區間切成幾小段、每段配自己的一條多項式）補回來：🅟 的 erf 切 <b>12 段</b>（每段寬 0.5）、ln 切 <b>4 段</b>。</p>
     </div>
   </div>
   <div class="soulbox"><span class="tag">🎯 取捨</span>：<b>精度 ↔ 覆蓋範圍</b> 是一條拉鋸線；想又準又廣，得切段 + range reduction，而切段會放大 proof（🅒 的 erf 5 段讓 proof ×2.2 → 15,360 B；「成果與限界」會兌現這個代價）。</div>
@@ -754,7 +762,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <li><b>⑤</b> Merton 完整情境（5 段 erf、7 個評等、d=10）</li>
         <li><b>⑥</b> 整個投組 PF1（任何 N；Merkle、95 advice 欄、91 lookup args、gate degree 6）</li>
       </ul>
-      <div class="soulbox" style="margin-top:.5rem"><span class="tag">🎯 讀法</span>：①→⑥ 不是「越做越肥」，是<b>裝的東西越來越多</b>：從一個函數的一次求值，到「整個投組、任何 N、一張 proof、verify ≈10 ms」。KZG 的 O(1) 讓 ⑥ <b>不隨 N 長大</b> —— N=8 和 N=128 都是 34,368 B。</div>
+      <div class="soulbox" style="margin-top:.5rem"><span class="tag">🎯 讀法</span>：①→⑥ 不是「越做越肥」，是<b>裝的東西越來越多</b>：從一個函數的一次求值，到「整個投組、任何 N、一張 proof、verify ≈10 ms」。KZG 的 O(1) 讓 ⑥ <b>不隨 N 長大</b> —— N=8 和 N=128 都是 34,368 B。<b>所以呢</b>：尺量完了，最後一張放所有出處。</div>
     </div>
   </div>
 </section>
