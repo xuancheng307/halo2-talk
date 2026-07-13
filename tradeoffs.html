@@ -368,6 +368,67 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="soulbox"><span class="tag">🎯 所以呢</span>：條件寫死了，接下來的每一個技術決定都<b>不再是品味，是答題</b>。先看把 R1–R5 全部湊齊時，終點長什麼樣 —— 下一張給你藍圖。</div>
 </section>
 
+<!-- ===== 2.4 · BLUEPRINT (序章 4/4) ===== -->
+<section class="slide" data-part="" data-label="藍圖">
+  <div class="slide-meta"><span class="part-label">序章 4/4 · 藍圖</span> · 終點長什麼樣：每晚一張證明</div>
+  <h2>藍圖：<span class="accent">整個投組 → 一張 34,368 B 的證明 → 10 毫秒驗完</span> <span class="rg rg-p">🅟</span></h2>
+  <figure style="margin:.2rem 0 0">
+    <svg viewBox="0 0 940 235" role="img" aria-label="PF1 夜批流程：私有部位與公開市場資料經 PF1 電路產出固定大小證明，監管與 LP 以 4 個公開輸入毫秒驗證" style="width:100%;max-width:1000px">
+      <defs><marker id="bp-arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#55596b"/></marker></defs>
+      <!-- fund side -->
+      <rect x="8" y="18" width="200" height="64" rx="10" fill="rgba(220,38,38,.06)" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="5 3"/>
+      <text x="108" y="40" font-size="12.5" text-anchor="middle" fill="#b91c1c" font-weight="800">基金部位（私有 witness）</text>
+      <text x="108" y="57" font-size="10.5" text-anchor="middle" fill="#55596b">N=8–128 筆，永不離開基金</text>
+      <text x="108" y="72" font-size="10.5" text-anchor="middle" fill="#55596b">只以 state_root 承諾示人</text>
+      <rect x="8" y="122" width="200" height="78" rx="10" fill="rgba(37,99,235,.06)" stroke="#2563eb" stroke-width="1.6"/>
+      <text x="108" y="143" font-size="12.5" text-anchor="middle" fill="#1d4ed8" font-weight="800">市場資料表 MDT（公開）</text>
+      <text x="108" y="159" font-size="10.5" text-anchor="middle" fill="#55596b">S、r、q、結算價、σ … 9 欄/葉</text>
+      <text x="108" y="174" font-size="10.5" text-anchor="middle" fill="#55596b">Merkle → market_data_root</text>
+      <text x="108" y="191" font-size="10" text-anchor="middle" fill="#7c3aed" font-weight="700">信任錨：行政管理人（見下）</text>
+      <!-- arrows into circuit -->
+      <line x1="208" y1="50" x2="288" y2="90" stroke="#55596b" stroke-width="1.8" marker-end="url(#bp-arr)"/>
+      <line x1="208" y1="160" x2="288" y2="122" stroke="#55596b" stroke-width="1.8" marker-end="url(#bp-arr)"/>
+      <!-- PF1 circuit -->
+      <rect x="292" y="62" width="212" height="92" rx="12" fill="rgba(124,58,237,.07)" stroke="#7c3aed" stroke-width="2"/>
+      <text x="398" y="84" font-size="13.5" text-anchor="middle" fill="#5b21b6" font-weight="900">PF1 電路（每晚跑一次）</text>
+      <text x="398" y="101" font-size="10.5" text-anchor="middle" fill="#55596b">pp=48 · d=12 通用 Horner kernel</text>
+      <text x="398" y="116" font-size="10.5" text-anchor="middle" fill="#55596b">Merkle 驗證 ＋ Delta 管線 ＋ 門檻比較</text>
+      <text x="398" y="131" font-size="10.5" text-anchor="middle" fill="#55596b">95 advice 欄 · 91 lookups · gate deg 6</text>
+      <text x="398" y="147" font-size="10" text-anchor="middle" fill="#8b94a3">prove：N=8/32/128 → 4.7/26.7/109 s</text>
+      <!-- proof -->
+      <line x1="504" y1="108" x2="574" y2="108" stroke="#55596b" stroke-width="1.8" marker-end="url(#bp-arr)"/>
+      <rect x="578" y="83" width="128" height="50" rx="10" fill="rgba(22,163,74,.08)" stroke="#16a34a" stroke-width="2"/>
+      <text x="642" y="104" font-size="12.5" text-anchor="middle" fill="#15803d" font-weight="900">proof 34,368 B</text>
+      <text x="642" y="120" font-size="10" text-anchor="middle" fill="#55596b">N=8 或 128 都一樣大</text>
+      <!-- verifier -->
+      <line x1="706" y1="108" x2="776" y2="108" stroke="#55596b" stroke-width="1.8" marker-end="url(#bp-arr)"/>
+      <rect x="780" y="52" width="152" height="112" rx="10" fill="var(--surface)" stroke="#d9dce3" stroke-width="1.6"/>
+      <text x="856" y="73" font-size="12.5" text-anchor="middle" fill="#1a1a1f" font-weight="800">監管 ／ LP</text>
+      <text x="856" y="90" font-size="10.5" text-anchor="middle" fill="#55596b">verify ≈10 ms</text>
+      <text x="856" y="106" font-size="10.5" text-anchor="middle" fill="#55596b">對 4 個公開輸入核對</text>
+      <text x="856" y="126" font-size="12" text-anchor="middle" fill="#15803d" font-weight="900">看到的只有：合規 ✓</text>
+      <text x="856" y="143" font-size="9.5" text-anchor="middle" fill="#8b94a3">部位、Delta、任何明細：看不到</text>
+      <!-- public inputs strip -->
+      <rect x="292" y="185" width="414" height="34" rx="8" fill="rgba(217,119,6,.07)" stroke="#d97706" stroke-width="1.4" stroke-dasharray="4 3"/>
+      <text x="499" y="200" font-size="10.5" text-anchor="middle" fill="#92400e" font-weight="800">公開輸入只有 4 個：state_root · market_data_root · threshold（τ·NAV） · today</text>
+      <text x="499" y="213" font-size="9.5" text-anchor="middle" fill="#92400e">threshold＝監管拿行政管理人認證的 NAV，在電路外算好傳入</text>
+      <line x1="499" y1="185" x2="450" y2="158" stroke="#d97706" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <line x1="706" y1="202" x2="800" y2="168" stroke="#d97706" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#bp-arr)"/>
+    </svg>
+    <figcaption>本報告自製 · 數字：scenario_a_full benches/pf1_results.md（2026-07-08b 定版）、HANDOFF.md（公開輸入＝4，portfolio.rs:2206）</figcaption>
+  </figure>
+  <div class="grid-2" style="margin-top:.4rem">
+    <div class="card amber"><h3>誠實三註（藍圖不是童話）</h3>
+      <ul style="font-size:.88rem">
+        <li><b>信任錨</b>：market_data_root 是 Poseidon 雜湊，LP <b>無法自行從公開數據重算</b> —— 實務錨是基金行政管理人（認證 NAV＋提供 root 重算工具；協議文件明載，不藏）。</li>
+        <li><b>單一 prover 的 demo</b>：多方金鑰管理、正式 SRS 儀式、營運監控未做。</li>
+        <li><b>法律接受度</b>：「ZK proof 算不算合規證據」在論文範圍外。</li>
+      </ul>
+    </div>
+    <div class="soulbox"><span class="tag">🎯 所以呢</span>：R1–R5 在這張圖上全部兌現 —— 部位不出門（R1）、誤差有界（R2）、10 ms 輕驗證（R3）、換模型只換係數（R4）、夜批跑得完（R5）。<b>這張藍圖的每一個零件，都是一個被逼出來的選擇 —— 接下來一張一張拆。</b>第一個零件：最底層的證明系統平台。</div>
+  </div>
+</section>
+
 <!-- ===== 2.5 · CORE TOOLS (why Halo2 + KZG) ===== -->
 <section class="slide" data-part="" data-label="核心工具">
   <div class="slide-meta"><span class="part-label">取捨 1 · 底層工具</span> · 為什麼不用更快的 Groth16<span class="rref">↩ R4 · R3</span></div>
@@ -875,7 +936,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   const NOTES = {
 '為什麼難':"上一張選了 ZK,這張講為什麼這件事難 —— 牆有三層。\n第一層:要算的東西全是超越函數。看 Delta 的公式:d1 要先算 ln(S/K)、除以 σ 乘根號 T,再把 d1 丟進常態機率 Φ,而 Φ 的核心是 erf;貼現還要一個 exp。Merton 的違約機率一樣,ln 跟 erf 一個都跑不掉。所以合規數學不是「碰巧用到」超越函數,它就是用超越函數寫成的。\n第二層:電路的世界裡只有一個 254 位質數體的保險箱,裡面只有整數的加法跟乘法。沒有浮點、沒有小數點、沒有 if/else、沒有長度隨資料變的迴圈 —— 連除法跟開根號都不存在。每一個實數運算,都得用整數加乘一磚一瓦重新蓋出來。\n第三層最容易被忽略:算的人正是利害關係人 —— prover 是被監管的基金自己。「大致對」在門檻邊界一文不值:差最後一位的一格,合規跟違規就翻盤,論文裡信用合規差兩個基點就能翻判定。所以誤差要的是可以證明的上界,不是測幾個點看起來不錯。\n三層牆疊起來:要重建超越函數、只有整數加乘當磚頭、蓋出來還得帶數學保證。下一張把「能用」的五個硬條件寫死。",
 '條件限制':"牆看清楚了,現在把「拆牆成功」的標準寫死 —— 五個硬條件,每條都有量尺,過不了任何一條就不能上線。\nR1,零部位揭露:部位、數量、每筆 Delta 永遠不離開基金;驗證者只看到 Merkle 承諾跟判定。量尺很具體:整個系統的公開輸入只有 4 個。\nR2,誤差要有可證明的上界:不是測起來準,是解析上界加實測雙保證 —— 出貨 kernel 實測 2.81 個 ULP、端到端 7 個,而 1 個 ULP 只有 2 的負 48 次方。\nR3,第三方輕驗證:proof 常數大小、毫秒級驗證,曲線還要上鏈友善 —— BN254 是以太坊內建的 precompile。\nR4,模型會演化:金融模型的函數跟係數會改版,改版不能重辦可信設定、不能重設計電路 —— 換函數只能是換係數這種等級的動作。\nR5,工程可行:夜批要跑得完,prove 分鐘級、verify 毫秒級。\n右邊那欄是預告:每一條後面站著哪個設計決定。這張表是整份報告的地圖 —— 從現在起,每個「為什麼選 X」都是在答 R 幾。條件湊齊時終點長什麼樣?下一張給你藍圖。",
-'核心工具':"在講我們怎麼算函數之前,先回答一個老師一定會問的上游問題:Groth16 的 proof 最小、驗證最快,你們為什麼不用最快的?\n我的答案是:快不等於合用。論文裡寫了四個理由。\n第一,通用設定。Groth16 每換一個電路就要重辦一次可信設定;我們的金融模型會更新,等於每次更新都要重辦儀式,根本不可行。Halo2 用的 KZG 是通用、可更新的 SRS,做一次、所有電路共用。\n第二,表達力,這是最關鍵的。我們的 kernel 需要自訂閘 —— 逐步 Horner 加截斷;還有原生查表 —— ByteTable 範圍檢查。Groth16 的 R1CS 只有 degree-2 乘法、沒有原生 lookup,要做我們這套 kernel 得拆成一大堆約束,又貴又笨。PLONKish 兩樣都給,出貨電路 🅟 是 91 個 lookup 參數加 degree-6 的閘,PLONKish 最省。所以 Groth16 再快,表達不了我們的電路就等於沒用。\n第三,proof 跟驗證夠用就好。我們 proof 數 KB、驗證數毫秒,而且不隨投資組合大小變。STARK 雖然免設定又抗量子,但 proof 偏大,小型 portfolio 反而吃虧。\n第四,工程成熟度。halo2_proofs v0.3.0 已經穩定;Jolt 這些新工具還在快速演化、API 常動,金融應用需要長期穩定。\n四個綜合下來,Halo2 加 KZG 最匹配,代價就是那一次性的可信設定。\n再補一句承諾方案:Halo2 原版用的是 IPA,免設定但驗證線性、proof 是 O(log n);我們的 PSE 版換成 KZG,proof 常數、配對驗證快、BN254 又是以太坊內建 —— 這層也是為了輕驗證。\n平台選定了,真正的難題才開始 —— 在這個底層上,超越函數到底怎麼算?下一張就看兩條直覺的路怎麼死。",
+'藍圖':"條件寫死了,先看終點 —— 這張圖就是每天晚上真實發生的事。\n左邊兩個輸入:基金的部位,私有 witness,N 從 8 到 128 筆,永遠不離開基金,只用 state_root 這個承諾示人;市場資料表,公開的,股價、利率、結算價、波動率,九個欄位一片葉子,壓成 market_data_root。\n中間是 PF1 電路:pp=48、d=12 的通用 Horner kernel,加上 Merkle 驗證、Delta 管線、門檻比較 —— 95 個 advice 欄、91 個 lookup。每晚跑一次,N=128 也就 109 秒。\n出來的是一張 34,368 bytes 的 proof —— 8 筆跟 128 筆部位,proof 一樣大。監管跟 LP 拿它對 4 個公開輸入驗證,10 毫秒驗完;看到的只有「合規,通過」,部位、Delta、任何明細都看不到。\n三句誠實的話。第一,market_data_root 是個雜湊,LP 自己重算不了 —— 實務上的信任錨是基金行政管理人:認證 NAV、提供重算工具,這寫在協議文件裡,不藏。第二,這是單一 prover 的 demo,金鑰管理跟正式 SRS 儀式沒做。第三,法律上 ZK proof 算不算合規證據,在論文範圍外。\n這張藍圖的每一個零件,都是一個被逼出來的選擇 —— 接下來一張一張拆。",
+'核心工具':"藍圖攤開了,第一個要拆的零件是最底層的平台 —— 證明系統跟承諾方案。老師一定會問:Groth16 的 proof 最小、驗證最快,你們為什麼不用最快的?\n我的答案是:快不等於合用。論文裡寫了四個理由。\n第一,通用設定。Groth16 每換一個電路就要重辦一次可信設定;我們的金融模型會更新,等於每次更新都要重辦儀式,根本不可行。Halo2 用的 KZG 是通用、可更新的 SRS,做一次、所有電路共用。\n第二,表達力,這是最關鍵的。我們的 kernel 需要自訂閘 —— 逐步 Horner 加截斷;還有原生查表 —— ByteTable 範圍檢查。Groth16 的 R1CS 只有 degree-2 乘法、沒有原生 lookup,要做我們這套 kernel 得拆成一大堆約束,又貴又笨。PLONKish 兩樣都給,出貨電路 🅟 是 91 個 lookup 參數加 degree-6 的閘,PLONKish 最省。所以 Groth16 再快,表達不了我們的電路就等於沒用。\n第三,proof 跟驗證夠用就好。我們 proof 數 KB、驗證數毫秒,而且不隨投資組合大小變。STARK 雖然免設定又抗量子,但 proof 偏大,小型 portfolio 反而吃虧。\n第四,工程成熟度。halo2_proofs v0.3.0 已經穩定;Jolt 這些新工具還在快速演化、API 常動,金融應用需要長期穩定。\n四個綜合下來,Halo2 加 KZG 最匹配,代價就是那一次性的可信設定。\n再補一句承諾方案:Halo2 原版用的是 IPA,免設定但驗證線性、proof 是 O(log n);我們的 PSE 版換成 KZG,proof 常數、配對驗證快、BN254 又是以太坊內建 —— 這層也是為了輕驗證。\n平台選定了,真正的難題才開始 —— 在這個底層上,超越函數到底怎麼算?下一張就看兩條直覺的路怎麼死。",
 '封面':"大家好。\n這份報告只講一件事:我們論文裡的每一個技術決定,背後的取捨是什麼。\n所以它不是教學、不是教你怎麼一步步做;是把每個選擇攤開來說清楚 —— 為什麼選這條、別的路為什麼走不通、換到了什麼、又付出什麼代價。\n這一版還多了一個規矩:報告裡每一個數字都掛徽章 —— 🅔 是低精度的實驗場、🅒 是 Merton 信用情境、🅟 是實際出貨的管線。三個配置的數字以前混著講,聽的人會亂;現在每個數字都能對回它的出身,不同基準的成績不互相背書。\n整份的走法是:先把問題立起來、摸到那道牆有多硬、定出五個硬條件、看到終點的藍圖 —— 然後才開始一個零件一個零件拆取捨。\n我會一張一張、一步一步把 why 講明白。我們開始。",
 '要解的問題':"先講一個具體的故事。一家對沖基金,每天晚上要向監管跟投資人證明兩件事:整個投資組合的 Delta 曝險沒有超過門檻、組合的違約機率沒有超過監管上限。麻煩在哪?傳統做法是把部位明細攤開給對方看 —— 但部位就是策略本身,攤開等於把多年的交易策略送人。\n那有哪些路?第一,全揭露,直接洩漏策略。第二,信任審計師:季審等級的速度、靠制度不靠數學,「每晚查一次」根本做不到。第三,TEE,把計算搬進晶片的保險飛地 —— 但信任只是從基金搬給晶片廠,而且旁路攻擊的前科不少。第四,MPC,多方一起算 —— 但每查一次,所有參與方都得在線多輪互動,夜批做不起來。剩下 ZK:證明「我算對了」,但不給你看輸入 —— 一方算、多方隨時驗、不交資料,形狀正好對上。\n先把誠實的話說在前面:ZK 不是什麼都不用信。部位藏住了,但市場資料的真實性還是需要一個現實世界的錨,我們把它收斂到 LP 本來就信任的基金行政管理人,藍圖那張會講清楚。\n那把金融模型搬進 ZK 電路到底有多難?下一張帶你摸那道牆。",
 '兩條死路':"那為什麼不能把超越函數直接放進去?直覺只有兩條路,我帶你看為什麼兩條都死。\n先補兩個詞:pp 是定點精度 —— 小數保留幾個二進位位,像用「分」記帳不用「元」;degree d 是多項式的最高次方,也是求值的步數。\n第一條,查表:把每個可能的輸入預先算好、存成一張表。輸入有 2 的 pp 次方種,表就要那麼多格。低精度還行,pp=16 大概六萬格;但金融要 pp=24、32,表就爆成一千六百多萬、四十三億格,而且每個函數一張 —— 任何電路都裝不下。\n第二條,多項式逼近:用一條低次多項式近似,再用 Horner 求值 —— 就是「乘 x、加下一個係數」一路捲下來。這條可行,但有兩個坑。坑 A:Taylor 在定點量化下崩潰,pp=32、d=10 時 ln 只剩 4.4 個有效位、約一位十進位;換成 Minimax 有 28.6 位。坑 B:中間值不截斷會膨脹 —— 每乘一步數字變長 pp 位,到第 d+1 步就是 S 的 d+1 次方,pp=32、d=10 是 2 的 352 次方,塞不進 BN254 這個 254 位的保險箱;出貨的 pp=48、d=12 更要 2 的 624 次方。\n所以可行的只剩多項式,但要先解掉 Taylor 崩潰跟保險箱裝不下這兩個坑 —— 接下來四個設計決定就是在回答這兩個坑。",
@@ -958,6 +1020,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 "FHE":"全同態加密；2021 年起已用 minimax 多項式逼近，故該技巧非 ZK 獨有、非我們發明。",
 "Scenario A":"Black–Scholes Delta 對沖情境，pp=24：端到端 Delta 1 ULP、比查表快 26.3×。",
 "Scenario C":"Merton 信用違約情境，pp=32：28.6–29.0 有效位、proof≈15,360 B、verify≈33 ms。",
+"PF1 (投組證明電路)":"Scenario A 完整版的出貨電路：整個投組的美元 Delta 合規壓成一張 proof；pp=48、d=12、95 advice 欄、91 lookups，proof 34,368 B（任何 N）、verify ≈10 ms。",
 "誤差預算 (error budget)":"把總誤差拆給逼近/量化/截斷各部分、形式化界定上限；本論文配窮舉驗證。",
 "窮舉驗證":"對定點輸入空間逐一檢查實際誤差是否在界內，補上形式化誤差界的實證。",
 "Black–Scholes Delta":"選擇權對標的價格的一階敏感度，用常態 CDF Φ 計算；Scenario A 要證它在限額內。",
@@ -1002,6 +1065,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '要解的問題':["金融法遵 (compliance)","Delta 曝險","Black–Scholes","Merton 模型","零知識證明 (ZK)","審計 (audit)","TEE (可信執行環境)","MPC (多方安全計算)","信任錨 (基金行政管理人)"],
 '為什麼難':["超越函數","exp / ln / erf","常態 CDF Φ","erf (誤差函數)","d₁ / d₂ (BS 中間量)","Black–Scholes Delta","Merton 模型","有限體 (𝔽ᵣ)","浮點","BN254","ULP"],
 '條件限制':["公開輸入 (public inputs)","Merkle 承諾","零知識證明 (ZK)","ULP","Minimax / Remez","誤差預算 (error budget)","窮舉驗證","KZG 承諾","BN254","可信設定 (trusted setup)","通用 Horner kernel","fixed 欄","ByteTable","逐步截斷 (per-step)","proof (證明 π)","verify (驗證)"],
+'藍圖':["PF1 (投組證明電路)","公開輸入 (public inputs)","Merkle 承諾","信任錨 (基金行政管理人)","proof (證明 π)","verify (驗證)","KZG 承諾","定點 pp=48","通用 Horner kernel","Black–Scholes Delta"],
 '核心工具':["PLONKish","自訂閘 (custom gate)","查表 (lookup)","Groth16 / R1CS","KZG 承諾","IPA (內積論證)","FRI / STARK","可信設定 (trusted setup)","BN254","通用 Horner kernel","ByteTable"],
 '兩條死路':["查表 (lookup)","pp (定點精度)","Taylor 展開","Minimax / Remez","有效位 (有效數字)","Horner 法","中間值膨脹","溢位 (overflow)","BN254","尺度 S=2^pp","逐步截斷 (per-step)"],
 '四個設計決定':["定點 pp=48","浮點","Minimax / Remez","Taylor 展開","ULP","逐步截斷 (per-step)","延遲截斷 (deferred)","溢位 (overflow)","通用 Horner kernel","ByteTable","fixed 欄","proof (證明 π)","verify (驗證)"],
@@ -1036,6 +1100,11 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
  ["R1–R5 是誰定的？會不會是先做出系統再倒推需求？","方向不是倒推的：R1、R2 直接來自問題本身（不洩漏部位＋門檻是懸崖），R3、R5 來自合規的使用形狀（多方隨時驗、夜批要跑得完），R4 來自金融模型會改版的現實。誠實說，量尺上的『具體數字』（2.81 ULP、34,368 B、109 s）是系統做出來之後量的 —— 條件定方向，數字是驗收成績，不是先射箭再畫靶。"],
  ["五個條件會不會互相打架？","會，而且整份報告就在講怎麼打：R2 要精度、R5 要中間值不爆 —— per-step 犧牲精度換可行、再用 degree 贖回；R4 要通用、R3 要小 proof —— 分段（erf 12 段）就讓 proof 變大。後面每一張取捨，都是這張表裡兩個條件在拔河。"],
  ["為什麼沒有『抗量子』這種條件？","誠實承認：BN254/KZG 不抗量子，這是 R3（上鏈友善＋輕驗證）換來的取捨。合規證明的時效是天級（每晚重發），不是要保密三十年的檔案，量子威脅的時間輪廓不同 —— 但若監管要求後量子，得換 STARK 路線並吞下大 proof 的代價。"]
+],
+'藍圖':[
+ ["監管憑什麼信市場資料？","market_data_root 承諾的是公開市場數據，但 root 本身是 Poseidon 雜湊 —— LP 沒辦法自己從公開數據重算。協議把信任收斂到基金行政管理人：認證 NAV（監管據此在電路外算門檻 τ·NAV）、提供 root 重算工具讓 LP 核對。誠實說：這是一個現實世界的信任假設，ZK 沒有消掉它，只是收斂到 LP 本來就信任的既有角色、不引入新的信任方。"],
+ ["藍圖離真的上線還差什麼？","誠實列三件：① 這是單一 prover 的 demo 系統 —— 多方金鑰管理、正式 SRS 儀式（目前 per-run fresh、非 ceremony 級）、營運監控都沒做；② 市場資料的信任錨是行政管理人，不是密碼學保證 —— LP 無法獨立驗證市場資料；③ 法律與監管接受度（ZK proof 算不算合規證據）完全在論文範圍外。電路與數字是真的，產品化是另一段路。"],
+ ["為什麼 proof 大小跟 N 完全無關？","KZG/SHPLONK 的 proof 由 column 結構決定、不由行數決定；N 變大只是行數變多（k 從 13 到 18），column schema 不動，所以 proof 一格不變 —— N=8 跟 N=128 都是 34,368 bytes、verify 都約 10 ms。這正是 R3『第三方輕驗證』選 KZG 的原因。"]
 ],
 '核心工具':[
  ["可信設定不是缺點嗎？為什麼還選 KZG？","是缺點，但可控：用『通用可更新』的 setup —— 做一次、所有電路共用，儀式裡只要一個人誠實銷毀秘密就安全。換來的是 proof 常數大小＋配對驗證便宜＋上鏈友善。免設定的代價（IPA 線性驗證、FRI 大 proof）對需要輕量、可重複驗證的合規反而更不利，所以這個取捨划算。"],
