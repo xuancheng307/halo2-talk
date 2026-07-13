@@ -411,21 +411,51 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <!-- ===== CORE KERNEL (how we evaluate + honest truncation) ===== -->
 <section class="slide" data-part="" data-label="核心 kernel">
   <div class="slide-meta"><span class="part-label">核心電路</span> · 怎麼算、又怎麼保證沒亂算</div>
-  <h2>核心 kernel：逐步 <span class="accent">Horner ＋ 誠實截斷</span></h2>
-  <div class="whybox"><span class="tag">❓ 核心公式</span>：選了定點 + Minimax 之後，電路裡<b>到底怎麼把多項式算出來</b>、又<b>怎麼保證 prover 沒亂填</b>？這頁是整個 kernel 的核心。</div>
+  <h2>出貨 kernel <span class="rg rg-p">🅟</span>：<span class="accent">逐步 Horner ＋ 每步誠實截斷</span></h2>
+  <div class="whybox"><span class="tag">❓ 核心公式</span>：選了定點 + Minimax 之後，電路裡<b>到底怎麼把多項式算出來</b>、又<b>怎麼保證 prover 沒亂填</b>？這頁講的是<b>實際出貨的 per-step kernel</b>（scenario_a_full/src/kernel.rs）；🅔 的延遲截斷變體放在「免費空間」那張。</div>
   <div class="grid-2">
-    <div class="card"><h3>① 怎麼算：pre-scaled 逐步 Horner</h3>
-      <p>係數先<b>非均勻預縮放</b> \( D_i=\lfloor c_i\, S^{\,d+1-i}\rceil \)（\(S{=}2^{pp}\)），再逐步遞推：</p>
-      <div class="fbox" style="margin:.3rem 0"><div class="cmt">\[ H_d=D_d,\quad H_k=D_k+R\,H_{k+1},\quad w=\tfrac{R\,H_1}{S^{\,d}} \]</div></div>
-      <p class="muted" style="font-size:.9rem">預縮放讓每次 ×R <b>自然進位一個 S</b> → 中間不用重縮放，最後除一次 \(S^{d}\)。</p>
+    <div class="card"><h3>① 怎麼算：per-step Horner，每步除回去</h3>
+      <p>每一步乘完 \(R\)、加上係數，<b>立刻</b>除以 \(S{=}2^{pp}\) 取整：</p>
+      <div class="fbox" style="margin:.3rem 0"><div class="cmt">\[ \mathrm{acc}_{i+1}=\Big\lfloor \tfrac{\mathrm{acc}_i\cdot R + c_i}{S} \Big\rfloor \]</div></div>
+      <p class="muted" style="font-size:.9rem">係數存成 <b>addends 格式</b>（\(c_i\) 放在 \(S^2\) 尺度），<b>不是</b>延遲版的整條預縮放 \(D_i=c_i S^{d+1-i}\)。因為每步清尺度，中間值恆 \(\approx 2\cdot pp\) bit（pp=48 → 96 bit）—— <b>d 加多大都不會溢位</b>。</p>
     </div>
-    <div class="card"><h3>② 怎麼保證：截斷靠閘 + 查表</h3>
-      <p>電路算不了「除法取整」⌊·⌋。改讓 prover 填商 \(H\) 與餘數 rem，閘<b>鎖死</b>：</p>
-      <div class="fbox" style="margin:.3rem 0"><div class="cmt">\[ D_k+R\,H_{k+1}=H_k\, S+\mathrm{rem},\quad \mathrm{rem}\in[0,S) \]</div></div>
-      <p class="muted" style="font-size:.9rem">rem 拆 byte、用 <b>ByteTable</b> 查 0–255 → 餘數落在範圍 ⟺ <b>誠實做了除法</b>，亂填會被抓。</p>
+    <div class="card"><h3>② 怎麼保證：每步一條閘 + byte 查表</h3>
+      <p>電路算不了 ⌊·⌋。讓 prover 填商 \(\mathrm{acc}_{i+1}\) 與餘數 rem，閘<b>鎖死</b>：</p>
+      <div class="fbox" style="margin:.3rem 0"><div class="cmt">\[ \mathrm{acc}_i R + c_i = \mathrm{acc}_{i+1} S + \mathrm{rem},\ \ \mathrm{rem}\in[0,S) \]</div></div>
+      <p class="muted" style="font-size:.9rem">rem 拆 <b>6 個 byte</b>（\(S=2^{48}=256^6\)）、逐一查同一張 <b>256 條目 ByteTable</b> → 餘數在範圍 ⟺ <b>誠實做了除法</b>。</p>
     </div>
   </div>
-  <div class="soulbox" style="margin-top:.45rem"><span class="tag">🎯 一句</span>：用預縮放係數 + 逐步 Horner 把多項式算出來；每次截斷都用「<b>商×S＋餘數</b>」的閘 ＋ ByteTable 鎖住餘數 —— <b>算得對、也沒有亂算的空間</b>。</div>
+  <div class="ideabox" style="margin-top:.45rem"><span class="tag">💡 帳單 <span class="rg rg-p">🅟</span></span>：每次 kernel 呼叫（d=12）＝ <b>3 種 gate</b>（horner_per_step／R 拆 byte／W 拆 byte）、<b>14 rows</b>（d+2）、<b>84 個 byte-lookup</b>（(d+2)×6）—— 全部查<b>同一張</b> 256 表。<span class="muted">（出處：kernel.rs 檔頭與 gate 定義）</span></div>
+  <div class="soulbox" style="margin-top:.35rem"><span class="tag">🎯 一句</span>：每一步都用「<b>商×S＋餘數</b>」的閘＋ByteTable 鎖死 —— <b>算得對、也沒有亂算的空間</b>。空口說無憑，下一張拿實際數字算一步給你看。</div>
+</section>
+
+<!-- ===== WORKED EXAMPLE (one real Horner step at toy scale) ===== -->
+<section class="slide" data-part="" data-label="算一步">
+  <div class="slide-meta"><span class="part-label">核心電路</span> · 一步算給你看（含作弊示範）</div>
+  <h2>算一步給你看：<span class="accent">誠實過關、作弊被抓</span></h2>
+  <div class="whybox"><span class="tag">❓ 為什麼要這張</span>：「閘鎖死截斷」聽起來抽象。用玩具尺度 <b>pp=8（S=256）</b>把一個 Horner step 完整算一遍 —— 同樣的邏輯在出貨版只是換成 S=2⁴⁸、rem 拆 6 bytes。</div>
+  <div class="grid-2">
+    <div class="card green"><h3>誠實的 prover</h3>
+      <ol class="steps" style="font-size:.95rem">
+        <li>見證值：\(\mathrm{acc}=100\)（≈0.3906）、\(R=181\)（≈0.7070）、係數 \(c=20{,}000\)（\(S^2{=}65{,}536\) 尺度，≈0.3052）。</li>
+        <li>算 \( \mathrm{acc}\cdot R + c = 18{,}100 + 20{,}000 = 38{,}100 \)。</li>
+        <li>除以 \(S{=}256\)：商 \(\mathrm{acc}_{\mathrm{next}}=\lfloor 38{,}100/256\rfloor=148\)，餘 \(\mathrm{rem}=38{,}100-148\cdot256=212\)。</li>
+        <li>閘檢查：\(148\cdot 256 + 212 = 38{,}100\) ✓；\(\mathrm{rem}=212\) 是一個 byte → ByteTable 查到 ✓。</li>
+      </ol>
+      <p class="muted" style="font-size:.88rem;margin-top:.3rem">真值 38,100/256 = 148.828…，floor 掉 0.828 —— 這就是「每步 &lt;1 ULP」的 floor 誤差。</p>
+    </div>
+    <div>
+      <div class="card red"><h3>作弊的 prover：想多報 1</h3>
+        <ol class="steps" style="font-size:.95rem">
+          <li>他填 \(\mathrm{acc}_{\mathrm{next}}=149\)（想讓結果大一點）。</li>
+          <li>閘逼出 \(\mathrm{rem}=38{,}100-149\cdot 256=-44\)。</li>
+          <li>有限體裡沒有負數：\(-44\) wrap 成 \(q-44\)（約 \(2^{254}\) 的巨數）。</li>
+          <li>巨數<b>拆不成 byte</b> → ByteTable 查不到 → 證明<b>確定性失敗</b>。</li>
+        </ol>
+      </div>
+      <div class="soulbox" style="margin-top:.5rem"><span class="tag">🎯 一句</span>：作弊不是「機率上難」，是<b>湊不出合法的 byte 分解</b>。負數在體裡自動變巨數，正是我們的守門員。<span class="muted">（witness 端用 div_euclid／rem_euclid，保證 rem 永遠非負 —— kernel.rs）</span></div>
+    </div>
+  </div>
 </section>
 
 <!-- ===== ExplicitRC (input soundness) ===== -->
