@@ -246,6 +246,9 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .tour-btn:hover{border-color:var(--accent);color:var(--accent)}
 @media(max-width:1180px){.flowrail{display:none!important}.slide.rail{padding-right:5rem}}
 @media(max-width:820px){.slide.rail{padding-right:1.6rem}}
+/* requirement back-reference tag (↩ R1–R5) */
+.rref{display:inline-block;font-size:.66rem;font-weight:800;padding:.02rem .38rem;border-radius:6px;
+  background:rgba(124,58,237,.09);color:#5b21b6;border:1px solid rgba(124,58,237,.3);margin-left:.45rem;vertical-align:.06em;text-transform:none;letter-spacing:0}
 /* formula boxes */
 .fbox{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:.55rem .9rem;margin:.5rem 0}
 .fbox .lbl{font-size:.82rem;font-weight:700;color:var(--accent-light);margin-bottom:.1rem}
@@ -349,9 +352,25 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="soulbox"><span class="tag">🎯 所以呢</span>：牆①逼你重建超越函數、牆②只給你整數加乘當磚頭、牆③要求蓋出來的東西<b>帶數學保證</b>。光「能算」不夠 —— 下一張把「能用」的五個硬條件一條一條寫死。</div>
 </section>
 
+<!-- ===== 2.3 · REQUIREMENTS R1-R5 (序章 3/4) ===== -->
+<section class="slide" data-part="" data-label="條件限制">
+  <div class="slide-meta"><span class="part-label">序章 3/4 · 條件</span> · 「能用」的五個硬條件</div>
+  <h2>五個硬條件 <span class="accent">R1–R5</span> —— 過不了任何一條，就不能上線</h2>
+  <div class="whybox"><span class="tag">❓ 走到這裡的問題</span>：牆看清楚了，那「拆牆成功」的標準是什麼？把金融合規的需求寫成<b>五條可量測的硬條件</b> —— 這張表是整份報告的地圖：後面每個「為什麼選 X」，都在回答其中一個編號。</div>
+  <table style="font-size:.88rem">
+    <tr><th style="width:16%">條件</th><th>一句話 ＋ 量尺（過線標準）</th><th style="width:33%">由哪個設計決定回答</th></tr>
+    <tr><td><b>R1 零部位揭露</b></td><td>部位、數量、每筆 Delta <b>永不離開基金</b>；驗證者只看到承諾（Merkle root）＋判定。<span class="muted">量尺：公開輸入僅 4 個。</span></td><td>ZK witness ＋ Merkle 承諾（state_root／market_data_root）</td></tr>
+    <tr><td><b>R2 誤差有可證上界</b></td><td>解析上界＋實測<b>雙保證</b>，在金融精度下成立。<span class="muted">量尺：🅟 kernel 2.81 ULP、端到端 7 ULP（1 ULP=2⁻⁴⁸）。</span></td><td>Minimax ＋ 誤差預算三源上界 ＋ 窮舉（低 pp）／實測（高 pp）</td></tr>
+    <tr><td><b>R3 第三方輕驗證</b></td><td>proof 常數大小、毫秒級驗證；曲線要<b>上鏈友善</b>。<span class="muted">量尺：34,368 B 全 N、verify ≈10 ms、BN254＝以太坊 precompile。</span></td><td>KZG／SHPLONK 承諾 on BN254</td></tr>
+    <tr><td><b>R4 模型會演化</b></td><td>函數／係數改版<b>不重辦 setup、不重設計電路</b>。<span class="muted">量尺：換函數＝只換 fixed 欄 d 個係數。</span></td><td>Halo2 通用 SRS ＋ 通用 Horner kernel ＋ 一張 ByteTable</td></tr>
+    <tr><td><b>R5 工程可行</b></td><td>夜批跑得完：<b>prove 分鐘級、verify 毫秒級</b>。<span class="muted">量尺：🅟 N=8/32/128 prove 4.7/26.7/109 s、verify ≈10 ms。</span></td><td>per-step 截斷（中間值恆 ≈96 bit）＋ KZG O(1) verify</td></tr>
+  </table>
+  <div class="soulbox"><span class="tag">🎯 所以呢</span>：條件寫死了，接下來的每一個技術決定都<b>不再是品味，是答題</b>。先看把 R1–R5 全部湊齊時，終點長什麼樣 —— 下一張給你藍圖。</div>
+</section>
+
 <!-- ===== 2.5 · CORE TOOLS (why Halo2 + KZG) ===== -->
 <section class="slide" data-part="" data-label="核心工具">
-  <div class="slide-meta"><span class="part-label">取捨 1 · 底層工具</span> · 為什麼不用更快的 Groth16</div>
+  <div class="slide-meta"><span class="part-label">取捨 1 · 底層工具</span> · 為什麼不用更快的 Groth16<span class="rref">↩ R4 · R3</span></div>
   <h2>為什麼不用<span class="accent">最快最小</span>的 Groth16？</h2>
   <div class="whybox"><span class="tag">❓ 直覺會問</span>：Groth16 proof 最小（3 群元素）、驗證最快 —— 那為什麼不用它？因為<b>「快」不等於「合用」</b>。論文裡寫了四個理由。<span class="muted">（名詞速記：proof＝算完後交出的一小份「可公開查驗的收據」；verify＝任何人幾毫秒核對這張收據；lookup＝「證明某個值出現在一張公開表裡」的約束。）</span></div>
   <table style="font-size:.9rem">
@@ -392,7 +411,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 4 · FOUR DECISIONS ===== -->
 <section class="slide" data-part="" data-label="四個設計決定">
-  <div class="slide-meta"><span class="part-label">取捨 3</span> · 全部攤在一張表</div>
+  <div class="slide-meta"><span class="part-label">取捨 3</span> · 全部攤在一張表<span class="rref">↩ R1–R5</span></div>
   <h2>四個設計決定 —— <span class="accent">選了什麼、別的為什麼不行</span></h2>
   <table style="font-size:.92rem">
     <tr><th style="width:20%">設計決定</th><th>為什麼選這個 · 別的為什麼不行</th><th style="width:24%">換到的效果</th></tr>
@@ -431,7 +450,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== CORE KERNEL (how we evaluate + honest truncation) ===== -->
 <section class="slide" data-part="" data-label="核心 kernel">
-  <div class="slide-meta"><span class="part-label">核心電路</span> · 怎麼算、又怎麼保證沒亂算</div>
+  <div class="slide-meta"><span class="part-label">核心電路</span> · 怎麼算、又怎麼保證沒亂算<span class="rref">↩ R5 · R4</span></div>
   <h2>出貨 kernel <span class="rg rg-p">🅟</span>：<span class="accent">逐步 Horner ＋ 每步誠實截斷</span></h2>
   <div class="whybox"><span class="tag">❓ 核心公式</span>：選了定點 + Minimax 之後，電路裡<b>到底怎麼把多項式算出來</b>、又<b>怎麼保證 prover 沒亂填</b>？這頁講的是<b>實際出貨的 per-step kernel</b>（scenario_a_full/src/kernel.rs）；🅔 的延遲截斷變體放在「免費空間」那張。</div>
   <div class="grid-2">
@@ -536,7 +555,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== REGIME MAP (pp × d plane, real operating points) ===== -->
 <section class="slide" data-part="" data-label="換道地圖">
-  <div class="slide-meta"><span class="part-label">取捨 3 · 拆決定 ③</span> · 一張圖看懂兩個 regime</div>
+  <div class="slide-meta"><span class="part-label">取捨 3 · 拆決定 ③</span> · 一張圖看懂兩個 regime<span class="rref">↩ R5</span></div>
   <h2>換道地圖：<span class="accent">(d+1)·pp = 254 這條線</span></h2>
   <div class="grid-2">
     <figure style="margin:.1rem 0 0">
@@ -648,7 +667,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== ERROR BUDGET (the precision guarantee) ===== -->
 <section class="slide" data-part="" data-label="誤差預算">
-  <div class="slide-meta"><span class="part-label">誤差保證</span> · 為什麼結果可信</div>
+  <div class="slide-meta"><span class="part-label">誤差保證</span> · 為什麼結果可信<span class="rref">↩ R2</span></div>
   <h2>誤差預算：精度<span class="accent">可信到一個明確的界</span></h2>
   <div class="whybox"><span class="tag">❓ 為什麼敢說「準」</span>：我們憑什麼說「準到 ULP=1」？不是測幾個點就喊 —— 是把總誤差<b>拆成三源、各給上界</b>，再用窮舉壓在界內。</div>
   <div class="soulbox"><span class="tag">🎯 核心公式</span>：\[ \mathrm{ULP}_{\mathrm{total}} \le \varepsilon_{\mathrm{approx}}+\varepsilon_{\mathrm{quant}}+\varepsilon_{\mathrm{trunc}} \]
@@ -752,7 +771,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== PROOF-SIZE LADDER ===== -->
 <section class="slide" data-part="" data-label="證明多大">
-  <div class="slide-meta"><span class="part-label">收尾 · 一把尺</span> · proof 從 736 B 到 34 KB</div>
+  <div class="slide-meta"><span class="part-label">收尾 · 一把尺</span> · proof 從 736 B 到 34 KB<span class="rref">↩ R3</span></div>
   <h2>證明到底多大？<span class="accent">一把尺、六個刻度</span></h2>
   <div class="whybox"><span class="tag">❓ 老師一定會問</span>：「你們的 proof 是 5KB 還是 34KB？」—— 都對。差別是<b>裡面裝了多少東西</b>。這把尺一次講清楚。</div>
   <div class="grid-2">
@@ -855,6 +874,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 (function(){
   const NOTES = {
 '為什麼難':"上一張選了 ZK,這張講為什麼這件事難 —— 牆有三層。\n第一層:要算的東西全是超越函數。看 Delta 的公式:d1 要先算 ln(S/K)、除以 σ 乘根號 T,再把 d1 丟進常態機率 Φ,而 Φ 的核心是 erf;貼現還要一個 exp。Merton 的違約機率一樣,ln 跟 erf 一個都跑不掉。所以合規數學不是「碰巧用到」超越函數,它就是用超越函數寫成的。\n第二層:電路的世界裡只有一個 254 位質數體的保險箱,裡面只有整數的加法跟乘法。沒有浮點、沒有小數點、沒有 if/else、沒有長度隨資料變的迴圈 —— 連除法跟開根號都不存在。每一個實數運算,都得用整數加乘一磚一瓦重新蓋出來。\n第三層最容易被忽略:算的人正是利害關係人 —— prover 是被監管的基金自己。「大致對」在門檻邊界一文不值:差最後一位的一格,合規跟違規就翻盤,論文裡信用合規差兩個基點就能翻判定。所以誤差要的是可以證明的上界,不是測幾個點看起來不錯。\n三層牆疊起來:要重建超越函數、只有整數加乘當磚頭、蓋出來還得帶數學保證。下一張把「能用」的五個硬條件寫死。",
+'條件限制':"牆看清楚了,現在把「拆牆成功」的標準寫死 —— 五個硬條件,每條都有量尺,過不了任何一條就不能上線。\nR1,零部位揭露:部位、數量、每筆 Delta 永遠不離開基金;驗證者只看到 Merkle 承諾跟判定。量尺很具體:整個系統的公開輸入只有 4 個。\nR2,誤差要有可證明的上界:不是測起來準,是解析上界加實測雙保證 —— 出貨 kernel 實測 2.81 個 ULP、端到端 7 個,而 1 個 ULP 只有 2 的負 48 次方。\nR3,第三方輕驗證:proof 常數大小、毫秒級驗證,曲線還要上鏈友善 —— BN254 是以太坊內建的 precompile。\nR4,模型會演化:金融模型的函數跟係數會改版,改版不能重辦可信設定、不能重設計電路 —— 換函數只能是換係數這種等級的動作。\nR5,工程可行:夜批要跑得完,prove 分鐘級、verify 毫秒級。\n右邊那欄是預告:每一條後面站著哪個設計決定。這張表是整份報告的地圖 —— 從現在起,每個「為什麼選 X」都是在答 R 幾。條件湊齊時終點長什麼樣?下一張給你藍圖。",
 '核心工具':"在講我們怎麼算函數之前,先回答一個老師一定會問的上游問題:Groth16 的 proof 最小、驗證最快,你們為什麼不用最快的?\n我的答案是:快不等於合用。論文裡寫了四個理由。\n第一,通用設定。Groth16 每換一個電路就要重辦一次可信設定;我們的金融模型會更新,等於每次更新都要重辦儀式,根本不可行。Halo2 用的 KZG 是通用、可更新的 SRS,做一次、所有電路共用。\n第二,表達力,這是最關鍵的。我們的 kernel 需要自訂閘 —— 逐步 Horner 加截斷;還有原生查表 —— ByteTable 範圍檢查。Groth16 的 R1CS 只有 degree-2 乘法、沒有原生 lookup,要做我們這套 kernel 得拆成一大堆約束,又貴又笨。PLONKish 兩樣都給,出貨電路 🅟 是 91 個 lookup 參數加 degree-6 的閘,PLONKish 最省。所以 Groth16 再快,表達不了我們的電路就等於沒用。\n第三,proof 跟驗證夠用就好。我們 proof 數 KB、驗證數毫秒,而且不隨投資組合大小變。STARK 雖然免設定又抗量子,但 proof 偏大,小型 portfolio 反而吃虧。\n第四,工程成熟度。halo2_proofs v0.3.0 已經穩定;Jolt 這些新工具還在快速演化、API 常動,金融應用需要長期穩定。\n四個綜合下來,Halo2 加 KZG 最匹配,代價就是那一次性的可信設定。\n再補一句承諾方案:Halo2 原版用的是 IPA,免設定但驗證線性、proof 是 O(log n);我們的 PSE 版換成 KZG,proof 常數、配對驗證快、BN254 又是以太坊內建 —— 這層也是為了輕驗證。\n平台選定了,真正的難題才開始 —— 在這個底層上,超越函數到底怎麼算?下一張就看兩條直覺的路怎麼死。",
 '封面':"大家好。\n這份報告只講一件事:我們論文裡的每一個技術決定,背後的取捨是什麼。\n所以它不是教學、不是教你怎麼一步步做;是把每個選擇攤開來說清楚 —— 為什麼選這條、別的路為什麼走不通、換到了什麼、又付出什麼代價。\n這一版還多了一個規矩:報告裡每一個數字都掛徽章 —— 🅔 是低精度的實驗場、🅒 是 Merton 信用情境、🅟 是實際出貨的管線。三個配置的數字以前混著講,聽的人會亂;現在每個數字都能對回它的出身,不同基準的成績不互相背書。\n整份的走法是:先把問題立起來、摸到那道牆有多硬、定出五個硬條件、看到終點的藍圖 —— 然後才開始一個零件一個零件拆取捨。\n我會一張一張、一步一步把 why 講明白。我們開始。",
 '要解的問題':"先講一個具體的故事。一家對沖基金,每天晚上要向監管跟投資人證明兩件事:整個投資組合的 Delta 曝險沒有超過門檻、組合的違約機率沒有超過監管上限。麻煩在哪?傳統做法是把部位明細攤開給對方看 —— 但部位就是策略本身,攤開等於把多年的交易策略送人。\n那有哪些路?第一,全揭露,直接洩漏策略。第二,信任審計師:季審等級的速度、靠制度不靠數學,「每晚查一次」根本做不到。第三,TEE,把計算搬進晶片的保險飛地 —— 但信任只是從基金搬給晶片廠,而且旁路攻擊的前科不少。第四,MPC,多方一起算 —— 但每查一次,所有參與方都得在線多輪互動,夜批做不起來。剩下 ZK:證明「我算對了」,但不給你看輸入 —— 一方算、多方隨時驗、不交資料,形狀正好對上。\n先把誠實的話說在前面:ZK 不是什麼都不用信。部位藏住了,但市場資料的真實性還是需要一個現實世界的錨,我們把它收斂到 LP 本來就信任的基金行政管理人,藍圖那張會講清楚。\n那把金融模型搬進 ZK 電路到底有多難?下一張帶你摸那道牆。",
@@ -896,6 +916,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 "TEE (可信執行環境)":"把計算搬進 CPU 的硬體隔離飛地（如 Intel SGX），由晶片簽名背書結果；信任對象變成晶片廠，且歷來有旁路攻擊（cache／電源／投機執行側信道）紀錄。",
 "MPC (多方安全計算)":"多個參與方各持一份秘密、合力算出結果而不互看輸入；每次計算需要所有方在線多輪互動 —— 「每晚一查」的合規形狀跑不動。",
 "信任錨 (基金行政管理人)":"ZK 之外仍需的現實信任來源：fund administrator 認證基金淨值 NAV（監管據此在電路外算門檻 τ·NAV），並提供 market_data_root 重算工具 —— LP 自己重算不了 Poseidon root。",
+"公開輸入 (public inputs)":"驗證者看得到的全部資訊。PF1 只有 4 個 —— state_root、market_data_root、threshold（τ·NAV 美元值）、today；公開輸入越少，隱私越強。",
+"Merkle 承諾":"把一整批資料壓成一個樹根雜湊（root）：資料放 witness、root 當公開輸入。資料一動 root 就變（綁死），但 root 洩漏不了內容（藏住）；市場資料每天換，setup／VK 不動、只換 root。",
 "有限體 (𝔽ᵣ)":"模一個大質數 r 的整數體；ZK 電路所有值都在此體內，只有加與乘、沒有小數。",
 "浮點":"IEEE 小數運算；有限體沒有原生支援，是 Halo2 的硬限制，逼出定點方案。",
 "零知識證明 (ZK)":"證明某敘述為真、卻不洩漏除『為真』以外任何資訊（這裡：證風險合規、不洩漏部位）。",
@@ -971,12 +993,15 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 "有限體 (𝔽ᵣ)":"GF(r)=ℤ/rℤ，r 大質數；電路所有值 ∈ 𝔽ᵣ，無小數、無浮點。",
 "TEE (可信執行環境)":"硬體隔離執行環境＋遠端證明（remote attestation）：晶片以私鑰簽署「此程式碼確實在飛地內執行」的聲明，安全性繫於晶片密鑰與微架構不被打穿。",
 "MPC (多方安全計算)":"n 方各持 xᵢ，共同計算 f(x₁,…,xₙ)，除輸出外不洩漏任何 xᵢ（半誠實／惡意模型下的模擬安全定義）；需多輪在線互動。",
+"公開輸入 (public inputs)":"x=(state_root, market_data_root, τ·NAV, today)；驗證 Verify(vk,x,π)，witness w（部位、Merkle 路徑、中間值）全私有。",
+"Merkle 承諾":"二元樹遞迴 root=H(child_L‖child_R)、葉=Poseidon(欄位)；in-circuit 以 O(log N) 條 path 約束驗 leaf→root。",
 "piecewise (分段)":"f|[a,b] 切 m 段，每段一條 deg≤d 多項式；erf 在 [0,5] 用 m=5。"
   };
   const TERMS = {
 '封面':["零知識證明 (ZK)","超越函數","定點 pp=48","Minimax / Remez","逐步截斷 (per-step)","通用 Horner kernel","ByteTable"],
 '要解的問題':["金融法遵 (compliance)","Delta 曝險","Black–Scholes","Merton 模型","零知識證明 (ZK)","審計 (audit)","TEE (可信執行環境)","MPC (多方安全計算)","信任錨 (基金行政管理人)"],
 '為什麼難':["超越函數","exp / ln / erf","常態 CDF Φ","erf (誤差函數)","d₁ / d₂ (BS 中間量)","Black–Scholes Delta","Merton 模型","有限體 (𝔽ᵣ)","浮點","BN254","ULP"],
+'條件限制':["公開輸入 (public inputs)","Merkle 承諾","零知識證明 (ZK)","ULP","Minimax / Remez","誤差預算 (error budget)","窮舉驗證","KZG 承諾","BN254","可信設定 (trusted setup)","通用 Horner kernel","fixed 欄","ByteTable","逐步截斷 (per-step)","proof (證明 π)","verify (驗證)"],
 '核心工具':["PLONKish","自訂閘 (custom gate)","查表 (lookup)","Groth16 / R1CS","KZG 承諾","IPA (內積論證)","FRI / STARK","可信設定 (trusted setup)","BN254","通用 Horner kernel","ByteTable"],
 '兩條死路':["查表 (lookup)","pp (定點精度)","Taylor 展開","Minimax / Remez","有效位 (有效數字)","Horner 法","中間值膨脹","溢位 (overflow)","BN254","尺度 S=2^pp","逐步截斷 (per-step)"],
 '四個設計決定':["定點 pp=48","浮點","Minimax / Remez","Taylor 展開","ULP","逐步截斷 (per-step)","延遲截斷 (deferred)","溢位 (overflow)","通用 Horner kernel","ByteTable","fixed 欄","proof (證明 π)","verify (驗證)"],
@@ -1006,6 +1031,11 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
  ["合規檢查不就是比大小嗎？哪裡需要超越函數？","門檻本身是比大小，但『風險值』要先算出來：Black–Scholes 的 Delta 用常態 CDF Φ、Merton 的違約機率用 ln 與 Φ。算這個風險值就得求 erf/ln/exp，這才是撞牆的地方。"],
  ["不能鏈下用浮點算好，電路只驗結果嗎？","『驗結果』本身就得在電路裡把計算重做一遍 —— ZK 證的是計算過程；如果電路只收一個數字不重算，prover 填什麼都能過。所以超越函數躲不掉，一定要能在電路內求值。"],
  ["誤差測起來很小不就夠了？為什麼堅持可證上界？","因為 prover 是利害關係人、而門檻是懸崖：邊界上差最後一位一格就翻判定（信用合規差 2 個基點就翻）。「測過的點都很準」擋不住「刻意挑沒測過的點」；可證上界對『每一個可能輸入』都成立，這是合規等級跟 demo 等級的分水嶺。"]
+],
+'條件限制':[
+ ["R1–R5 是誰定的？會不會是先做出系統再倒推需求？","方向不是倒推的：R1、R2 直接來自問題本身（不洩漏部位＋門檻是懸崖），R3、R5 來自合規的使用形狀（多方隨時驗、夜批要跑得完），R4 來自金融模型會改版的現實。誠實說，量尺上的『具體數字』（2.81 ULP、34,368 B、109 s）是系統做出來之後量的 —— 條件定方向，數字是驗收成績，不是先射箭再畫靶。"],
+ ["五個條件會不會互相打架？","會，而且整份報告就在講怎麼打：R2 要精度、R5 要中間值不爆 —— per-step 犧牲精度換可行、再用 degree 贖回；R4 要通用、R3 要小 proof —— 分段（erf 12 段）就讓 proof 變大。後面每一張取捨，都是這張表裡兩個條件在拔河。"],
+ ["為什麼沒有『抗量子』這種條件？","誠實承認：BN254/KZG 不抗量子，這是 R3（上鏈友善＋輕驗證）換來的取捨。合規證明的時效是天級（每晚重發），不是要保密三十年的檔案，量子威脅的時間輪廓不同 —— 但若監管要求後量子，得換 STARK 路線並吞下大 proof 的代價。"]
 ],
 '核心工具':[
  ["可信設定不是缺點嗎？為什麼還選 KZG？","是缺點，但可控：用『通用可更新』的 setup —— 做一次、所有電路共用，儀式裡只要一個人誠實銷毀秘密就安全。換來的是 proof 常數大小＋配對驗證便宜＋上鏈友善。免設定的代價（IPA 線性驗證、FRI 大 proof）對需要輕量、可重複驗證的合規反而更不利，所以這個取捨划算。"],
