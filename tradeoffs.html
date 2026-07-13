@@ -701,24 +701,61 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="slide-meta"><span class="part-label">取捨 · 收尾</span> · 換到了什麼 · 代價是什麼</div>
   <h2>成果 與 <span class="accent">誠實的限界</span></h2>
   <div class="grid-2">
-    <div class="card green"><h3>成果（這些取捨換到的效果）</h3>
-      <ul style="font-size:.95rem">
-        <li><b>Scenario A</b>（B–S Delta, pp=24）：端到端 Delta <b>1 ULP</b>、比查表快 <b>26.3×</b>、pp≥24 唯一可行</li>
-        <li><b>Scenario C</b>（Merton 信用違約, pp=32）：<b>28.6–29.0 有效位</b>、7 個評等對到小數 8 位、proof ≈ 15,360 B / verify ≈ 33 ms</li>
-        <li><b>13 函數全 ULP=1</b>、proof <b>5.0–9.5 KB</b>、verify ≤ 5.1 ms</li>
+    <div class="card green"><h3>成果（依基準分開講）</h3>
+      <ul style="font-size:.93rem">
+        <li><span class="rg rg-p">🅟</span><b>出貨 pipeline</b>（B–S Delta 投組, pp=48, d=12）：proof <b>34,368 B、與 N 無關</b>；verify <b>≈10 ms</b>；prove N=8/32/128 → <b>4.71 / 26.7 / 109.2 s</b>；exp kernel <b>2.81 ULP</b>、Delta 端到端 <b>7 ULP</b></li>
+        <li><span class="rg rg-c">🅒</span><b>Scenario C</b>（Merton 信用違約, pp=32, d=10）：<b>28.6–29.0 有效位</b>、7 個評等、proof <b>15,360 B</b>／verify <b>≈33 ms</b></li>
+        <li><span class="rg rg-e">🅔</span><b>實驗場</b>（pp=16, 延遲）：13 函數全 <b>ULP≤1</b>；單函數端到端 proof <b>5.0–9.5 KB</b>、verify <b>≤5.1 ms</b>；論文版 Scenario A（pp=24）Delta <b>1 ULP</b>、比查表快 <b>26.3×</b></li>
       </ul>
     </div>
-    <div class="card red"><h3>誠實限界（代價）</h3>
-      <ul style="font-size:.95rem">
-        <li>\( \mathrm{erf} \) 要 <b>5 段 piecewise</b> 才覆蓋 \( [0,5] \)（proof ×2.2）</li>
-        <li>bit-budget \( (d+1)\cdot pp<254 \)（pp 上限 42 @ \( d{=}5 \)）</li>
-        <li>大批次比單函數查表<b>慢約 7.5×</b></li>
-        <li>proof 比查表大約 <b>6.8×</b>（但仍 &lt;5KB）</li>
+    <div class="card red"><h3>誠實限界（代價，同樣掛徽章）</h3>
+      <ul style="font-size:.93rem">
+        <li><b>per-step 的精度價</b><span class="rg rg-e">🅔</span>：d* 時 <b>0/13</b> 達 ULP≤1（ULP 2–7）→ 🅟 得用 d=12 贖回</li>
+        <li><b>分段的 proof 價</b>：erf 🅒 <b>5 段</b>蓋 [0,5]（proof <b>×2.2</b> → 15,360 B）；🅟 更用 <b>12 段</b>（每段 0.5，蓋 [0,6)）＋ ln 4 段</li>
+        <li><b>查表在 pp≥32 才真的死</b>（4.3×10⁹ 格/函數）；低 pp 它仍有優勢：🅔 大批次 N=1000 我們<b>慢 7.5×</b>、proof 比直接查表<b>大 6.8×</b>（4,992 vs 736 B）</li>
+        <li><b>bit-budget</b>：延遲截斷 \( (d{+}1)\cdot pp<254 \)（d=5 時 pp 上限 42）→ 高 pp 全靠 per-step</li>
       </ul>
     </div>
   </div>
-  <div class="soulbox"><span class="tag">🎯 收尾一句</span>：把「能算一個函數」變成「<b>能證一個金融模型</b>」。</div>
-  <div class="foot"><span>出處 · 引用 →</span><span>↑ 回頂</span></div>
+  <div class="soulbox"><span class="tag">🎯 收尾一句</span>：把「能算一個函數」變成「<b>能證一個金融模型</b>」—— 而且每個數字都能對回它的量測基準。proof 到底多大？下一張一把尺量到底。</div>
+  <div class="foot"><span>證明多大 · 出處 →</span><span>↑ 回頂</span></div>
+</section>
+
+<!-- ===== PROOF-SIZE LADDER ===== -->
+<section class="slide" data-part="" data-label="證明多大">
+  <div class="slide-meta"><span class="part-label">收尾 · 一把尺</span> · proof 從 736 B 到 34 KB</div>
+  <h2>證明到底多大？<span class="accent">一把尺、六個刻度</span></h2>
+  <div class="whybox"><span class="tag">❓ 老師一定會問</span>：「你們的 proof 是 5KB 還是 34KB？」—— 都對。差別是<b>裡面裝了多少東西</b>。這把尺一次講清楚。</div>
+  <div class="grid-2">
+    <figure style="margin:.2rem 0 0">
+      <svg viewBox="0 0 460 258" role="img" aria-label="proof 大小階梯：736B 到 34,368B，log 尺度" style="width:100%;max-width:480px">
+        <g font-size="11" font-weight="800">
+          <!-- log10 scale: w = (log10(B)-2.7)*165, bars start x=40 -->
+          <rect x="40" y="14"  width="28"  height="20" rx="4" fill="#93c5fd"/><text x="74" y="29" fill="#1d4ed8">736 B 🅔</text>
+          <rect x="40" y="52"  width="77"  height="20" rx="4" fill="#60a5fa"/><text x="123" y="67" fill="#1d4ed8">1,472 B 🅔</text>
+          <rect x="40" y="90"  width="165" height="20" rx="4" fill="#3b82f6"/><text x="211" y="105" fill="#1d4ed8">4,992 B 🅔</text>
+          <rect x="40" y="128" width="166" height="20" rx="4" fill="#818cf8"/><rect x="206" y="128" width="45" height="20" rx="4" fill="#a5b4fc"/><text x="257" y="143" fill="#4338ca">5,024–9,536 B 🅔</text>
+          <rect x="40" y="166" width="245" height="20" rx="4" fill="#f59e0b"/><text x="291" y="181" fill="#92400e">15,360 B 🅒</text>
+          <rect x="40" y="204" width="303" height="20" rx="4" fill="#16a34a"/><text x="349" y="219" fill="#15803d">34,368 B 🅟</text>
+        </g>
+        <g font-size="10.5" fill="#8b94a3" text-anchor="end" font-weight="700"><text x="34" y="29">①</text><text x="34" y="67">②</text><text x="34" y="105">③</text><text x="34" y="143">④</text><text x="34" y="181">⑤</text><text x="34" y="219">⑥</text></g>
+        <line x1="40" y1="8" x2="40" y2="232" stroke="#94a3b8" stroke-width="1.3"/>
+        <text x="40" y="246" font-size="9.5" fill="#8b94a3">長度為 log 尺度</text>
+      </svg>
+      <figcaption>本報告自製 · 資料：exp04/benchmark_results.md（①②③）、exp07/benchmark_results.json（④）、論文 ch4（⑤）、scenario_a_full/benches/pf1_results.md 2026-07-08b（⑥）</figcaption>
+    </figure>
+    <div>
+      <ul style="font-size:.92rem">
+        <li><b>①</b> 單函數「直接查表」電路（Method A，65,536 格表）—— proof 最小、表最肥</li>
+        <li><b>②</b> per-step kernel 單獨（pp=16、d=5：3 gates／2 lookups）</li>
+        <li><b>③</b> 延遲 kernel＋ExplicitRC（5+1 gates／12 lookups）—— ③÷① 就是「比查表大 6.8×」的出處</li>
+        <li><b>④</b> 單函數端到端（含 range reduction／分段／符號處理，13 函數）</li>
+        <li><b>⑤</b> Merton 完整情境（5 段 erf、7 個評等、d=10）</li>
+        <li><b>⑥</b> 整個投組 PF1（任何 N；Merkle、95 advice 欄、91 lookup args、gate degree 6）</li>
+      </ul>
+      <div class="soulbox" style="margin-top:.5rem"><span class="tag">🎯 讀法</span>：①→⑥ 不是「越做越肥」，是<b>裝的東西越來越多</b>：從一個函數的一次求值，到「整個投組、任何 N、一張 proof、verify ≈10 ms」。KZG 的 O(1) 讓 ⑥ <b>不隨 N 長大</b> —— N=8 和 N=128 都是 34,368 B。</div>
+    </div>
+  </div>
 </section>
 
 <!-- ===== 10 · SOURCES ===== -->
@@ -729,6 +766,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="grid-2">
     <div>
       <div class="defn"><span class="dt">本論文</span><span class="gloss">《Minimax Polynomial Approximation for Transcendental Functions in Zero-Knowledge Proofs》—— 所有 (pp, d)、ULP、截斷策略、bit-budget、Scenario A / C 數據的出處。</span></div>
+      <div class="defn"><span class="dt">一手量測檔（本報告逐數核對）</span><span class="gloss">🅔 exp03b full13_summary.md（13 函數消融）· exp04 per_step_results.md／benchmark_results.md（kernel 電路實測）· exp07 benchmark_results.json（端到端）· exp09 ln_sweep_output.txt（per-step 掃描）· exp12 ln_degree_sweep.json（degree 掃描）；🅒 exp10／論文 ch4；🅟 scenario_a_full：kernel.rs、erf_pp48.rs、benches/pf1_results.md（2026-07-08b 定版）、HANDOFF.md。</span></div>
       <div class="defn"><span class="dt">證明系統 · Halo2 stack</span><span class="gloss">The halo2 Book；PLONK（Gabizon–Williamson–Ciobotaru, ePrint 2019/953）；KZG（2010）；SHPLONK（BDFG, ePrint 2020/081）；BN254。</span></div>
       <div class="defn"><span class="dt">金融模型</span><span class="gloss">Black–Scholes（1973）；Merton 結構式信用模型（1974）。</span></div>
     </div>
