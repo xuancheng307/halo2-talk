@@ -628,9 +628,12 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="grid-3" style="margin-top:.3rem">
     <div class="card"><h3>\(\varepsilon_{\mathrm{approx}}\) 逼近</h3><p style="font-size:.9rem">Remez 的 \(L^\infty\) 逼近誤差 —— degree-\(d\) 在該區間<b>不可再降</b>的部分。</p></div>
     <div class="card"><h3>\(\varepsilon_{\mathrm{quant}}\) 量化</h3><p style="font-size:.9rem">係數 \(D_i\) 取整的誤差；高次係數在較高 scale、相對誤差小。</p></div>
-    <div class="card"><h3>\(\varepsilon_{\mathrm{trunc}}\) 截斷</h3><p style="font-size:.9rem">最後 \(\div S^{d}\) 的截斷；<b>延遲截斷下 ≤ 1 ULP</b>。</p></div>
+    <div class="card"><h3>\(\varepsilon_{\mathrm{trunc}}\) 截斷</h3><p style="font-size:.9rem">看 kernel：<b>延遲</b><span class="rg rg-e">🅔</span>只截最後一次 → <b>≤1 ULP</b>；<b>per-step</b><span class="rg rg-p">🅟</span>每步 floor 各 &lt;1 ULP、最壞累到 <b>≈d ULP</b>。</p></div>
   </div>
-  <div class="ideabox" style="margin-top:.4rem"><span class="tag">💡 順手解釋了量化飽和</span>：\(d\!\uparrow\) 讓 \(\varepsilon_{\mathrm{approx}}\!\downarrow\) 但 \(\varepsilon_{\mathrm{quant}}\!\uparrow\)；\(\varepsilon_{\mathrm{quant}}\) 一主導，加 degree <b>反而有害</b> —— 上一張的甜蜜點，根就在這條公式。再加窮舉驗證 \(\mathrm{ULP}_{\mathrm{max}}\le\mathrm{ULP}_{\mathrm{total}}\)（每個可表示輸入都查過），<b>這才是能拿去做金融合規的底氣</b>。</div>
+  <div class="card green" style="margin-top:.4rem"><h3>界 vs 實測（兩個都要給）</h3>
+    <p style="font-size:.95rem"><span class="rg rg-p">🅟</span> pp=48、d=12 的界是「最壞 ≈12 ULP／步鏈」；<b>實測</b>：exp kernel（Remez、[0,ln2) 單段）max <b>2.81 ULP</b>，Delta 端到端 <b>7 ULP</b>（d₁ 中途值 15 ULP，含上游 FpMul/FpDiv 鏈）—— 實測穩穩落在界內，1 ULP 只有 2⁻⁴⁸≈3.6×10⁻¹⁵。<span class="muted">（出處：scenario_a_full HANDOFF.md、benches/pf1_results.md）</span></p>
+  </div>
+  <div class="ideabox" style="margin-top:.4rem"><span class="tag">💡 順手解釋了量化飽和</span>：\(d\!\uparrow\) 讓 \(\varepsilon_{\mathrm{approx}}\!\downarrow\) 但 \(\varepsilon_{\mathrm{quant}},\varepsilon_{\mathrm{trunc}}\) 的地板不動（per-step 還隨步數微增）；地板一主導，加 degree <b>只剩成本</b> —— 上一張的飽和平台，根就在這條公式。低 pp<span class="rg rg-e">🅔</span>再配窮舉驗證（每個可表示輸入都查過），<b>這才是能拿去做金融合規的底氣</b>。</div>
 </section>
 
 <!-- ===== 7 · FUNCTION & INTERVAL ===== -->
@@ -639,27 +642,27 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <h2>還有兩個更細的取捨：<span class="accent">函數本身 · 區間寬窄</span></h2>
   <div class="grid-2">
     <div class="card amber"><h3>① 係數條件數：函數自己決定地板</h3>
-      <p>同樣 pp、同樣 \( d \)，不同函數精度差很多 —— pp=48、\( d{=}14 \)：</p>
+      <p>同一個 per-step kernel、同 pp=48、同 \( d{=}14 \)（ch4 量測）：</p>
       <table style="font-size:.92rem">
-        <tr><th>函數</th><th>精度</th></tr>
-        <tr><td>\( \ln \)</td><td>142 ULP</td></tr>
-        <tr class="hl"><td>\( \mathrm{erf} \)</td><td><b>15 ULP</b></td></tr>
+        <tr><th>函數</th><th>精度</th><th>有效位</th></tr>
+        <tr><td>\( \ln(1{+}x) \)</td><td>142 ULP</td><td>40.8</td></tr>
+        <tr class="hl"><td>\( \mathrm{erf} \)</td><td><b>15 ULP</b></td><td><b>44.1</b></td></tr>
       </table>
-      <p class="muted" style="margin-top:.4rem;font-size:.9rem">為什麼差這麼多：\( \mathrm{erf} \) 是<b>奇函數</b>、一半係數為 0、約 7 個有效 Horner 步；\( \ln \) 14 步全有效、累加的量化誤差多。<b>函數結構（條件數）決定地板，與 kernel 無關。</b></p>
+      <p class="muted" style="margin-top:.4rem;font-size:.9rem">為什麼差近 10×：\( \mathrm{erf} \) 是<b>奇函數</b>、偶次係數趨近 0，14 步裡只有 <b>約 7 步</b>帶截斷誤差；\( \ln \) 的 14 個係數正負交錯、全有效、每步都累 floor 偏差。<b>函數的係數結構決定地板，與 kernel 無關。</b></p>
     </div>
-    <div class="card amber"><h3>② 區間：精度 ↔ 覆蓋的拉鋸</h3>
-      <p>窄區間更準，但覆蓋變小：</p>
+    <div class="card amber"><h3>② 區間：精度 ↔ 覆蓋的拉鋸 <span class="rg rg-e">🅔</span></h3>
+      <p>窄區間更準，但覆蓋變小（d=5、pp=16，ch4 表）：</p>
       <table style="font-size:.9rem">
-        <tr><th>函數 · 區間</th><th>ULP</th></tr>
-        <tr><td>\( \ln \) on \( [0,\ln 2) \)</td><td><b>1</b></td></tr>
+        <tr><th>函數 · 區間</th><th>ULP</th><th>劣化</th></tr>
+        <tr><td>\( \ln \) on \( [0,\ln 2) \)</td><td><b>1</b></td><td rowspan="2">9×</td></tr>
         <tr><td>\( \ln \) on \( [0,e{-}1) \)</td><td>9</td></tr>
-        <tr><td>\( \mathrm{erf} \) on \( [0,1] \)</td><td><b>3</b></td></tr>
-        <tr><td>\( \mathrm{erf} \) on \( [0,2) \)</td><td>20</td></tr>
+        <tr><td>\( \mathrm{erf} \) on \( [0,1] \)</td><td><b>3</b></td><td rowspan="2">40.7×</td></tr>
+        <tr><td>\( \mathrm{erf} \) on \( [0,2.5] \)</td><td>122</td></tr>
       </table>
-      <p class="muted" style="margin-top:.4rem;font-size:.9rem">覆蓋變小要靠 <b>range reduction</b> 補回來。</p>
+      <p class="muted" style="margin-top:.4rem;font-size:.9rem">覆蓋變小要靠 <b>range reduction／分段</b>補回來：🅟 的 erf 切 <b>12 段</b>（每段寬 0.5）、ln 切 <b>4 段</b>。</p>
     </div>
   </div>
-  <div class="soulbox"><span class="tag">🎯 取捨</span>：<b>精度 ↔ 覆蓋範圍</b> 是一條拉鋸線；想又準又廣，得切段 + range reduction，而切段又會放大 proof（第 9 張會兌現這個代價）。</div>
+  <div class="soulbox"><span class="tag">🎯 取捨</span>：<b>精度 ↔ 覆蓋範圍</b> 是一條拉鋸線；想又準又廣，得切段 + range reduction，而切段會放大 proof（🅒 的 erf 5 段讓 proof ×2.2 → 15,360 B；「成果與限界」會兌現這個代價）。</div>
 </section>
 
 <!-- ===== 8 · WHERE WE STAND (honest positioning) ===== -->
