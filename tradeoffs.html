@@ -483,6 +483,62 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   </div>
 </section>
 
+<!-- ===== 2.45 · LAYER MAP (system layers, you-are-here anchor) ===== -->
+<section class="slide" data-part="" data-label="分層地圖">
+  <div class="slide-meta"><span class="part-label">旅程 5/8 · 藍圖</span> · 系統分四層 —— 後面每個取捨都住在其中一層</div>
+  <h2>分層地圖：<span class="accent">接下來的每個取捨，都在修其中一層</span></h2>
+  <div class="whybox"><span class="tag">❓ 這張是什麼</span>：旅程地圖是<b>時間軸</b>（我們怎麼一路走來），這張是<b>座標系</b>（系統分哪幾層、每個問題住哪層）。從下一張起，<b>螢幕右側會一直亮著「你在哪一層」</b> —— 聽到任何一個取捨時，你都知道我們正在修理系統的哪個部分。</div>
+  <figure style="margin:.2rem 0 0">
+    <svg viewBox="0 0 960 352" role="img" aria-label="四層系統圖：應用層、數值層、電路層、證明系統層；需求往下壓、限制往上頂" style="width:100%;max-width:1010px">
+      <defs><marker id="lm-dn" markerWidth="8" markerHeight="8" refX="4" refY="6" orient="auto"><path d="M0,0 L8,0 L4,7 z" fill="#55596b"/></marker>
+      <marker id="lm-up" markerWidth="8" markerHeight="8" refX="4" refY="1" orient="auto"><path d="M0,7 L8,7 L4,0 z" fill="#dc2626"/></marker></defs>
+      <!-- side rails -->
+      <line x1="26" y1="44" x2="26" y2="322" stroke="#55596b" stroke-width="2.2" marker-end="url(#lm-dn)"/>
+      <text x="18" y="183" transform="rotate(-90 18 183)" text-anchor="middle" font-size="11.5" fill="#55596b" font-weight="700">需求往下壓</text>
+      <line x1="938" y1="322" x2="938" y2="44" stroke="#dc2626" stroke-width="2.2" marker-end="url(#lm-up)"/>
+      <text x="952" y="183" transform="rotate(90 952 183)" text-anchor="middle" font-size="11.5" fill="#dc2626" font-weight="700">限制往上頂</text>
+      <!-- L4 application -->
+      <rect x="52" y="30" width="580" height="58" rx="10" fill="rgba(217,119,6,.08)" stroke="#d97706" stroke-width="1.8"/>
+      <text x="66" y="52" font-size="13" fill="#92400e" font-weight="900">應用層 — 金融合規</text>
+      <text x="66" y="72" font-size="11" fill="#55596b">Black–Scholes Δ · Merton PD · 門檻判定　｜　問題：<tspan fill="#b91c1c" font-weight="700">要證什麼、準到哪</tspan></text>
+      <text x="648" y="52" font-size="10.5" fill="#92400e" font-weight="700">住這層的投影片：</text>
+      <text x="648" y="68" font-size="10" fill="#55596b">問題 · 為什麼難 · 條件 R1–R5 · 藍圖</text>
+      <!-- gap 1 -->
+      <text x="90" y="105" font-size="10" fill="#55596b">↓ 合規公式全是超越函數 → 變成「逼近」問題</text>
+      <text x="420" y="105" font-size="10" fill="#dc2626">↑ 頂回去的是 ULP 誤差保證（R2）</text>
+      <!-- L3 numeric -->
+      <rect x="52" y="112" width="580" height="58" rx="10" fill="rgba(37,99,235,.08)" stroke="#2563eb" stroke-width="1.8"/>
+      <text x="66" y="134" font-size="13" fill="#1d4ed8" font-weight="900">數值層 — 實數 → 整數</text>
+      <text x="66" y="154" font-size="11" fill="#55596b">定點 pp=48 · Minimax · Horner · per-step 截斷　｜　問題：<tspan fill="#b91c1c" font-weight="700">超越函數怎麼算得準</tspan></text>
+      <text x="648" y="134" font-size="10.5" fill="#1d4ed8" font-weight="700">住這層的投影片：</text>
+      <text x="648" y="150" font-size="10" fill="#55596b">兩條死路 · 四個決定 · 免費空間 · 換道地圖</text>
+      <text x="648" y="163" font-size="10" fill="#55596b">逐步的代價 · 量化飽和 · 誤差預算 · 函數與區間</text>
+      <!-- gap 2 -->
+      <text x="90" y="187" font-size="10" fill="#55596b">↓ 每一步乘加＋截斷 → 交給「閘」鎖死</text>
+      <text x="420" y="187" font-size="10" fill="#dc2626">↑ 頂回去的是閘／查表的成本帳單</text>
+      <!-- L2 circuit -->
+      <rect x="52" y="194" width="580" height="58" rx="10" fill="rgba(124,58,237,.08)" stroke="#7c3aed" stroke-width="1.8"/>
+      <text x="66" y="216" font-size="13" fill="#5b21b6" font-weight="900">電路層 — 鎖死誠實</text>
+      <text x="66" y="236" font-size="11" fill="#55596b">商餘閘 · ByteTable · ExplicitRC · Merkle　｜　問題：<tspan fill="#b91c1c" font-weight="700">prover 亂填怎麼被抓</tspan></text>
+      <text x="648" y="216" font-size="10.5" fill="#5b21b6" font-weight="700">住這層的投影片：</text>
+      <text x="648" y="232" font-size="10" fill="#55596b">核心 kernel · 算一步 · ExplicitRC</text>
+      <!-- gap 3 -->
+      <text x="90" y="269" font-size="10" fill="#55596b">↓ 整張 trace 表 → 壓成多項式承諾</text>
+      <text x="420" y="269" font-size="10" fill="#dc2626" font-weight="700">↑ 254-bit 保險箱 → bit-budget (d+1)·pp&lt;254</text>
+      <!-- L1 proof system -->
+      <rect x="52" y="276" width="580" height="58" rx="10" fill="rgba(85,89,107,.08)" stroke="#55596b" stroke-width="1.8"/>
+      <text x="66" y="298" font-size="13" fill="#1a1a1f" font-weight="900">證明系統層 — 平台</text>
+      <text x="66" y="318" font-size="11" fill="#55596b">PLONKish Halo2 · KZG · BN254　｜　問題：<tspan fill="#b91c1c" font-weight="700">怎麼變成 34KB、10ms 可驗的證明</tspan></text>
+      <text x="648" y="298" font-size="10.5" fill="#1a1a1f" font-weight="700">住這層的投影片：</text>
+      <text x="648" y="314" font-size="10" fill="#55596b">核心工具（下一張）</text>
+      <!-- red cross-layer constraint arrow: proof system → numeric -->
+      <path d="M 620 288 C 700 270, 700 190, 636 150" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#lm-up)"/>
+    </svg>
+    <figcaption>本報告自製 · 紅色虛線＝全報告最重要的跨層限制：證明系統層的 254-bit 體，直接頂進數值層、劃出截斷策略的邊界（換道地圖那張的那條線）</figcaption>
+  </figure>
+  <div class="soulbox" style="margin-top:.3rem"><span class="tag">🎯 讀法</span>：需求<b>往下壓</b>（合規要準 → 數值要逼近 → 電路要鎖死 → 平台要能證），限制<b>往上頂</b>（254-bit → bit-budget → 截斷策略 → 精度保證）—— <b>每個取捨都是某一層被上下夾出來的</b>。下一張先修最底層：為什麼平台選 Halo2。</div>
+</section>
+
 <!-- ===== 2.5 · CORE TOOLS (why Halo2 + KZG) ===== -->
 <section class="slide" data-part="" data-label="核心工具">
   <div class="slide-meta"><span class="part-label">旅程 6/8 · 被逼的選擇</span> · 取捨 1 底層平台：為什麼不用更快的 Groth16<span class="rref">↩ R4 · R3</span></div>
@@ -992,6 +1048,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '為什麼難':"上一張選了 ZK,這張講為什麼這件事難 —— 牆有三層。\n第一層:要算的東西全是超越函數。看 Delta 的公式:d1 要先算 ln(S/K)、除以 σ 乘根號 T,再把 d1 丟進常態機率 Φ,而 Φ 的核心是 erf;貼現還要一個 exp。Merton 的違約機率一樣,ln 跟 erf 一個都跑不掉。所以合規數學不是「碰巧用到」超越函數,它就是用超越函數寫成的。\n第二層:電路的世界裡只有一個 254 位質數體的保險箱,裡面只有整數的加法跟乘法。沒有浮點、沒有小數點、沒有 if/else、沒有長度隨資料變的迴圈 —— 連除法跟開根號都不存在。每一個實數運算,都得用整數加乘一磚一瓦重新蓋出來。\n第三層最容易被忽略:算的人正是利害關係人 —— prover 是被監管的基金自己。「大致對」在門檻邊界一文不值:差最後一位的一格,合規跟違規就翻盤 —— 論文裡的例子:投資級違約機率本身只有 10 到 100 個基點,誤差只要 ±0.002、也就是 20 個基點,判定就翻。所以誤差要的是可以證明的上界,不是測幾個點看起來不錯。\n三層牆疊起來:要重建超越函數、只有整數加乘當磚頭、蓋出來還得帶數學保證。下一張把「能用」的五個硬條件寫死。",
 '條件限制':"牆看清楚了,現在把「拆牆成功」的標準寫死 —— 五個硬條件,每條都有量尺,過不了任何一條就不能上線。\nR1,零部位揭露:部位、數量、每筆 Delta 永遠不離開基金;驗證者只看到 Merkle 承諾跟判定。量尺很具體:整個系統的公開輸入只有 4 個。\nR2,誤差要有可證明的上界:不是測起來準,是解析上界加實測雙保證 —— 出貨 kernel 實測 2.81 個 ULP、端到端 7 個,而 1 個 ULP 只有 2 的負 48 次方。\nR3,第三方輕驗證:proof 常數大小、毫秒級驗證。這裡誠實補一句:BN254 剛好是以太坊內建的 precompile 曲線,未來要上鏈可以不換體 —— 但那是紅利、是論文結論的展望,不是本場景的需求;我們的 verifier 是監管跟 LP,驗證在鏈下。\nR4,模型會演化:金融模型的函數跟係數會改版,改版不能重辦可信設定儀式、不能重設計電路 —— 換函數只能是「換係數＋重跑 keygen」這種等級的動作。誠實講,係數放 fixed 欄,VK 還是會變、驗證方要重收一次;所以每天都在變的市場資料走另一條路 —— Merkle root 當公開輸入,VK 完全不動。改版頻率決定走哪條路,這本身就是一個取捨。\nR5,工程可行:夜批要跑得完,prove 分鐘級、verify 毫秒級。\n右邊那欄是預告:每一條後面站著哪個設計決定。這張表是整份報告的地圖 —— 從現在起,每個「為什麼選 X」都是在答 R 幾。條件湊齊時終點長什麼樣?下一張給你藍圖。",
 '藍圖':"條件寫死了,先看終點 —— 這張圖就是每天晚上真實發生的事。\n左邊兩個輸入:基金的部位,私有 witness,N 從 8 到 128 筆,永遠不離開基金,只用 state_root 這個承諾示人;市場資料表,公開的,股價、利率、結算價、波動率,九個欄位一片葉子,壓成 market_data_root。\n中間是 PF1 電路:pp=48、d=12 的通用 Horner kernel,加上 Merkle 驗證、Delta 管線、門檻比較 —— 95 個 advice 欄、91 個 lookup。每晚跑一次,N=128 也就 109 秒。\n出來的是一張 34,368 bytes 的 proof —— 8 筆跟 128 筆部位,proof 一樣大。監管跟 LP 拿它對 4 個公開輸入驗證,10 毫秒驗完;看到的只有「合規,通過」,部位、Delta、任何明細都看不到。\n三句誠實的話。第一,market_data_root 是個雜湊,LP 自己重算不了 —— 實務上的信任錨是基金行政管理人:認證 NAV、提供重算工具,這寫在協議文件裡,不藏。第二,這是單一 prover 的 demo,金鑰管理跟正式 SRS 儀式沒做。第三,法律上 ZK proof 算不算合規證據,在論文範圍外。\n這張藍圖的每一個零件,都是一個被逼出來的選擇 —— 接下來一張一張拆。",
+'分層地圖':"進零件之前,先給你一個座標系 —— 剛才的旅程地圖是時間軸,講我們怎麼一路走來;這張是空間圖,講系統分哪幾層。\n由上往下四層:應用層,金融合規 —— 要證什麼、準到哪;數值層 —— 把實數運算變成整數的逼近跟截斷;電路層 —— 用閘跟查表把每一步鎖死,讓 prover 沒有亂填的空間;最底下證明系統層 —— Halo2、KZG、BN254,把整件事變成一張 34KB、10 毫秒可驗的證明。\n兩個方向都要看。需求往下壓:合規要準,逼出數值層的逼近;數值要一步步算,交給電路層鎖死;電路要能驗,靠平台出證明。但限制也往上頂 —— 最重要的就是那條紅色虛線:證明系統層的 254 位保險箱,直接頂進數值層,劃出截斷策略的邊界,就是等下換道地圖那條線。\n從下一張開始,螢幕右邊會一直亮著「你在哪一層」—— 聽到任何取捨,你都知道我們正在修系統的哪個部分。先從最底層修起:為什麼平台選 Halo2。",
 '核心工具':"藍圖攤開了,第一個要拆的零件是最底層的平台 —— 證明系統跟承諾方案。老師一定會問:Groth16 的 proof 最小、驗證最快,你們為什麼不用最快的?\n我的答案是:快不等於合用。論文裡寫了四個理由。\n第一,通用設定。Groth16 每換一個電路就要重辦一次可信設定;我們的金融模型會更新,等於每次更新都要重辦儀式,根本不可行。Halo2 用的 KZG 是通用、可更新的 SRS,做一次、所有電路共用。\n第二,表達力,這是最關鍵的。我們的 kernel 需要自訂閘 —— 逐步 Horner 加截斷;還有原生查表 —— ByteTable 範圍檢查。Groth16 的 R1CS 只有 degree-2 乘法、沒有原生 lookup,要做我們這套 kernel 得拆成一大堆約束,又貴又笨。PLONKish 兩樣都給,出貨電路 🅟 是 91 個 lookup 參數加 degree-6 的閘,PLONKish 最省。所以 Groth16 再快,表達不了我們的電路就等於沒用。\n第三,proof 跟驗證夠用就好:數 KB、數毫秒、不隨投組大小變;STARK 免設定又抗量子,但 proof 偏大,小投組吃虧。\n第四,工程成熟度:halo2_proofs 已穩定,Jolt 這類新工具 API 還在動,金融應用要長期穩。\n綜合下來 Halo2 加 KZG 最匹配,代價是那一次性的可信設定。承諾方案順帶一句:原版 IPA 免設定但驗證是線性時間;PSE 版換 KZG,proof 常數、驗證毫秒 —— 同樣是在答 R3 輕驗證。\n平台選定了,真正的難題才開始 —— 在這個底層上,超越函數到底怎麼算?下一張就看兩條直覺的路怎麼死。",
 '封面':"大家好。\n這份報告只講一件事:我們論文裡的每一個技術決定,背後的取捨是什麼。\n所以它不是教學、不是教你怎麼一步步做;是把每個選擇攤開來說清楚 —— 為什麼選這條、別的路為什麼走不通、換到了什麼、又付出什麼代價。\n這一版還多了一個規矩:報告裡每一個數字都掛徽章 —— 🅔 是低精度的實驗場、🅒 是 Merton 信用情境、🅟 是實際出貨的管線。三個配置的數字以前混著講,聽的人會亂;現在每個數字都能對回它的出身,不同基準的成績不互相背書。\n我會一張一張、一步一步把 why 講明白;整條路的地圖,下一張直接給你。我們開始。",
 '思路歷程':"開始拆牆之前,先給你整條路的地圖 —— 這不是目錄,是我們真實走過的推導路線,八個站。\n第一站,問題:每晚要向監管跟投資人證明風險在限額內,但部位就是策略,不能攤。第二站,選路:審計慢又靠信任、TEE 信晶片、MPC 要全員在線 —— 只有 ZK 的形狀對。第三站,撞牆:合規公式全是 ln、exp、erf 這些超越函數,而電路裡只有加跟乘。第四站,把「拆牆成功」寫成五條可量測的硬條件 R1 到 R5。第五站,藍圖:終點長什麼樣 —— 每晚一張三萬四千位元組的證明、十毫秒驗完。\n後半段就是把藍圖的零件一個個拆開:第六站,四個被逼的選擇 —— 定點、Minimax、per-step、通用 kernel;第七站,怎麼保證 prover 沒亂算 —— 商餘閘鎖死加誤差三源上界;第八站,成果與代價,成績單依三個量測基準分開報。\n每一站下面那行紅字,就是把我們推去下一站的問題 —— 這條路不是事後美化的,每個因果都是真的。接下來左上角會一直有「旅程幾之八」告訴你人在哪。我們上路。",
@@ -1122,6 +1179,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '為什麼難':["超越函數","exp / ln / erf","常態 CDF Φ","erf (誤差函數)","d₁ / d₂ (BS 中間量)","Black–Scholes Delta","Merton 模型","有限體 (𝔽ᵣ)","浮點","BN254","ULP"],
 '條件限制':["公開輸入 (public inputs)","Merkle 承諾","零知識證明 (ZK)","ULP","Minimax / Remez","誤差預算 (error budget)","窮舉驗證","KZG 承諾","BN254","可信設定 (trusted setup)","通用 Horner kernel","fixed 欄","ByteTable","逐步截斷 (per-step)","proof (證明 π)","verify (驗證)"],
 '藍圖':["PF1 (投組證明電路)","公開輸入 (public inputs)","Merkle 承諾","信任錨 (基金行政管理人)","proof (證明 π)","verify (驗證)","KZG 承諾","定點 pp=48","通用 Horner kernel","Black–Scholes Delta"],
+'分層地圖':["超越函數","定點 pp=48","Minimax / Remez","逐步截斷 (per-step)","商餘分解 (quotient-remainder)","ByteTable","ExplicitRC","PLONKish","KZG 承諾","BN254","bit-budget"],
 '核心工具':["PLONKish","自訂閘 (custom gate)","查表 (lookup)","Groth16 / R1CS","KZG 承諾","IPA (內積論證)","FRI / STARK","可信設定 (trusted setup)","BN254","通用 Horner kernel","ByteTable"],
 '兩條死路':["查表 (lookup)","pp (定點精度)","Taylor 展開","Minimax / Remez","有效位 (有效數字)","Horner 法","中間值膨脹","溢位 (overflow)","BN254","尺度 S=2^pp","逐步截斷 (per-step)"],
 '四個設計決定':["定點 pp=48","浮點","Minimax / Remez","Taylor 展開","ULP","逐步截斷 (per-step)","延遲截斷 (deferred)","溢位 (overflow)","通用 Horner kernel","ByteTable","fixed 欄","proof (證明 π)","verify (驗證)"],
@@ -1161,6 +1219,10 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
  ["監管憑什麼信市場資料？","market_data_root 承諾的是公開市場數據，但 root 本身是 Poseidon 雜湊 —— LP 沒辦法自己從公開數據重算。協議把信任收斂到基金行政管理人：認證 NAV（監管據此在電路外算門檻 τ·NAV）、提供 root 重算工具讓 LP 核對。誠實說：這是一個現實世界的信任假設，ZK 沒有消掉它，只是收斂到 LP 本來就信任的既有角色、不引入新的信任方。"],
  ["藍圖離真的上線還差什麼？","誠實列三件：① 這是單一 prover 的 demo 系統 —— 多方金鑰管理、正式 SRS 儀式（目前 per-run fresh、非 ceremony 級）、營運監控都沒做；② 市場資料的信任錨是行政管理人，不是密碼學保證 —— LP 無法獨立驗證市場資料；③ 法律與監管接受度（ZK proof 算不算合規證據）完全在論文範圍外。電路與數字是真的，產品化是另一段路。"],
  ["為什麼 proof 大小跟 N 完全無關？","KZG/SHPLONK 的 proof 由 column 結構決定、不由行數決定；N 變大只是行數變多（k 從 13 到 18），column schema 不動，所以 proof 一格不變 —— N=8 跟 N=128 都是 34,368 bytes、verify 都約 10 ms。這正是 R3『第三方輕驗證』選 KZG 的原因。"]
+],
+'分層地圖':[
+ ["為什麼超越函數的問題不在電路層解，要多一個數值層？","電路層只有加、乘、查表這三種原語 —— 超越函數必須先在數值層被翻譯成「多項式＋定點」這種電路聽得懂的語言，電路層才有東西可以鎖。分層的意義是每層只解自己的問題、各自給出可證的保證：數值層保證誤差上界，電路層保證沒亂算，證明系統層保證可驗證 —— 三個保證疊起來才是完整的合規證明。"],
+ ["這個分層是你們發明的嗎？","不是,這是把任何 ZK 應用都有的結構明講出來（類似網路的分層模型）。我們的貢獻集中在數值層（截斷策略、誤差預算、bit-budget）和它與電路層的接口（商餘閘、ByteTable）—— 應用層的金融模型跟證明系統層的 Halo2 都是既有的。講清楚分層,正是為了誠實標出貢獻的位置。"]
 ],
 '核心工具':[
  ["可信設定不是缺點嗎？為什麼還選 KZG？","是缺點，但可控：用『通用可更新』的 setup —— 做一次、所有電路共用，儀式裡只要一個人誠實銷毀秘密就安全。換來的是 proof 常數大小＋配對驗證便宜＋上鏈友善。免設定的代價（IPA 線性驗證、FRI 大 proof）對需要輕量、可重複驗證的合規反而更不利，所以這個取捨划算。"],
@@ -1411,10 +1473,13 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
   // teleprompter: while open, panels follow the slide you scroll to
   // ===== pipeline locator rail: mark which stage we are on + the connecting action between steps =====
-  const STAGE={};
+  const STAGE={'要解的問題':1,'為什麼難':1,'條件限制':1,'藍圖':1,
+    '兩條死路':2,'四個設計決定':2,'量測基準':2,'免費空間':2,'換道地圖':2,'逐步的代價':2,'量化飽和':2,'誤差預算':2,'函數與區間':2,
+    '核心 kernel':3,'算一步':3,'ExplicitRC':3,
+    '核心工具':4};
   slides.forEach(s=>{if(STAGE[s.dataset.label])s.classList.add('rail');});
   const rail=document.createElement('div'); rail.className='flowrail';
-  rail.innerHTML='<div class="fr-title">證明流程 · 你在這</div>'+[[1,'算術化 · 排表','填見證 + 加規則'],[2,'加約束 · 閘/複製/查表','每欄插值成多項式'],[3,'多項式 · 整除 Z_H','承諾每條多項式'],[4,'KZG 承諾','FS 抽隨機點 + 批次'],[5,'SHPLONK 批次開啟','在 ζ 開啟 + 配對'],[6,'隨機點驗證',null]].map(a=>'<div class="fr-stage" data-s="'+a[0]+'"><span class="fr-n">'+a[0]+'</span>'+a[1]+'</div>'+(a[2]?'<div class="fr-arrow">↓ '+a[2]+'</div>':'')).join('');
+  rail.innerHTML='<div class="fr-title">系統分層 · 你在這</div>'+[[1,'應用層 · 要證什麼','超越函數逼出'],[2,'數值層 · 實數→整數','每步交給閘鎖死'],[3,'電路層 · 鎖死誠實','壓成多項式承諾'],[4,'證明系統 · 平台',null]].map(a=>'<div class="fr-stage" data-s="'+a[0]+'"><span class="fr-n">'+a[0]+'</span>'+a[1]+'</div>'+(a[2]?'<div class="fr-arrow">↓ '+a[2]+'</div>':'')).join('');
   document.body.appendChild(rail);
   rail.querySelectorAll('.fr-stage').forEach(n=>n.addEventListener('click',()=>{const s=+n.dataset.s;const t=slides.find(sl=>STAGE[sl.dataset.label]===s);if(t)t.scrollIntoView();}));
   function updateRail(){const s=STAGE[labels[viewIdx]||''];if(s){rail.classList.add('show');rail.querySelectorAll('.fr-stage').forEach(n=>n.classList.toggle('active',+n.dataset.s===s));}else rail.classList.remove('show');}
