@@ -560,6 +560,41 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="slide-meta"><span class="part-label">旅程 6/8 · 被逼的選擇</span> · 取捨 2：為什麼不能直接放</div>
   <h2>兩條直覺的路，<span class="accent">都是死路</span></h2>
   <div class="whybox"><span class="tag">❓ 為什麼不能直接放進去</span>：要在電路裡算 \( \ln,\exp,\mathrm{erf} \)，直覺只有兩條路 —— 查表、或多項式逼近。先看清楚兩條各死在哪，才知道我們的選擇是被逼出來的。</div>
+  <figure style="margin:.3rem 0 .2rem">
+    <svg viewBox="0 0 940 148" role="img" aria-label="分岔圖：超越函數進電路的兩條直覺路 —— 查表爆量死路；多項式有 Taylor 崩潰與中間值脹爆兩個坑，靠 Minimax 加截斷策略走通" style="width:100%;max-width:1000px">
+      <defs><marker id="de-arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#55596b"/></marker>
+      <marker id="de-grn" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#16a34a"/></marker></defs>
+      <!-- start -->
+      <rect x="8" y="48" width="168" height="52" rx="9" fill="var(--surface)" stroke="#94a3b8" stroke-width="1.7"/>
+      <text x="92" y="69" font-size="12" text-anchor="middle" fill="#1a1a1f" font-weight="900">ln · exp · erf 要進 𝔽ᵣ</text>
+      <text x="92" y="87" font-size="9.5" text-anchor="middle" fill="#55596b">體裡只有整數加與乘</text>
+      <!-- fork up: lookup -->
+      <line x1="176" y1="60" x2="248" y2="38" stroke="#55596b" stroke-width="1.8" marker-end="url(#de-arr)"/>
+      <rect x="252" y="14" width="196" height="46" rx="9" fill="var(--surface)" stroke="#94a3b8" stroke-width="1.6"/>
+      <text x="350" y="33" font-size="11.5" text-anchor="middle" fill="#1a1a1f" font-weight="800">路① 查表</text>
+      <text x="350" y="50" font-size="9.5" text-anchor="middle" fill="#55596b">每個輸入預先算好存表</text>
+      <line x1="448" y1="37" x2="512" y2="37" stroke="#dc2626" stroke-width="1.8" marker-end="url(#de-arr)"/>
+      <rect x="516" y="14" width="200" height="46" rx="9" fill="rgba(220,38,38,.06)" stroke="#dc2626" stroke-width="1.8"/>
+      <text x="616" y="33" font-size="11.5" text-anchor="middle" fill="#b91c1c" font-weight="900">💀 爆量：2^pp 格／函數</text>
+      <text x="616" y="50" font-size="9.5" text-anchor="middle" fill="#b91c1c">pp=32 → 43 億格，裝不下</text>
+      <text x="742" y="42" font-size="17" fill="#b91c1c" font-weight="900">✗</text>
+      <!-- fork down: polynomial -->
+      <line x1="176" y1="88" x2="248" y2="110" stroke="#55596b" stroke-width="1.8" marker-end="url(#de-arr)"/>
+      <rect x="252" y="88" width="196" height="46" rx="9" fill="var(--surface)" stroke="#94a3b8" stroke-width="1.6"/>
+      <text x="350" y="107" font-size="11.5" text-anchor="middle" fill="#1a1a1f" font-weight="800">路② 多項式逼近＋Horner</text>
+      <text x="350" y="124" font-size="9.5" text-anchor="middle" fill="#55596b">只用加乘就算得出來</text>
+      <line x1="448" y1="111" x2="512" y2="111" stroke="#55596b" stroke-width="1.8" marker-end="url(#de-arr)"/>
+      <rect x="516" y="88" width="200" height="46" rx="9" fill="rgba(217,119,6,.07)" stroke="#d97706" stroke-width="1.7"/>
+      <text x="616" y="104" font-size="10.5" text-anchor="middle" fill="#92400e" font-weight="800">坑A：Taylor 定點下崩潰</text>
+      <text x="616" y="121" font-size="10.5" text-anchor="middle" fill="#92400e" font-weight="800">坑B：中間值脹爆（2⁶²⁴）</text>
+      <line x1="716" y1="111" x2="748" y2="111" stroke="#16a34a" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#de-grn)"/>
+      <rect x="752" y="82" width="180" height="58" rx="9" fill="rgba(22,163,74,.08)" stroke="#16a34a" stroke-width="2"/>
+      <text x="842" y="102" font-size="11.5" text-anchor="middle" fill="#15803d" font-weight="900">唯一活路</text>
+      <text x="842" y="118" font-size="10" text-anchor="middle" fill="#15803d" font-weight="700">Minimax 解坑A</text>
+      <text x="842" y="133" font-size="10" text-anchor="middle" fill="#15803d" font-weight="700">截斷策略解坑B（下兩張）</text>
+    </svg>
+    <figcaption>本報告自製 · 兩條死路的數字在下方兩張卡片；坑 A／坑 B 的解法＝接下來的四個設計決定</figcaption>
+  </figure>
   <div class="grid-2">
     <div class="card red"><h3>死路①　查表：爆量</h3>
       <p>把每個輸入預先算好存表。<span class="muted" style="font-size:.9rem">（pp＝小數保留幾個二進位位；輸入有 2^pp 種，表就要 2^pp 格。）</span>精度一拉高，表就爆炸：</p>
@@ -639,6 +674,62 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <p class="muted" style="font-size:.9rem">rem 拆 <b>6 個 byte</b>（\(S=2^{48}=256^6\)）、逐一查同一張 <b>256 條目 ByteTable</b>（只存 0–255 的表＝合法硬幣面額清單）→ 餘數在範圍 ⟺ <b>誠實做了除法</b>。</p>
     </div>
   </div>
+  </div>
+  <figure style="margin:.45rem 0 0">
+    <svg viewBox="0 0 940 192" role="img" aria-label="一個 Horner step 的資料流：acc 乘 R 加係數，經商餘分解閘產出下一步 acc 與餘數，餘數拆 6 bytes 查 ByteTable" style="width:100%;max-width:1000px">
+      <defs><marker id="kf-arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#55596b"/></marker></defs>
+      <!-- acc_i -->
+      <rect x="8" y="40" width="100" height="42" rx="8" fill="rgba(37,99,235,.07)" stroke="#2563eb" stroke-width="1.6"/>
+      <text x="58" y="58" font-size="12" text-anchor="middle" fill="#1d4ed8" font-weight="800">accᵢ</text>
+      <text x="58" y="74" font-size="9" text-anchor="middle" fill="#55596b">第 i 步累積值</text>
+      <line x1="108" y1="61" x2="140" y2="61" stroke="#55596b" stroke-width="1.8" marker-end="url(#kf-arr)"/>
+      <!-- multiply-add -->
+      <rect x="144" y="34" width="158" height="54" rx="8" fill="var(--surface)" stroke="#94a3b8" stroke-width="1.6"/>
+      <text x="223" y="56" font-size="12" text-anchor="middle" fill="#1a1a1f" font-weight="800">乘加：accᵢ·R ＋ cᵢ</text>
+      <text x="223" y="74" font-size="9" text-anchor="middle" fill="#55596b">一列 advice 完成</text>
+      <rect x="144" y="128" width="66" height="34" rx="7" fill="rgba(124,58,237,.08)" stroke="#7c3aed" stroke-width="1.4"/>
+      <text x="177" y="142" font-size="10" text-anchor="middle" fill="#5b21b6" font-weight="800">R 輸入</text>
+      <text x="177" y="155" font-size="8.5" text-anchor="middle" fill="#55596b">witness</text>
+      <rect x="222" y="128" width="80" height="34" rx="7" fill="rgba(217,119,6,.08)" stroke="#d97706" stroke-width="1.4"/>
+      <text x="262" y="142" font-size="10" text-anchor="middle" fill="#92400e" font-weight="800">cᵢ 係數</text>
+      <text x="262" y="155" font-size="8.5" text-anchor="middle" fill="#55596b">fixed 欄（換函數只換這）</text>
+      <line x1="177" y1="128" x2="200" y2="92" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#kf-arr)"/>
+      <line x1="262" y1="128" x2="248" y2="92" stroke="#d97706" stroke-width="1.5" marker-end="url(#kf-arr)"/>
+      <line x1="302" y1="61" x2="334" y2="61" stroke="#55596b" stroke-width="1.8" marker-end="url(#kf-arr)"/>
+      <!-- intermediate value -->
+      <rect x="338" y="34" width="140" height="54" rx="8" fill="var(--surface)" stroke="#94a3b8" stroke-width="1.6"/>
+      <text x="408" y="56" font-size="11.5" text-anchor="middle" fill="#1a1a1f" font-weight="800">中間值 ≈96 bit</text>
+      <text x="408" y="74" font-size="9" text-anchor="middle" fill="#15803d">254-bit 保險箱裝得下</text>
+      <line x1="478" y1="61" x2="510" y2="61" stroke="#55596b" stroke-width="1.8" marker-end="url(#kf-arr)"/>
+      <!-- quotient-remainder gate -->
+      <rect x="514" y="30" width="140" height="62" rx="10" fill="rgba(124,58,237,.09)" stroke="#7c3aed" stroke-width="2"/>
+      <text x="584" y="52" font-size="12" text-anchor="middle" fill="#5b21b6" font-weight="900">商餘分解 ÷S 🔒</text>
+      <text x="584" y="69" font-size="9" text-anchor="middle" fill="#55596b">prover 填商與餘</text>
+      <text x="584" y="83" font-size="9" text-anchor="middle" fill="#55596b">一條閘鎖死</text>
+      <!-- quotient out -->
+      <line x1="654" y1="48" x2="694" y2="48" stroke="#55596b" stroke-width="1.8" marker-end="url(#kf-arr)"/>
+      <rect x="698" y="26" width="118" height="44" rx="8" fill="rgba(22,163,74,.08)" stroke="#16a34a" stroke-width="1.8"/>
+      <text x="757" y="44" font-size="12" text-anchor="middle" fill="#15803d" font-weight="800">商＝accᵢ₊₁</text>
+      <text x="757" y="61" font-size="9" text-anchor="middle" fill="#55596b">回到固定小數位</text>
+      <path d="M757,26 C757,6 300,4 226,30" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#kf-arr)"/>
+      <text x="500" y="16" font-size="9.5" text-anchor="middle" fill="#15803d" font-weight="700">↻ 下一步（共 d 步；最後一步輸出結果）</text>
+      <!-- remainder out -->
+      <line x1="614" y1="92" x2="648" y2="120" stroke="#55596b" stroke-width="1.8" marker-end="url(#kf-arr)"/>
+      <rect x="652" y="118" width="84" height="38" rx="8" fill="rgba(220,38,38,.06)" stroke="#dc2626" stroke-width="1.6"/>
+      <text x="694" y="134" font-size="11" text-anchor="middle" fill="#b91c1c" font-weight="800">餘數 rem</text>
+      <text x="694" y="149" font-size="8.5" text-anchor="middle" fill="#55596b">∈[0,S) 待驗</text>
+      <line x1="736" y1="137" x2="762" y2="137" stroke="#55596b" stroke-width="1.6" marker-end="url(#kf-arr)"/>
+      <g>
+        <rect x="766" y="128" width="16" height="16" rx="3" fill="#f1f5f9" stroke="#94a3b8"/><rect x="784" y="128" width="16" height="16" rx="3" fill="#f1f5f9" stroke="#94a3b8"/><rect x="802" y="128" width="16" height="16" rx="3" fill="#f1f5f9" stroke="#94a3b8"/><rect x="820" y="128" width="16" height="16" rx="3" fill="#f1f5f9" stroke="#94a3b8"/><rect x="838" y="128" width="16" height="16" rx="3" fill="#f1f5f9" stroke="#94a3b8"/><rect x="856" y="128" width="16" height="16" rx="3" fill="#f1f5f9" stroke="#94a3b8"/>
+        <text x="819" y="120" font-size="9" text-anchor="middle" fill="#55596b">拆 6 bytes（S=2⁴⁸=256⁶）</text>
+        <text x="819" y="158" font-size="9.5" text-anchor="middle" fill="#15803d" font-weight="800">每枚查 ByteTable（256 條目）✓</text>
+      </g>
+      <!-- gate strip -->
+      <rect x="8" y="170" width="924" height="20" rx="6" fill="rgba(217,119,6,.06)" stroke="#d97706" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <text x="470" y="184" font-size="10.5" text-anchor="middle" fill="#92400e" font-weight="800">閘：accᵢ·R ＋ cᵢ ＝ accᵢ₊₁·S ＋ rem —— 湊不回原金額、或 rem 拆不成 byte ⇒ 證明確定性失敗</text>
+    </svg>
+    <figcaption>本報告自製 · 結構出自 scenario_a_full/src/kernel.rs（horner_per_step 閘＋byte 分解）；一次呼叫 d=12＝14 rows、84 個 byte-lookup，全查同一張 256 表</figcaption>
+  </figure>
   <div class="ideabox" style="margin-top:.45rem"><span class="tag">💡 帳單 <span class="rg rg-p">🅟</span></span>：每次 kernel 呼叫（d=12）＝ <b>3 種 gate</b>（horner_per_step／R 拆 byte／W 拆 byte）、<b>14 rows</b>（d+2）、<b>84 個 byte-lookup</b>（(d+2)×6）—— 全部查<b>同一張</b> 256 表。<span class="muted">（出處：kernel.rs 檔頭與 gate 定義）</span></div>
   <div class="soulbox" style="margin-top:.35rem"><span class="tag">🎯 一句</span>：每一步都用「<b>商×S＋餘數</b>」的閘＋ByteTable 鎖死 —— <b>算得對、也沒有亂算的空間</b>。空口說無憑，下一張拿實際數字算一步給你看。</div>
 </section>
@@ -677,6 +768,35 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="slide-meta"><span class="part-label">旅程 7/8 · 保證沒亂算</span> · 連輸入都騙不了</div>
   <h2>ExplicitRC：連<span class="accent">輸入</span>都騙不了</h2>
   <div class="whybox"><span class="tag">❓ 為什麼可以信</span>：輸入 \(R\) 是 prover 私下給的。多項式逼近<b>只在選定區間內準</b>；他若餵一個超範圍的 \(R\)，輸出是垃圾、卻仍能過證明。怎麼擋？</div>
+  <figure style="margin:.3rem 0 .2rem">
+    <svg viewBox="0 0 940 132" role="img" aria-label="數線圖：合法輸入 R 在 0 到 R_max 之間，gap 拆成兩枚 byte；超界的 R 使 gap 為負、在體裡繞成巨數、拆不成 byte 而失敗" style="width:100%;max-width:1000px">
+      <defs><marker id="rc-arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#55596b"/></marker></defs>
+      <!-- axis -->
+      <line x1="50" y1="72" x2="900" y2="72" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#rc-arr)"/>
+      <!-- legal segment -->
+      <line x1="50" y1="72" x2="620" y2="72" stroke="#16a34a" stroke-width="5" opacity=".55"/>
+      <line x1="50" y1="62" x2="50" y2="82" stroke="#55596b" stroke-width="1.6"/>
+      <text x="50" y="98" font-size="11" text-anchor="middle" fill="#55596b" font-weight="700">0</text>
+      <line x1="620" y1="60" x2="620" y2="84" stroke="#b91c1c" stroke-width="2"/>
+      <text x="620" y="100" font-size="11" text-anchor="middle" fill="#b91c1c" font-weight="800">R_max（區間上界，電路常數）</text>
+      <text x="335" y="58" font-size="10.5" text-anchor="middle" fill="#15803d" font-weight="800">合法區：多項式在這裡才準</text>
+      <!-- honest R -->
+      <circle cx="400" cy="72" r="6" fill="#16a34a"/>
+      <text x="400" y="118" font-size="11" text-anchor="middle" fill="#15803d" font-weight="800">R（witness）</text>
+      <!-- gap brace -->
+      <path d="M404,34 H616" fill="none" stroke="#7c3aed" stroke-width="1.6"/>
+      <line x1="404" y1="34" x2="404" y2="42" stroke="#7c3aed" stroke-width="1.6"/>
+      <line x1="616" y1="34" x2="616" y2="42" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="510" y="24" font-size="10.5" text-anchor="middle" fill="#5b21b6" font-weight="800">gap ＝ R_max − R ＝ gap_lo ＋ gap_hi·256（兩枚 byte，查共用 ByteTable）✓ 唯一分解</text>
+      <!-- cheating R' -->
+      <circle cx="780" cy="72" r="6" fill="#dc2626"/>
+      <text x="780" y="98" font-size="11" text-anchor="middle" fill="#b91c1c" font-weight="800">R′ 超界</text>
+      <text x="780" y="42" font-size="10.5" text-anchor="middle" fill="#b91c1c" font-weight="800">gap 為負 → 體裡 wrap 成 ≈2²⁵⁴ 巨數</text>
+      <text x="780" y="57" font-size="10.5" text-anchor="middle" fill="#b91c1c" font-weight="800">→ 拆不成 2 bytes ⇒ 確定性失敗 ✗</text>
+      <text x="470" y="128" font-size="9.5" text-anchor="middle" fill="#8b94a3">同一招在 kernel 內也用來鎖 rem —— 全電路只需這一張 256 條目的表</text>
+    </svg>
+    <figcaption>本報告自製 · 約束：gap_lo＋gap_hi·256＋R＝R_max（成本僅 1 gate）；出處見本頁下方與 kernel.rs</figcaption>
+  </figure>
   <div class="grid-2">
     <div>
       <div class="fbox"><div class="lbl">gap decomposition 約束</div>
@@ -849,6 +969,25 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <div class="card"><h3>\(\varepsilon_{\mathrm{quant}}\) 量化</h3><p style="font-size:.9rem">係數 \(D_i\) 取整的誤差；高次係數在較高 scale、相對誤差小。</p></div>
     <div class="card"><h3>\(\varepsilon_{\mathrm{trunc}}\) 截斷</h3><p style="font-size:.9rem">看 kernel：<b>延遲</b><span class="rg rg-e">🅔</span>只截最後一次 → <b>≤1 ULP</b>；<b>per-step</b><span class="rg rg-p">🅟</span>每步 floor 各 &lt;1 ULP、最壞累到 <b>≈d ULP</b>。</p></div>
   </div>
+  <figure style="margin:.4rem 0 0">
+    <svg viewBox="0 0 940 118" role="img" aria-label="橫條圖：pp=48 d=12 的最壞解析上界約 12 ULP，實測 exp kernel 2.81 ULP、Delta 端到端 7 ULP，皆落在界內" style="width:100%;max-width:1000px">
+      <g font-size="11" font-weight="700">
+        <!-- scale: 12 ULP = 660px, start x=210 -->
+        <rect x="210" y="8" width="660" height="18" rx="4" fill="none" stroke="#d97706" stroke-width="1.8" stroke-dasharray="6 3"/>
+        <text x="204" y="22" text-anchor="end" fill="#92400e">解析上界（最壞 ≈d）</text>
+        <text x="876" y="22" fill="#92400e">12 ULP</text>
+        <rect x="210" y="38" width="155" height="18" rx="4" fill="#16a34a"/>
+        <text x="204" y="52" text-anchor="end" fill="#15803d">實測 · exp kernel</text>
+        <text x="371" y="52" fill="#15803d">2.81 ULP</text>
+        <rect x="210" y="68" width="385" height="18" rx="4" fill="#4ade80"/>
+        <text x="204" y="82" text-anchor="end" fill="#15803d">實測 · Delta 端到端</text>
+        <text x="601" y="82" fill="#15803d">7 ULP（含上游 FpMul/FpDiv 鏈）</text>
+      </g>
+      <line x1="210" y1="94" x2="870" y2="94" stroke="#94a3b8" stroke-width="1.2"/>
+      <g font-size="9.5" fill="#8b94a3" text-anchor="middle"><text x="210" y="108">0</text><text x="430" y="108">4</text><text x="650" y="108">8</text><text x="870" y="108">12 ULP</text></g>
+    </svg>
+    <figcaption>本報告自製 <span class="rg rg-p">🅟</span> pp=48、d=12 · 界＝per-step 每步 floor &lt;1 ULP × d 步的最壞累積；實測出自 benches/pf1_results.md（2026-07-08b 定版）—— 穩落在界內</figcaption>
+  </figure>
   <div class="card green" style="margin-top:.4rem"><h3>界 vs 實測（兩個都要給）</h3>
     <p style="font-size:.95rem"><span class="rg rg-p">🅟</span> pp=48、d=12 的界是「最壞 ≈12 ULP／步鏈」；<b>實測</b>：exp kernel（Remez、[0,ln2) 單段）max <b>2.81 ULP</b>，Delta 端到端 <b>7 ULP</b>（d₁ 中途值 15 ULP，含上游 FpMul/FpDiv 鏈）—— 實測穩穩落在界內，1 ULP 只有 2⁻⁴⁸≈3.6×10⁻¹⁵。<span class="muted">（出處：scenario_a_full HANDOFF.md、benches/pf1_results.md）</span></p>
   </div>
@@ -882,6 +1021,101 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     </div>
   </div>
   <div class="soulbox"><span class="tag">🎯 取捨</span>：<b>精度 ↔ 覆蓋範圍</b> 是一條拉鋸線；想又準又廣，得切段 + range reduction，而切段會放大 proof（🅒 的 erf 5 段讓 proof ×2.2 → 15,360 B；「成果與限界」會兌現這個代價）。</div>
+</section>
+
+<!-- ===== 7.5 · DECISION PATH MAP (all decision nodes + their chaining) ===== -->
+<section class="slide" data-part="" data-label="決策路線圖">
+  <div class="slide-meta"><span class="part-label">旅程 6–7/8 · 選擇的串連</span> · 七個節點、一條被逼出來的路</div>
+  <h2>決策路線圖：<span class="accent">每個節點選了什麼、殺掉了什麼、又逼出下一題</span></h2>
+  <div class="whybox" style="margin-bottom:.3rem"><span class="tag">❓ 這張是什麼</span>：前面把每個取捨各講了一張，這張把<b>七個決策節點串成一條鏈</b> —— 左邊綠色是選的路，右邊紅色是死掉的選項與死因，每個節點下面那行字，就是這個選擇<b>逼出的下一題</b>。這不是七個獨立旋鈕：改任何一個節點，下游全部連動。</div>
+  <figure style="margin:.1rem 0 0">
+    <svg viewBox="0 0 960 592" role="img" aria-label="七個決策節點鏈：平台、數值表示、超越函數路線、逼近方法、截斷時機、電路結構、資料承諾；左為採用方案、右為淘汰方案與死因" style="width:100%;max-width:1010px">
+      <defs><marker id="dp-dn" markerWidth="8" markerHeight="8" refX="4" refY="6" orient="auto"><path d="M0,0 L8,0 L4,7 z" fill="#55596b"/></marker></defs>
+      <text x="46" y="18" font-size="11" fill="#15803d" font-weight="800">✓ 選的路</text>
+      <text x="470" y="18" font-size="11" fill="#b91c1c" font-weight="800">✗ 死掉的選項（死因）</text>
+      <!-- chain spine -->
+      <line x1="30" y1="30" x2="30" y2="574" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4"/>
+      <!-- ============ row 1: platform (taller: 4 rejects) ============ -->
+      <circle cx="30" cy="62" r="12" fill="#4f46e5"/><text x="30" y="66" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">1</text>
+      <rect x="46" y="28" width="380" height="68" rx="9" fill="rgba(22,163,74,.07)" stroke="#16a34a" stroke-width="1.7"/>
+      <text x="58" y="46" font-size="12" fill="#15803d" font-weight="900">平台：Halo2（PLONKish）＋ KZG · BN254</text>
+      <text x="58" y="62" font-size="10" fill="#55596b">自訂閘＋原生 lookup＋通用可更新 SRS</text>
+      <text x="58" y="77" font-size="10" fill="#55596b">曲線 BN254：生態／SRS／消融基準同棧（方法正交）</text>
+      <text x="58" y="91" font-size="9.5" fill="#8b94a3">代價：一次性可信設定、不抗量子</text>
+      <rect x="440" y="28" width="510" height="68" rx="9" fill="rgba(220,38,38,.05)" stroke="#dc2626" stroke-width="1.4" stroke-dasharray="5 3"/>
+      <text x="452" y="45" font-size="10" fill="#b91c1c" font-weight="700">Groth16 ✗ 每電路重辦 setup；R1CS 只 deg-2、無 lookup → 做不了 kernel</text>
+      <text x="452" y="61" font-size="10" fill="#b91c1c" font-weight="700">STARK ✗ 高效能生態全小體（Goldilocks 64-bit）→ 96-bit 中間值塞不進；proof 偏大</text>
+      <text x="452" y="77" font-size="10" fill="#b91c1c" font-weight="700">IPA ✗ 免設定但驗證線性時間 → 輸給 R3 輕驗證</text>
+      <text x="452" y="92" font-size="10" fill="#b91c1c" font-weight="700">BLS12-381 ✗ halo2curves 官方不支援、SRS／基準都在 BN254（電路邏輯可平移）</text>
+      <line x1="30" y1="96" x2="30" y2="112" stroke="#55596b" stroke-width="1.8" marker-end="url(#dp-dn)"/>
+      <text x="46" y="110" font-size="10" fill="#7c3aed" font-weight="700">→ 平台給了 254-bit 保險箱＋加與乘 —— 實數運算怎麼進來？</text>
+      <!-- ============ row 2: number representation ============ -->
+      <circle cx="30" cy="142" r="12" fill="#4f46e5"/><text x="30" y="146" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">2</text>
+      <rect x="46" y="120" width="380" height="46" rx="9" fill="rgba(22,163,74,.07)" stroke="#16a34a" stroke-width="1.7"/>
+      <text x="58" y="138" font-size="12" fill="#15803d" font-weight="900">數值表示：定點 pp=48 <tspan font-size="10" fill="#55596b">（🅟；尺度 S=2⁴⁸）</tspan></text>
+      <text x="58" y="155" font-size="10" fill="#55596b">「用分記帳」：整數乘 S 模擬小數 · 48=6×8 恰好 byte 對齊</text>
+      <rect x="440" y="120" width="510" height="46" rx="9" fill="rgba(220,38,38,.05)" stroke="#dc2626" stroke-width="1.4" stroke-dasharray="5 3"/>
+      <text x="452" y="139" font-size="10" fill="#b91c1c" font-weight="700">浮點 ✗ 有限體裡根本不存在；模擬 IEEE754 的對齊／捨入每步都要 range check，</text>
+      <text x="452" y="154" font-size="10" fill="#b91c1c" font-weight="700">一次浮點乘的電路成本 ≈ 整條 kernel</text>
+      <line x1="30" y1="166" x2="30" y2="182" stroke="#55596b" stroke-width="1.8" marker-end="url(#dp-dn)"/>
+      <text x="46" y="180" font-size="10" fill="#7c3aed" font-weight="700">→ 小數變整數了 —— 但 ln／exp／erf 這些超越函數怎麼算？</text>
+      <!-- ============ row 3: transcendental route ============ -->
+      <circle cx="30" cy="212" r="12" fill="#4f46e5"/><text x="30" y="216" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">3</text>
+      <rect x="46" y="190" width="380" height="46" rx="9" fill="rgba(22,163,74,.07)" stroke="#16a34a" stroke-width="1.7"/>
+      <text x="58" y="208" font-size="12" fill="#15803d" font-weight="900">超越函數路線：多項式逼近</text>
+      <text x="58" y="225" font-size="10" fill="#55596b">只用加與乘就算得出來 —— 電路唯一原生聽得懂的形式</text>
+      <rect x="440" y="190" width="510" height="46" rx="9" fill="rgba(220,38,38,.05)" stroke="#dc2626" stroke-width="1.4" stroke-dasharray="5 3"/>
+      <text x="452" y="209" font-size="10" fill="#b91c1c" font-weight="700">整函數查表 ✗ 表要 2^pp 格／函數：pp=24→1,680 萬、pp=32→43 億格，</text>
+      <text x="452" y="224" font-size="10" fill="#b91c1c" font-weight="700">金融要 pp=24–48 → 任何電路都裝不下（低 pp 大批次它仍贏，誠實承認）</text>
+      <line x1="30" y1="236" x2="30" y2="252" stroke="#55596b" stroke-width="1.8" marker-end="url(#dp-dn)"/>
+      <text x="46" y="250" font-size="10" fill="#7c3aed" font-weight="700">→ 走多項式 —— 用哪種多項式？</text>
+      <!-- ============ row 4: approximation ============ -->
+      <circle cx="30" cy="282" r="12" fill="#4f46e5"/><text x="30" y="286" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">4</text>
+      <rect x="46" y="260" width="380" height="46" rx="9" fill="rgba(22,163,74,.07)" stroke="#16a34a" stroke-width="1.7"/>
+      <text x="58" y="278" font-size="12" fill="#15803d" font-weight="900">逼近方法：Minimax（Remez）</text>
+      <text x="58" y="295" font-size="10" fill="#55596b">全區間 L∞ 最佳 · 🅔 13 函數最小 degree 全 ULP≤1（延遲）</text>
+      <rect x="440" y="260" width="510" height="46" rx="9" fill="rgba(220,38,38,.05)" stroke="#dc2626" stroke-width="1.4" stroke-dasharray="5 3"/>
+      <text x="452" y="279" font-size="10" fill="#b91c1c" font-weight="700">Taylor ✗ 定點量化下崩潰：pp=32、d=10 的 ln 只剩 4.4 有效位</text>
+      <text x="452" y="294" font-size="10" fill="#b91c1c" font-weight="700">（同條件 Minimax 28.6 位）—— 不是「比較差」，是不能用</text>
+      <line x1="30" y1="306" x2="30" y2="322" stroke="#55596b" stroke-width="1.8" marker-end="url(#dp-dn)"/>
+      <text x="46" y="320" font-size="10" fill="#7c3aed" font-weight="700">→ Horner 求值每乘一步長 pp 位、中間值會脹 —— 什麼時候截斷？</text>
+      <!-- ============ row 5: truncation ============ -->
+      <circle cx="30" cy="352" r="12" fill="#4f46e5"/><text x="30" y="356" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">5</text>
+      <rect x="46" y="330" width="380" height="46" rx="9" fill="rgba(22,163,74,.07)" stroke="#16a34a" stroke-width="1.7"/>
+      <text x="58" y="348" font-size="12" fill="#15803d" font-weight="900">截斷時機：per-step <tspan font-size="10" fill="#55596b">（🅟；每步除回 S）</tspan></text>
+      <text x="58" y="365" font-size="10" fill="#55596b">中間值恆 ≈2·pp bit（pp=48→96 bit）· 任何 pp 都不溢位</text>
+      <rect x="440" y="330" width="510" height="46" rx="9" fill="rgba(220,38,38,.05)" stroke="#dc2626" stroke-width="1.4" stroke-dasharray="5 3"/>
+      <text x="452" y="349" font-size="10" fill="#b91c1c" font-weight="700">延遲截斷 ✗（高 pp）bit-budget (d+1)·pp&lt;254：pp=48 只容 d≤4、管線要 d=12</text>
+      <text x="452" y="364" font-size="10" fill="#b91c1c" font-weight="700">→ 根本算不出來（🅔 低 pp 它精度較好，仍用於實驗場＋pp=24 備援）</text>
+      <line x1="30" y1="376" x2="30" y2="392" stroke="#55596b" stroke-width="1.8" marker-end="url(#dp-dn)"/>
+      <text x="46" y="390" font-size="10" fill="#7c3aed" font-weight="700">→ 每步的除法＋輸入範圍要鎖死、函數還要能換 —— 電路長什麼樣？</text>
+      <!-- ============ row 6: circuit structure ============ -->
+      <circle cx="30" cy="422" r="12" fill="#4f46e5"/><text x="30" y="426" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">6</text>
+      <rect x="46" y="400" width="380" height="46" rx="9" fill="rgba(22,163,74,.07)" stroke="#16a34a" stroke-width="1.7"/>
+      <text x="58" y="418" font-size="12" fill="#15803d" font-weight="900">電路結構：通用 Horner kernel＋ByteTable＋ExplicitRC</text>
+      <text x="58" y="435" font-size="10" fill="#55596b">商餘閘鎖截斷 · 一張 256 表全函數共用 · 換函數只換 d 個係數</text>
+      <rect x="440" y="400" width="510" height="46" rx="9" fill="rgba(220,38,38,.05)" stroke="#dc2626" stroke-width="1.4" stroke-dasharray="5 3"/>
+      <text x="452" y="419" font-size="10" fill="#b91c1c" font-weight="700">每函數專用電路 ✗ 換函數＝重設計電路 → R4 直接陣亡</text>
+      <text x="452" y="434" font-size="10" fill="#b91c1c" font-weight="700">ORV（輸出範圍驗證）✗ 想省輸入檢查，但 13 函數有 7 個 security gap</text>
+      <line x1="30" y1="446" x2="30" y2="462" stroke="#55596b" stroke-width="1.8" marker-end="url(#dp-dn)"/>
+      <text x="46" y="460" font-size="10" fill="#7c3aed" font-weight="700">→ 函數會換（低頻）之外，市場資料天天變（高頻）—— 怎麼進電路？</text>
+      <!-- ============ row 7: data commitment ============ -->
+      <circle cx="30" cy="492" r="12" fill="#4f46e5"/><text x="30" y="496" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">7</text>
+      <rect x="46" y="470" width="380" height="46" rx="9" fill="rgba(22,163,74,.07)" stroke="#16a34a" stroke-width="1.7"/>
+      <text x="58" y="488" font-size="12" fill="#15803d" font-weight="900">市場資料：Merkle root 當公開輸入</text>
+      <text x="58" y="505" font-size="10" fill="#55596b">每天只換 root，電路／VK／setup 完全不動</text>
+      <rect x="440" y="470" width="510" height="46" rx="9" fill="rgba(220,38,38,.05)" stroke="#dc2626" stroke-width="1.4" stroke-dasharray="5 3"/>
+      <text x="452" y="489" font-size="10" fill="#b91c1c" font-weight="700">塞進電路內表格／fixed 欄 ✗ 每日更新＝改電路常數 → 天天重 keygen、VK 天天變，</text>
+      <text x="452" y="504" font-size="10" fill="#b91c1c" font-weight="700">驗證方天天重收 → 低頻的「函數係數」才走 fixed 欄，高頻資料走 Merkle</text>
+      <!-- terminal -->
+      <line x1="30" y1="516" x2="30" y2="538" stroke="#55596b" stroke-width="1.8" marker-end="url(#dp-dn)"/>
+      <rect x="46" y="540" width="904" height="40" rx="9" fill="rgba(124,58,237,.07)" stroke="#7c3aed" stroke-width="1.8"/>
+      <text x="498" y="558" font-size="11.5" text-anchor="middle" fill="#5b21b6" font-weight="900">＝ 藍圖：每晚一張 34,368 B proof · verify ≈10 ms · 部位零揭露（R1–R5 全兌現）</text>
+      <text x="498" y="574" font-size="9.5" text-anchor="middle" fill="#8b94a3">每一個節點的死因，前面都有專屬投影片攤開數字 —— 這張只是把路串起來</text>
+    </svg>
+    <figcaption>本報告自製 · 各節點死因出處：核心工具（1）、兩條死路（2·3）、四個設計決定（4）、免費空間／換道地圖（5）、核心 kernel／ExplicitRC（6）、條件 R4 量尺（7）</figcaption>
+  </figure>
+  <div class="soulbox" style="margin-top:.3rem"><span class="tag">🎯 讀法</span>：這條鏈的因果是<b>單向被逼</b>的 —— 選了 254-bit 平台才有 bit-budget 問題、選了定點才有截斷問題、選了 per-step 才需要商餘閘。<b>反過來驗證也成立</b>：想換掉任何一個紅色選項，就得把它下游的所有節點重選一遍。路走完了 —— 那這條路上什麼是新的？下一張誠實定位。</div>
 </section>
 
 <!-- ===== 8 · WHERE WE STAND (honest positioning) ===== -->
@@ -1069,6 +1303,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '換道地圖':"兩種截斷的整個故事,濃縮成這一張地圖。橫軸是定點精度 pp,縱軸是次數 d,那條線就是 (d+1) 乘 pp 等於 254 —— 保險箱的邊界。\n線下是紅利區:pp=16、d 四到七,加上備援 kernel 的 pp=24、d=8,延遲截斷都塞得進去 —— 吃紅利、拿 ULP=1。\n線上只剩 per-step:Scenario C 的 pp=32、d=10,延遲的中間值估 320 位,實測直接標 INFEASIBLE;出貨的 pp=48、d=12 更要 624 位。per-step 的中間值永遠約 96 位,degree 怎麼加都安全。\n一定有人問:那高 pp 配低 d、留在紅利區不行嗎?不行,那裡沒有可用的精度 —— pp=48、d=4 的 ln 誤差是 6.9 乘 10 的 7 次方個 ULP,等於沒算。紅利區在高 pp 是空的。\n所以換道是被逼的,代價是精度 —— 下一張把這筆帳一項一項攤開。",
 '逐步的代價':"這張是誠實的帳單:per-step 到底輸延遲多少。exp03b 的完整消融,pp=16、13 個函數、各自用最小可行的 degree。\n結果一翻兩瞪眼:同一組係數、同一個 degree,延遲 13 個全部 ULP=1;per-step 一個都沒有,誤差 2 到 7 倍。所以前面那句「13 函數全 ULP=1」永遠要掛兩個標籤:實驗場、延遲截斷。它不是出貨 kernel 的成績 —— 這一點我們自己先講,不等人來抓。\n那出貨怎麼辦?用 degree 贖。pp=48 把 d 從最小可行的 5 左右拉到 12,實測 exp kernel 最大 2.81 ULP、Delta 端到端 7 ULP。而且高精度下每個 ULP 只有 2 的負 48 次方 —— 7 個 ULP 大約 10 的負 14 次方,對金融門檻綽綽有餘。\ndegree 是用錢買精度 —— 那是不是加越多越好?下一張看實測。",
 '證明多大':"最後這把尺回答老師一定會問的:你們 proof 到底是 5KB 還是 34KB?答案是都對,差別在裡面裝了多少東西。\n從左到右六個刻度:736 bytes 是單函數直接查表的 proof,最小,但那張表本身六萬多格。1,472 是 per-step kernel 單獨的價格。4,992 是延遲 kernel 加輸入範圍檢查 —— 除以 736 就是「比查表大 6.8 倍」的出處。5 到 9.5 KB 是單函數端到端,含 range reduction 跟分段。15,360 是 Merton 完整情境。34,368 是整個投資組合:Merkle、95 個 advice 欄、91 個 lookup 參數,全部裝進去。\n重點讀法:這不是越做越肥,是裝的東西越來越多。而且 KZG 的常數大小讓最後一格不隨 N 長大 —— 8 個部位跟 128 個部位,proof 一樣大、驗證一樣約 10 毫秒。這就是「整個投組、一張證明、毫秒驗證」的具體樣子。",
+'決策路線圖':"取捨一張一張講完了,這張把整條路串起來 —— 七個決策節點,左邊綠色是選的路,右邊紅色是死掉的選項跟死因。\n重點不是每個節點選了什麼,那前面都講過了 —— 重點是節點之間的串連:每個選擇都逼出下一題。選了 Halo2 跟 BN254,拿到 254 位的保險箱跟自訂閘,但實數運算得自己蓋 —— 逼出定點。選了定點,超越函數還是進不來 —— 查表爆量,只剩多項式。走多項式,Taylor 在定點下崩潰 —— 只剩 Minimax。用 Horner 求值,中間值每乘一步脹 pp 位 —— 高精度下延遲截斷撞上 bit-budget,只剩 per-step。per-step 每步都有一個除法要鎖 —— 逼出商餘閘跟 ByteTable;函數要能換 —— 逼出通用 kernel;輸入要防超界 —— ORV 試過,7 個函數有安全漏洞,改 ExplicitRC。最後,市場資料天天變 —— 塞進電路等於天天重 keygen、VK 天天變,所以走 Merkle root,每天只換 root、VK 不動。\n反過來驗證也成立:想把任何一個紅色選項救回來,它下游的所有節點都要重選一遍 —— 這就是「被逼出來的路」的意思,不是七個獨立的旋鈕。路走完了,下一張講這條路上什麼是新的。",
   };
 
   const deck=document.getElementById('deck');
@@ -1189,6 +1424,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '免費空間':["延遲截斷 (deferred)","逐步截斷 (per-step)","bit-budget","暫存空間 (紅利)","BN254","pp (定點精度)","degree (多項式次數 d)","中間值膨脹","溢位 (overflow)"],
 '量化飽和':["量化飽和","d* (最佳 degree)","harmful degree","degree (多項式次數 d)","量化誤差","逼近誤差","ULP","pp (定點精度)"],
 '函數與區間':["係數條件數","精度地板","區間 (interval)","range reduction","piecewise (分段)","ULP","erf (誤差函數)","exp / ln / erf","degree (多項式次數 d)"],
+'決策路線圖':["PLONKish","KZG 承諾","BN254","Groth16 / R1CS","FRI / STARK","IPA (內積論證)","定點 pp=48","查表 (lookup)","Minimax / Remez","Taylor 展開","逐步截斷 (per-step)","延遲截斷 (deferred)","bit-budget","通用 Horner kernel","ByteTable","ExplicitRC","Merkle 承諾","fixed 欄"],
 '我們站在哪':["查表 (lookup)","ezkl / zkLLM","ZKFixedPointChip","FHE","Minimax / Remez","Taylor 展開","量化飽和","延遲截斷 (deferred)","bit-budget","誤差預算 (error budget)","窮舉驗證","ByteTable","exp / ln / erf"],
 '成果與限界':["Scenario A","Scenario C","Black–Scholes Delta","Merton 模型","ULP","有效位 (有效數字)","proof (證明 π)","verify (驗證)","piecewise (分段)","bit-budget","查表 (lookup)","range reduction"],
 '量測基準':["pp (定點精度)","延遲截斷 (deferred)","逐步截斷 (per-step)","proof (證明 π)","verify (驗證)","ULP","窮舉驗證"],
@@ -1249,6 +1485,11 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '函數與區間':[
  ["係數條件數差這麼多，能不能改寫多項式讓 ln 也變好？","可以用更好的基底/區間縮放改善條件數（我們就靠窄區間+range reduction 把 ln 拉到 ULP=1），但『地板由函數係數結構決定』這件事不會消失 —— 有些函數天生難逼近，這是要承認的限制。"],
  ["窄區間更準，那為什麼不把所有函數都用超窄區間？","因為覆蓋會不夠，得靠 range reduction 把輸入化簡進窄區間、再還原 —— 這多出一段電路與額外誤差。所以是『精度 ↔ 覆蓋 + 額外電路成本』的三方取捨,不是越窄越好。"]
+],
+'決策路線圖':[
+ ["這七個節點的順序是設計出來的，還是事後整理的？","講的順序跟邏輯依賴一致，但誠實說：實作中有迭代 —— ORV 是先試過、消融發現 13 函數有 7 個 security gap 才換 ExplicitRC；延遲截斷也是低 pp 實驗做完，才確立高 pp 必須換道。圖上畫的是「誰逼出誰」的邏輯鏈，不是嚴格時間軸；因果是真的，時間上有來回。"],
+ ["有沒有哪個節點其實可以換，而且下游不用全改？","有，分兩類。曲線（BN254→BLS12-381）跟方法正交：電路邏輯與 bit-budget 分析幾乎不動（純量體 255 bit，邊界只差 1 bit），換的是基域＋SRS 的工程遷移。但數值層節點（逼近方法、截斷時機）一動，誤差預算、degree 選擇、電路 rows 全部連動重算 —— 這也是為什麼整份報告花最多篇幅在數值層。"],
+ ["把七個節點串成一條線，會不會把設計講得太線性、太漂亮？","圖上每個死因都有專屬投影片攤開實測數字，不是事後補的敘事；而且我們保留了不漂亮的部分 —— 延遲截斷沒有被「淘汰」，它在低 pp 實驗場精度更好、還留作 pp=24 備援 kernel；查表在低 pp 大批次也仍然比我們強。線性的是邏輯依賴，不是優劣的全稱判斷。"]
 ],
 '我們站在哪':[
  ["既然 ZKFixedPointChip 2023 已經用 Remez，你們到底新在哪？","他們把 Remez 用在定點電路，但沒有系統化的 Minimax-vs-Taylor 量化分析、沒有量化飽和的記錄、沒有 ln/erf 的誤差分析電路、也沒有 Horner 鏈內延遲截斷的 bit-budget 分析。我們新的是『分析+誤差保證+金融落地』那一層，不是『首次在 ZK 用 minimax』。"],
