@@ -400,7 +400,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <p style="font-size:.92rem;margin-top:.35rem"><b>Merton 是誰</b>：1974 年的結構式信用模型 —— 用公司資產價值推「違約機率」。論文的<b>第二個真實金融情境</b>，證明方法不綁死在 Black–Scholes。</p>
       <p style="font-size:.88rem;margin-top:.35rem" class="muted">出自這裡：28.6–29.0 有效位、proof 15,360 B、verify ≈33 ms、erf 5 段。</p>
     </div>
-    <div class="card green"><h3><span class="rg rg-p">🅟</span> 出貨 pipeline</h3>
+    <div class="card green"><h3><span class="rg rg-p">🅟</span> 出貨 pipeline（PF1）</h3>
       <p style="font-size:.92rem"><b>配置</b>：Black–Scholes Delta 投組（Scenario A 完整版 scenario_a_full），pp=48、d=12，<b>per-step</b> 截斷。</p>
       <p style="font-size:.92rem;margin-top:.35rem"><b>用途</b>：實際交付的系統；延遲 kernel 只留作備援（pp=24、d=8）。</p>
       <p style="font-size:.88rem;margin-top:.35rem" class="muted">出自這裡：proof 34,368 B（任何 N）、verify ≈10 ms、exp kernel 2.81 ULP、Delta 端到端 7 ULP。</p>
@@ -497,9 +497,15 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <text x="398" y="147" font-size="10" text-anchor="middle" fill="#8b94a3">prove：N=8/32/128 → 4.7/26.7/109 s</text>
       <!-- proof -->
       <line x1="504" y1="108" x2="574" y2="108" stroke="#55596b" stroke-width="1.8" marker-end="url(#bp-arr)"/>
+      <text x="642" y="76" font-size="8.5" text-anchor="middle" fill="#8b94a3" font-weight="700">每晚交三件：state_root · PF1 · PF2</text>
       <rect x="578" y="83" width="128" height="50" rx="10" fill="rgba(22,163,74,.08)" stroke="#16a34a" stroke-width="2"/>
       <text x="642" y="104" font-size="12.5" text-anchor="middle" fill="#15803d" font-weight="900">proof 34,368 B</text>
       <text x="642" y="120" font-size="10" text-anchor="middle" fill="#55596b">N=8 或 128 都一樣大</text>
+      <!-- PF2 shadow (commercial scope, not covered) -->
+      <rect x="578" y="140" width="128" height="38" rx="10" fill="rgba(107,114,128,.06)" stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="5 3"/>
+      <text x="642" y="155" font-size="10" text-anchor="middle" fill="#55596b" font-weight="800">＋ PF2 proof（State Transition）</text>
+      <text x="642" y="170" font-size="8.5" text-anchor="middle" fill="#8b94a3">保 state tree 完整 · 商業範圍不展開</text>
+      <line x1="706" y1="155" x2="778" y2="140" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#bp-arr)"/>
       <!-- verifier -->
       <line x1="706" y1="108" x2="776" y2="108" stroke="#55596b" stroke-width="1.8" marker-end="url(#bp-arr)"/>
       <rect x="780" y="52" width="152" height="112" rx="10" fill="var(--surface)" stroke="#d9dce3" stroke-width="1.6"/>
@@ -517,6 +523,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     </svg>
     <figcaption>本報告自製 · 數字：scenario_a_full benches/pf1_results.md（2026-07-08b 定版）、HANDOFF.md（公開輸入＝4，portfolio.rs:2206）</figcaption>
   </figure>
+  <div class="ideabox" style="margin-top:.4rem"><span class="tag">🧩 本報告在整個協議的哪一塊</span>：完整協議每晚交<b>三件</b>：state_root、<b>PF1</b>、<b>PF2</b>。<b>PF1＝本報告與論文的全部內容</b> —— 證「投組淨 Delta 曝險在限額內」（\( |\sum_i w_i\,\Delta_i S_i| \le \tau\cdot\mathrm{NAV} \)）。<b>PF2</b>（State Transition，綁交易所簽章）證 state tree 的每筆更新合法 —— PF1 的「State Tree 完整性」假設（Assumption 1）由它承擔，兩張 proof 以公開的 state_root 綁定。<b>PF2 屬商業範圍，本報告與論文皆不展開內部</b>（口徑同主報告）。</div>
   <div class="grid-2" style="margin-top:.4rem">
     <div class="card amber"><h3>誠實三註（藍圖不是童話）</h3>
       <ul style="font-size:.88rem">
@@ -1324,7 +1331,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   const NOTES = {
 '為什麼難':"上一張選了 ZK,這張講為什麼這件事難 —— 牆有三層。\n第一層:要算的東西全是超越函數。看 Delta 的公式:d1 要先算 ln(S/K)、除以 σ 乘根號 T,再把 d1 丟進常態機率 Φ,而 Φ 的核心是 erf;貼現還要一個 exp。Merton 的違約機率一樣,ln 跟 erf 一個都跑不掉。所以合規數學不是「碰巧用到」超越函數,它就是用超越函數寫成的。\n第二層:電路的世界裡只有一個 254 位質數體的保險箱,裡面只有整數的加法跟乘法。沒有浮點、沒有小數點、沒有 if/else、沒有長度隨資料變的迴圈 —— 連除法跟開根號都不存在。每一個實數運算,都得用整數加乘一磚一瓦重新蓋出來。\n第三層最容易被忽略:算的人正是利害關係人 —— prover 是被監管的基金自己。「大致對」在門檻邊界一文不值:差最後一位的一格,合規跟違規就翻盤 —— 論文裡的例子:投資級違約機率本身只有 10 到 100 個基點,誤差只要 ±0.002、也就是 20 個基點,判定就翻。所以誤差要的是可以證明的上界,不是測幾個點看起來不錯。\n三層牆疊起來:要重建超越函數、只有整數加乘當磚頭、蓋出來還得帶數學保證。下一張把「能用」的五個硬條件寫死。",
 '條件限制':"牆看清楚了,現在把「拆牆成功」的標準寫死 —— 五個硬條件,每條都有量尺,過不了任何一條就不能上線。\nR1,零部位揭露:部位、數量、每筆 Delta 永遠不離開基金;驗證者只看到 Merkle 承諾跟判定。量尺很具體:整個系統的公開輸入只有 4 個。\nR2,誤差要有可證明的上界:不是測起來準,是解析上界加實測雙保證 —— 出貨 kernel 實測 2.81 個 ULP、端到端 7 個,而 1 個 ULP 只有 2 的負 48 次方。\nR3,第三方輕驗證:proof 常數大小、毫秒級驗證。這裡誠實補一句:BN254 剛好是以太坊內建的 precompile 曲線,未來要上鏈可以不換體 —— 但那是紅利、是論文結論的展望,不是本場景的需求;我們的 verifier 是監管跟 LP,驗證在鏈下。\nR4,模型會演化:金融模型的函數跟係數會改版,改版不能重辦可信設定儀式、不能重設計電路 —— 換函數只能是「換係數＋重跑 keygen」這種等級的動作。誠實講,係數放 fixed 欄,VK 還是會變、驗證方要重收一次;所以每天都在變的市場資料走另一條路 —— Merkle root 當公開輸入,VK 完全不動。改版頻率決定走哪條路,這本身就是一個取捨。\nR5,工程可行:夜批要跑得完,prove 分鐘級、verify 毫秒級。\n右邊那欄是預告:每一條後面站著哪個設計決定。這張表是整份報告的地圖 —— 從現在起,每個「為什麼選 X」都是在答 R 幾。條件湊齊時終點長什麼樣?下一張給你藍圖。",
-'藍圖':"條件寫死了,先看終點 —— 這張圖就是每天晚上真實發生的事。\n左邊兩個輸入:基金的部位,私有 witness,N 從 8 到 128 筆,永遠不離開基金,只用 state_root 這個承諾示人;市場資料表,公開的,股價、利率、結算價、波動率,九個欄位一片葉子,壓成 market_data_root。\n中間是 PF1 電路:pp=48、d=12 的通用 Horner kernel,加上 Merkle 驗證、Delta 管線、門檻比較 —— 95 個 advice 欄、91 個 lookup。每晚跑一次,N=128 也就 109 秒。\n出來的是一張 34,368 bytes 的 proof —— 8 筆跟 128 筆部位,proof 一樣大。監管跟 LP 拿它對 4 個公開輸入驗證,10 毫秒驗完;看到的只有「合規,通過」,部位、Delta、任何明細都看不到。\n三句誠實的話。第一,market_data_root 是個雜湊,LP 自己重算不了 —— 實務上的信任錨是基金行政管理人:認證 NAV、提供重算工具,這寫在協議文件裡,不藏。第二,這是單一 prover 的 demo,金鑰管理跟正式 SRS 儀式沒做。第三,法律上 ZK proof 算不算合規證據,在論文範圍外。\n這張藍圖的每一個零件,都是一個被逼出來的選擇 —— 接下來一張一張拆。",
+'藍圖':"條件寫死了,先看終點 —— 這張圖就是每天晚上真實發生的事。\n左邊兩個輸入:基金的部位,私有 witness,N 從 8 到 128 筆,永遠不離開基金,只用 state_root 這個承諾示人;市場資料表,公開的,股價、利率、結算價、波動率,九個欄位一片葉子,壓成 market_data_root。\n中間是 PF1 電路:pp=48、d=12 的通用 Horner kernel,加上 Merkle 驗證、Delta 管線、門檻比較 —— 95 個 advice 欄、91 個 lookup。每晚跑一次,N=128 也就 109 秒。\n出來的是一張 34,368 bytes 的 proof —— 8 筆跟 128 筆部位,proof 一樣大。監管跟 LP 拿它對 4 個公開輸入驗證,10 毫秒驗完;看到的只有「合規,通過」,部位、Delta、任何明細都看不到。\n這裡把 scope 講清楚:完整協議每晚其實交三件 —— state_root、PF1、PF2。這份報告跟論文的全部內容都是 PF1,證投組的 Delta 合規;PF2 是 State Transition 證明,綁交易所簽章,負責保證部位樹的每一筆更新都合法 —— PF1 假設樹是完整的,那個假設就由 PF2 承擔,兩張證明用公開的 state_root 綁在一起。PF2 屬商業範圍,今天不展開。\n三句誠實的話。第一,market_data_root 是個雜湊,LP 自己重算不了 —— 實務上的信任錨是基金行政管理人:認證 NAV、提供重算工具,這寫在協議文件裡,不藏。第二,這是單一 prover 的 demo,金鑰管理跟正式 SRS 儀式沒做。第三,法律上 ZK proof 算不算合規證據,在論文範圍外。\n這張藍圖的每一個零件,都是一個被逼出來的選擇 —— 接下來一張一張拆。",
 '分層地圖':"進零件之前,先給你一個座標系 —— 剛才的旅程地圖是時間軸,講我們怎麼一路走來;這張是空間圖,講系統分哪幾層。\n由上往下四層:應用層,金融合規 —— 要證什麼、準到哪;數值層 —— 把實數運算變成整數的逼近跟截斷;電路層 —— 用閘跟查表把每一步鎖死,讓 prover 沒有亂填的空間;最底下證明系統層 —— Halo2、KZG、BN254,把整件事變成一張 34KB、10 毫秒可驗的證明。\n兩個方向都要看。需求往下壓:合規要準,逼出數值層的逼近;數值要一步步算,交給電路層鎖死;電路要能驗,靠平台出證明。但限制也往上頂 —— 最重要的就是那條紅色虛線:證明系統層的 254 位保險箱,直接頂進數值層,劃出截斷策略的邊界,就是等下換道地圖那條線。\n從下一張開始,螢幕右邊會一直亮著「你在哪一層」—— 聽到任何取捨,你都知道我們正在修系統的哪個部分。先從最底層修起:為什麼平台選 Halo2。",
 '核心工具':"藍圖攤開了,第一個要拆的零件是最底層的平台 —— 證明系統跟承諾方案。老師一定會問:Groth16 的 proof 最小、驗證最快,你們為什麼不用最快的?\n我的答案是:快不等於合用。理由可以整理成四點 —— 這是論文的選型立場,加上工程上的判斷。\n第一,也是最關鍵的一點:表達力。我們的 kernel 需要兩樣東西 —— 自訂閘,逐步 Horner 加截斷;還有原生查表,ByteTable 範圍檢查。這裡我給個具體的價目:pp=48、d=12 的出貨 kernel,一次呼叫是 14 個 row,裡面有 14 次 48-bit 的範圍檢查 —— 每次把餘數拆成 6 個 byte,查同一張 256 表,總共 84 個 lookup。換成 R1CS 呢?沒有 lookup 這個原語,只能做位元分解,14 乘以 48,大約 690 條布林約束 —— 光範圍檢查這一項就貴大約 8 倍,再乘上投資組合的 N 個部位。誠實講,R1CS 不是「做不到」,它是每個原語都要攤平、貴一個級距;而 PLONKish 兩樣都原生給你,出貨電路 🅟 是 91 個 lookup 參數加 degree-6 的閘。所以 Groth16 再快,底層原語不對,整條路就走不順。\n第二,通用設定。Groth16 是每換一個電路就要重辦一次可信設定。這裡要說清楚,不是「金融模型天天改」那麼廉價的理由 —— 而是 R4 那條:我們換一個函數、換一組係數,在 Halo2 底下就只是換 fixed 欄的係數、重跑一次 keygen,幾十秒、沒有儀式;同一件事在 Groth16 底下,是重新找一批互不串通的人辦一場多方儀式。差別是幾十秒對一場儀式。至於每天在變的市場資料,走 Merkle root 當公開輸入,VK 完全不動。\n第三,proof 跟驗證夠用就好:數 KB、數毫秒、不隨投組大小變;STARK 免設定又抗量子,但 proof 偏大,小投組吃虧。\n第四,工程成熟度:halo2_proofs 已穩定,Jolt 這類新工具 API 還在動,金融應用要長期穩。\n綜合下來 Halo2 加 KZG 最匹配,代價是那一次性的可信設定。承諾方案順帶一句:原版 IPA 免設定但驗證是線性時間;PSE 版換 KZG,proof 常數、驗證毫秒 —— 同樣是在答 R3 輕驗證。\n平台選定了,真正的難題才開始 —— 在這個底層上,超越函數到底怎麼算?下一張就看兩條直覺的路怎麼死。",
 '封面':"大家好。\n這份報告只講一件事:我們論文裡的每一個技術決定,背後的取捨是什麼。\n所以它不是教學、不是教你怎麼一步步做;是把每個選擇攤開來說清楚 —— 為什麼選這條、別的路為什麼走不通、換到了什麼、又付出什麼代價。\n這一版還多了一個規矩:報告裡每一個數字都掛徽章 —— 🅔 是低精度的實驗場、🅒 是 Merton 信用情境、🅟 是實際出貨的管線。三個配置的數字以前混著講,聽的人會亂;現在每個數字都能對回它的出身,不同基準的成績不互相背書。\n我會一張一張、一步一步把 why 講明白;整條路的地圖,下一張直接給你;三個配置是誰,地圖之後馬上介紹。我們開始。",
@@ -1413,6 +1420,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 "Scenario A":"Black–Scholes Delta 對沖情境，pp=24：端到端 Delta 1 ULP、比查表快 26.3×。",
 "Scenario C":"Merton 信用違約情境，pp=32：28.6–29.0 有效位、proof≈15,360 B、verify≈33 ms。",
 "PF1 (投組證明電路)":"Scenario A 完整版的出貨電路：整個投組的美元 Delta 合規壓成一張 proof；pp=48、d=12、95 advice 欄、91 lookups，proof 34,368 B（任何 N）、verify ≈10 ms。",
+"PF1 / PF2 分工":"完整協議每晚交三件：state_root、PF1、PF2。PF1＝本報告全部內容（證投組 Delta 合規）；PF2＝State Transition proof（綁交易所簽章，證 state tree 每筆更新合法，承擔 PF1 的 Assumption 1）；兩者以公開 state_root 綁定。PF2 屬商業範圍不展開。",
 "誤差預算 (error budget)":"把總誤差拆給逼近/量化/截斷各部分、形式化界定上限；本論文配窮舉驗證。",
 "窮舉驗證":"對定點輸入空間逐一檢查實際誤差是否在界內，補上形式化誤差界的實證。",
 "Black–Scholes Delta":"選擇權對標的價格的一階敏感度，用常態 CDF Φ 計算；Scenario A 要證它在限額內。",
@@ -1462,7 +1470,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '要解的問題':["金融法遵 (compliance)","Delta 曝險","Black–Scholes","Merton 模型","零知識證明 (ZK)","審計 (audit)","TEE (可信執行環境)","MPC (多方安全計算)","信任錨 (基金行政管理人)"],
 '為什麼難':["超越函數","exp / ln / erf","常態 CDF Φ","erf (誤差函數)","d₁ / d₂ (BS 中間量)","Black–Scholes Delta","Merton 模型","有限體 (𝔽ᵣ)","浮點","BN254","ULP"],
 '條件限制':["公開輸入 (public inputs)","Merkle 承諾","零知識證明 (ZK)","ULP","Minimax / Remez","誤差預算 (error budget)","窮舉驗證","KZG 承諾","BN254","可信設定 (trusted setup)","通用 Horner kernel","fixed 欄","ByteTable","逐步截斷 (per-step)","proof (證明 π)","verify (驗證)"],
-'藍圖':["PF1 (投組證明電路)","公開輸入 (public inputs)","Merkle 承諾","信任錨 (基金行政管理人)","proof (證明 π)","verify (驗證)","KZG 承諾","定點 pp=48","通用 Horner kernel","Black–Scholes Delta"],
+'藍圖':["PF1 (投組證明電路)","PF1 / PF2 分工","公開輸入 (public inputs)","Merkle 承諾","信任錨 (基金行政管理人)","proof (證明 π)","verify (驗證)","KZG 承諾","定點 pp=48","通用 Horner kernel","Black–Scholes Delta"],
 '分層地圖':["超越函數","定點 pp=48","Minimax / Remez","逐步截斷 (per-step)","商餘分解 (quotient-remainder)","ByteTable","ExplicitRC","PLONKish","KZG 承諾","BN254","bit-budget"],
 '核心工具':["PLONKish","自訂閘 (custom gate)","查表 (lookup)","Groth16 / R1CS","KZG 承諾","IPA (內積論證)","FRI / STARK","Goldilocks / BabyBear (小體)","可信設定 (trusted setup)","BN254","BLS12-381","通用 Horner kernel","ByteTable"],
 '兩條死路':["查表 (lookup)","k / 2-adicity","pp (定點精度)","Taylor 展開","Minimax / Remez","有效位 (有效數字)","Horner 法","中間值膨脹","溢位 (overflow)","BN254","尺度 S=2^pp","逐步截斷 (per-step)"],
@@ -1501,6 +1509,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
  ["為什麼沒有『抗量子』這種條件？","誠實承認：BN254/KZG 不抗量子，這是 R3（輕驗證）換來的取捨。要分兩層講：證明的「有效性」時效是天級（每晚重發），量子偽造無從得利；但「部位隱私」是長期的 —— 承諾與證明的隱藏性建立在離散對數假設上，若未來量子破了它，歷史資料理論上有回溯揭露風險。要長期後量子隱私，得換 STARK／hash 路線並吞下大 proof 的代價 —— 這是真實限界，不迴避。"]
 ],
 '藍圖':[
+ ["只有 PF1 一張證明夠嗎？部位樹被動過手腳怎麼辦？","不夠，協議每晚交三件：state_root、PF1、PF2。PF1 假設 state tree 是完整的（Assumption 1），這個假設由 PF2（State Transition proof，綁交易所簽章）承擔 —— 它證明樹的每筆更新都合法；兩張 proof 用公開的 state_root 綁定。本報告與論文只展開 PF1；PF2 屬商業範圍，口徑與主報告一致。"],
  ["監管憑什麼信市場資料？","market_data_root 承諾的是公開市場數據，但 root 本身是 Poseidon 雜湊 —— LP 沒辦法自己從公開數據重算。協議把信任收斂到基金行政管理人：認證 NAV（監管據此在電路外算門檻 τ·NAV）、提供 root 重算工具讓 LP 核對。誠實說：這是一個現實世界的信任假設，ZK 沒有消掉它，只是收斂到 LP 本來就信任的既有角色、不引入新的信任方。"],
  ["藍圖離真的上線還差什麼？","誠實列三件：① 這是單一 prover 的 demo 系統 —— 多方金鑰管理、正式 SRS 儀式（目前 per-run fresh、非 ceremony 級）、營運監控都沒做；② 市場資料的信任錨是行政管理人，不是密碼學保證 —— LP 無法獨立驗證市場資料；③ 法律與監管接受度（ZK proof 算不算合規證據）完全在論文範圍外。電路與數字是真的，產品化是另一段路。"],
  ["為什麼 proof 大小跟 N 完全無關？","KZG/SHPLONK 的 proof 由 column 結構決定、不由行數決定；N 變大只是行數變多（k 從 13 到 18），column schema 不動，所以 proof 一格不變 —— N=8 跟 N=128 都是 34,368 bytes、verify 都約 10 ms。這正是 R3『第三方輕驗證』選 KZG 的原因。"]
