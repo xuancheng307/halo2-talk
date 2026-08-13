@@ -11,7 +11,7 @@
 <script defer src="assets/katex/auto-render.min.js"
   onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false})"></script>
 <!-- audio tour: Fish Audio TTS (voice: 台湾女生 e855dc04, model s1), generated 2026-08-12 from NOTES -->
-<script>window.AUDIO_MANIFEST=[{"label":"封面","file":"t01.mp3"},{"label":"量測基準","file":"t02.mp3"},{"label":"思路歷程","file":"t03.mp3"},{"label":"要解的問題","file":"t04.mp3"},{"label":"為什麼難","file":"t05.mp3"},{"label":"條件限制","file":"t06.mp3"},{"label":"藍圖","file":"t07.mp3"},{"label":"分層地圖","file":"t08.mp3"},{"label":"核心工具","file":"t09.mp3"},{"label":"兩條死路","file":"t10.mp3"},{"label":"四個設計決定","file":"t11.mp3"},{"label":"核心 kernel","file":"t12.mp3"},{"label":"算一步","file":"t13.mp3"},{"label":"ExplicitRC","file":"t14.mp3"},{"label":"免費空間","file":"t15.mp3"},{"label":"換道地圖","file":"t16.mp3"},{"label":"逐步的代價","file":"t17.mp3"},{"label":"量化飽和","file":"t18.mp3"},{"label":"誤差預算","file":"t19.mp3"},{"label":"函數與區間","file":"t20.mp3"},{"label":"決策路線圖","file":"t21.mp3"},{"label":"我們站在哪","file":"t22.mp3"},{"label":"成果與限界","file":"t23.mp3"},{"label":"證明多大","file":"t24.mp3"},{"label":"出處","file":"t25.mp3"}];</script>
+<script>window.AUDIO_MANIFEST=[{"label":"封面","file":"t01.mp3"},{"label":"思路歷程","file":"t02.mp3"},{"label":"量測基準","file":"t03.mp3"},{"label":"要解的問題","file":"t04.mp3"},{"label":"為什麼難","file":"t05.mp3"},{"label":"條件限制","file":"t06.mp3"},{"label":"藍圖","file":"t07.mp3"},{"label":"分層地圖","file":"t08.mp3"},{"label":"核心工具","file":"t09.mp3"},{"label":"兩條死路","file":"t10.mp3"},{"label":"四個設計決定","file":"t11.mp3"},{"label":"核心 kernel","file":"t12.mp3"},{"label":"算一步","file":"t13.mp3"},{"label":"ExplicitRC","file":"t14.mp3"},{"label":"免費空間","file":"t15.mp3"},{"label":"換道地圖","file":"t16.mp3"},{"label":"逐步的代價","file":"t17.mp3"},{"label":"量化飽和","file":"t18.mp3"},{"label":"誤差預算","file":"t19.mp3"},{"label":"函數與區間","file":"t20.mp3"},{"label":"決策路線圖","file":"t21.mp3"},{"label":"我們站在哪","file":"t22.mp3"},{"label":"成果與限界","file":"t23.mp3"},{"label":"證明多大","file":"t24.mp3"},{"label":"出處","file":"t25.mp3"}];</script>
 <style>
 :root{
   --bg:#ffffff; --surface:#f7f8fa; --surface-2:#eef0f4; --border:#d9dce3;
@@ -305,43 +305,17 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     </div>
     <p style="margin-top:1rem;font-size:.92rem;color:var(--text-dim)">本版規矩：<b>每個數字都掛徽章</b>
       <span class="rg rg-e">🅔 實驗場 pp=16/24</span><span class="rg rg-c">🅒 Merton pp=32</span><span class="rg rg-p">🅟 出貨管線 pp=48</span>
-      —— 這三個配置是誰，<b>下一頁先介紹</b>。</p>
+      —— 這三個配置是誰，<b>第 3 頁先介紹</b>。</p>
     <p style="margin-top:1.2rem;font-size:.8rem" class="muted">↓ 向下捲動 · 右側圓點可跳節 · 按 n 看講稿 · 按 q 看名詞·問答</p>
   </div>
-</section>
-
-<!-- ===== 1.2 · REGIME LEGEND (three measurement regimes) ===== -->
-<section class="slide" data-part="" data-label="量測基準">
-  <div class="slide-meta"><span class="part-label">先立規矩</span> · 量測基準：每個數字來自哪個配置</div>
-  <h2>三個量測基準 —— <span class="accent">先認識三位主角，數字才有戶籍</span></h2>
-  <div class="whybox"><span class="tag">❓ 為什麼第一件事是這個</span>：本論文的數字來自<b>三個不同配置</b>。不先講清楚，聽到一半一定會問「你的 proof 到底是 5KB 還是 34KB？」——都對，但屬於不同基準。所以規矩先立：<b>每個數字都掛徽章</b>。<span class="muted">卡片裡的技術詞（延遲截斷、per-step、degree、ULP…）後面都會逐一講到，這頁先記住三個徽章各是誰。</span></div>
-  <div class="grid-3">
-    <div class="card" style="border-color:rgba(37,99,235,.4)"><h3><span class="rg rg-e">🅔</span> 實驗場</h3>
-      <p style="font-size:.92rem"><b>配置</b>：pp=16／24，<b>延遲截斷</b> kernel，單函數電路。</p>
-      <p style="font-size:.92rem;margin-top:.35rem"><b>用途</b>：論文 exp01–08 的受控實驗 —— 隔離變因（Minimax vs Taylor、延遲 vs 逐步、degree 掃描）。</p>
-      <p style="font-size:.88rem;margin-top:.35rem" class="muted">出自這裡：13 函數 ULP≤1、proof 736 B–9.5 KB、verify ≤5.1 ms、26.3×、6.8×、7.5×。</p>
-    </div>
-    <div class="card" style="border-color:rgba(217,119,6,.45)"><h3><span class="rg rg-c">🅒</span> Scenario C</h3>
-      <p style="font-size:.92rem"><b>配置</b>：Merton 信用模型，pp=32、d=10，<b>per-step</b> 截斷（exp10）。</p>
-      <p style="font-size:.92rem;margin-top:.35rem"><b>Merton 是誰</b>：1974 年的結構式信用模型 —— 用公司資產價值推「違約機率」。論文的<b>第二個真實金融情境</b>，證明方法不綁死在 Black–Scholes。</p>
-      <p style="font-size:.88rem;margin-top:.35rem" class="muted">出自這裡：28.6–29.0 有效位、proof 15,360 B、verify ≈33 ms、erf 5 段。</p>
-    </div>
-    <div class="card green"><h3><span class="rg rg-p">🅟</span> 出貨 pipeline</h3>
-      <p style="font-size:.92rem"><b>配置</b>：Black–Scholes Delta 投組（Scenario A 完整版 scenario_a_full），pp=48、d=12，<b>per-step</b> 截斷。</p>
-      <p style="font-size:.92rem;margin-top:.35rem"><b>用途</b>：實際交付的系統；延遲 kernel 只留作備援（pp=24、d=8）。</p>
-      <p style="font-size:.88rem;margin-top:.35rem" class="muted">出自這裡：proof 34,368 B（任何 N）、verify ≈10 ms、exp kernel 2.81 ULP、Delta 端到端 7 ULP。</p>
-    </div>
-  </div>
-  <div class="soulbox"><span class="tag">🎯 一句</span>：🅔 是<b>做研究的顯微鏡</b>（低 pp、延遲截斷、單函數），🅟 是<b>真的出貨的機器</b>（pp=48、per-step、整個投組一張 proof），🅒 在中間第一次驗證 per-step 上高精度可行。<b>拿 🅔 的精度替 🅟 背書、或拿 🅟 的 proof 大小去比 🅔，都是張冠李戴</b> —— 這份報告不這樣做。<b>所以呢</b>：規矩立好了，下一張給你整條推導的路線圖。</div>
 </section>
 
 <!-- ===== 1.5 · JOURNEY MAP ===== -->
 <section class="slide" data-part="" data-label="思路歷程">
   <div class="slide-meta"><span class="part-label">旅程地圖</span> · 整條推導，一張看完</div>
-  <h2>思路歷程：<span class="accent">每一站，都是被上一站的問題逼出來的</span></h2>
-  <div class="whybox"><span class="tag">❓ 這張是什麼</span>：這不是目錄，是<b>推導的路線圖</b> —— 從金融問題一路走到做完的協議，八個站。每站下面那行小字，就是把我們推去下一站的問題。接下來整份報告，就是沿著這條路把每一站重走一遍。</div>
+  <h2>思路歷程：<span class="accent">解一個問題，會面對一連串的問題 —— 一步一步解決</span></h2>
   <figure style="margin:.3rem 0 0">
-    <svg viewBox="0 0 940 300" role="img" aria-label="八站思路歷程：問題→為什麼是ZK→撞牆→條件→藍圖→四個決定→保證沒亂算→成果與代價" style="width:100%;max-width:1000px">
+    <svg viewBox="0 0 940 300" role="img" aria-label="八站思路歷程：問題→為什麼是ZK→撞牆→條件→藍圖→四個決定→保證沒亂算→成果與代價" style="width:100%;max-width:1180px">
       <!-- snake path -->
       <path d="M90,70 H750 C830,70 870,100 870,135 C870,170 830,200 750,200 H90" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-dasharray="7 5"/>
       <polygon points="98,196 82,200 98,204" fill="#94a3b8"/>
@@ -384,9 +358,33 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <text x="90" y="266" font-size="9.8" text-anchor="middle" fill="#15803d">誠實收案 ✓</text>
       </g>
     </svg>
-    <figcaption>本報告自製 · 每站下方紅字＝把我們推去下一站的問題；站 6 與站 7 在後半段會交錯出現（選擇與保證是一體兩面）</figcaption>
+    <figcaption>本報告自製 · 每站下方紅字＝解完這站冒出來的下一個問題；站 6 與站 7 在後半段會交錯出現（選擇與保證是一體兩面）</figcaption>
   </figure>
-  <div class="soulbox" style="margin-top:.35rem"><span class="tag">🎯 讀法</span>：這條路<b>不是事後美化的直線</b> —— 每一站的因果都是真的：部位不能攤 → 只剩 ZK → 撞上超越函數 → 逼出 R1–R5 → 藍圖 → 每個零件都是被逼的選擇。從下一張起，左上角的「旅程 N/8」告訴你人在哪一站。</div>
+</section>
+
+<!-- ===== 1.7 · REGIME LEGEND (three measurement regimes) ===== -->
+<section class="slide" data-part="" data-label="量測基準">
+  <div class="slide-meta"><span class="part-label">先立規矩</span> · 量測基準：每個數字來自哪個配置</div>
+  <h2>三個量測基準 —— <span class="accent">先認識三位主角，數字才有戶籍</span></h2>
+  <div class="whybox"><span class="tag">❓ 上路前先立規矩</span>：本論文的數字來自<b>三個不同配置</b>。不先講清楚，聽到一半一定會問「你的 proof 到底是 5KB 還是 34KB？」——都對，但屬於不同基準。所以規矩先立：<b>每個數字都掛徽章</b>。<span class="muted">卡片裡的技術詞（延遲截斷、per-step、degree、ULP…）後面都會逐一講到，這頁先記住三個徽章各是誰。</span></div>
+  <div class="grid-3">
+    <div class="card" style="border-color:rgba(37,99,235,.4)"><h3><span class="rg rg-e">🅔</span> 實驗場</h3>
+      <p style="font-size:.92rem"><b>配置</b>：pp=16／24，<b>延遲截斷</b> kernel，單函數電路。</p>
+      <p style="font-size:.92rem;margin-top:.35rem"><b>用途</b>：論文 exp01–08 的受控實驗 —— 隔離變因（Minimax vs Taylor、延遲 vs 逐步、degree 掃描）。</p>
+      <p style="font-size:.88rem;margin-top:.35rem" class="muted">出自這裡：13 函數 ULP≤1、proof 736 B–9.5 KB、verify ≤5.1 ms、26.3×、6.8×、7.5×。</p>
+    </div>
+    <div class="card" style="border-color:rgba(217,119,6,.45)"><h3><span class="rg rg-c">🅒</span> Scenario C</h3>
+      <p style="font-size:.92rem"><b>配置</b>：Merton 信用模型，pp=32、d=10，<b>per-step</b> 截斷（exp10）。</p>
+      <p style="font-size:.92rem;margin-top:.35rem"><b>Merton 是誰</b>：1974 年的結構式信用模型 —— 用公司資產價值推「違約機率」。論文的<b>第二個真實金融情境</b>，證明方法不綁死在 Black–Scholes。</p>
+      <p style="font-size:.88rem;margin-top:.35rem" class="muted">出自這裡：28.6–29.0 有效位、proof 15,360 B、verify ≈33 ms、erf 5 段。</p>
+    </div>
+    <div class="card green"><h3><span class="rg rg-p">🅟</span> 出貨 pipeline</h3>
+      <p style="font-size:.92rem"><b>配置</b>：Black–Scholes Delta 投組（Scenario A 完整版 scenario_a_full），pp=48、d=12，<b>per-step</b> 截斷。</p>
+      <p style="font-size:.92rem;margin-top:.35rem"><b>用途</b>：實際交付的系統；延遲 kernel 只留作備援（pp=24、d=8）。</p>
+      <p style="font-size:.88rem;margin-top:.35rem" class="muted">出自這裡：proof 34,368 B（任何 N）、verify ≈10 ms、exp kernel 2.81 ULP、Delta 端到端 7 ULP。</p>
+    </div>
+  </div>
+  <div class="soulbox"><span class="tag">🎯 一句</span>：🅔 是<b>做研究的顯微鏡</b>（低 pp、延遲截斷、單函數），🅟 是<b>真的出貨的機器</b>（pp=48、per-step、整個投組一張 proof），🅒 在中間第一次驗證 per-step 上高精度可行。<b>拿 🅔 的精度替 🅟 背書、或拿 🅟 的 proof 大小去比 🅔，都是張冠李戴</b> —— 這份報告不這樣做。<b>所以呢</b>：規矩立好了，正式上路 —— 第一站：要解的問題。</div>
 </section>
 
 <!-- ===== 2 · THE PROBLEM (序章 1/4) ===== -->
@@ -1285,8 +1283,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '藍圖':"條件寫死了,先看終點 —— 這張圖就是每天晚上真實發生的事。\n左邊兩個輸入:基金的部位,私有 witness,N 從 8 到 128 筆,永遠不離開基金,只用 state_root 這個承諾示人;市場資料表,公開的,股價、利率、結算價、波動率,九個欄位一片葉子,壓成 market_data_root。\n中間是 PF1 電路:pp=48、d=12 的通用 Horner kernel,加上 Merkle 驗證、Delta 管線、門檻比較 —— 95 個 advice 欄、91 個 lookup。每晚跑一次,N=128 也就 109 秒。\n出來的是一張 34,368 bytes 的 proof —— 8 筆跟 128 筆部位,proof 一樣大。監管跟 LP 拿它對 4 個公開輸入驗證,10 毫秒驗完;看到的只有「合規,通過」,部位、Delta、任何明細都看不到。\n三句誠實的話。第一,market_data_root 是個雜湊,LP 自己重算不了 —— 實務上的信任錨是基金行政管理人:認證 NAV、提供重算工具,這寫在協議文件裡,不藏。第二,這是單一 prover 的 demo,金鑰管理跟正式 SRS 儀式沒做。第三,法律上 ZK proof 算不算合規證據,在論文範圍外。\n這張藍圖的每一個零件,都是一個被逼出來的選擇 —— 接下來一張一張拆。",
 '分層地圖':"進零件之前,先給你一個座標系 —— 剛才的旅程地圖是時間軸,講我們怎麼一路走來;這張是空間圖,講系統分哪幾層。\n由上往下四層:應用層,金融合規 —— 要證什麼、準到哪;數值層 —— 把實數運算變成整數的逼近跟截斷;電路層 —— 用閘跟查表把每一步鎖死,讓 prover 沒有亂填的空間;最底下證明系統層 —— Halo2、KZG、BN254,把整件事變成一張 34KB、10 毫秒可驗的證明。\n兩個方向都要看。需求往下壓:合規要準,逼出數值層的逼近;數值要一步步算,交給電路層鎖死;電路要能驗,靠平台出證明。但限制也往上頂 —— 最重要的就是那條紅色虛線:證明系統層的 254 位保險箱,直接頂進數值層,劃出截斷策略的邊界,就是等下換道地圖那條線。\n從下一張開始,螢幕右邊會一直亮著「你在哪一層」—— 聽到任何取捨,你都知道我們正在修系統的哪個部分。先從最底層修起:為什麼平台選 Halo2。",
 '核心工具':"藍圖攤開了,第一個要拆的零件是最底層的平台 —— 證明系統跟承諾方案。老師一定會問:Groth16 的 proof 最小、驗證最快,你們為什麼不用最快的?\n我的答案是:快不等於合用。論文裡寫了四個理由。\n第一,通用設定。Groth16 每換一個電路就要重辦一次可信設定;我們的金融模型會更新,等於每次更新都要重辦儀式,根本不可行。Halo2 用的 KZG 是通用、可更新的 SRS,做一次、所有電路共用。\n第二,表達力,這是最關鍵的。我們的 kernel 需要自訂閘 —— 逐步 Horner 加截斷;還有原生查表 —— ByteTable 範圍檢查。Groth16 的 R1CS 只有 degree-2 乘法、沒有原生 lookup,要做我們這套 kernel 得拆成一大堆約束,又貴又笨。PLONKish 兩樣都給,出貨電路 🅟 是 91 個 lookup 參數加 degree-6 的閘,PLONKish 最省。所以 Groth16 再快,表達不了我們的電路就等於沒用。\n第三,proof 跟驗證夠用就好:數 KB、數毫秒、不隨投組大小變;STARK 免設定又抗量子,但 proof 偏大,小投組吃虧。\n第四,工程成熟度:halo2_proofs 已穩定,Jolt 這類新工具 API 還在動,金融應用要長期穩。\n綜合下來 Halo2 加 KZG 最匹配,代價是那一次性的可信設定。承諾方案順帶一句:原版 IPA 免設定但驗證是線性時間;PSE 版換 KZG,proof 常數、驗證毫秒 —— 同樣是在答 R3 輕驗證。\n平台選定了,真正的難題才開始 —— 在這個底層上,超越函數到底怎麼算?下一張就看兩條直覺的路怎麼死。",
-'封面':"大家好。\n這份報告只講一件事:我們論文裡的每一個技術決定,背後的取捨是什麼。\n所以它不是教學、不是教你怎麼一步步做;是把每個選擇攤開來說清楚 —— 為什麼選這條、別的路為什麼走不通、換到了什麼、又付出什麼代價。\n這一版還多了一個規矩:報告裡每一個數字都掛徽章 —— 🅔 是低精度的實驗場、🅒 是 Merton 信用情境、🅟 是實際出貨的管線。三個配置的數字以前混著講,聽的人會亂;現在每個數字都能對回它的出身,不同基準的成績不互相背書。\n我會一張一張、一步一步把 why 講明白;這三個配置到底是誰,下一張先自我介紹,再給你整條路的地圖。我們開始。",
-'思路歷程':"開始拆牆之前,先給你整條路的地圖 —— 這不是目錄,是我們真實走過的推導路線,八個站。\n第一站,問題:每晚要向監管跟投資人證明風險在限額內,但部位就是策略,不能攤。第二站,選路:審計慢又靠信任、TEE 信晶片、MPC 要全員在線 —— 只有 ZK 的形狀對。第三站,撞牆:合規公式全是 ln、exp、erf 這些超越函數,而電路裡只有加跟乘。第四站,把「拆牆成功」寫成五條可量測的硬條件 R1 到 R5。第五站,藍圖:終點長什麼樣 —— 每晚一張三萬四千位元組的證明、十毫秒驗完。\n後半段就是把藍圖的零件一個個拆開:第六站,四個被逼的選擇 —— 定點、Minimax、per-step、通用 kernel;第七站,怎麼保證 prover 沒亂算 —— 商餘閘鎖死加誤差三源上界;第八站,成果與代價,成績單依三個量測基準分開報。\n每一站下面那行紅字,就是把我們推去下一站的問題 —— 這條路不是事後美化的,每個因果都是真的。接下來左上角會一直有「旅程幾之八」告訴你人在哪。我們上路。",
+'封面':"大家好。\n這份報告只講一件事:我們論文裡的每一個技術決定,背後的取捨是什麼。\n所以它不是教學、不是教你怎麼一步步做;是把每個選擇攤開來說清楚 —— 為什麼選這條、別的路為什麼走不通、換到了什麼、又付出什麼代價。\n這一版還多了一個規矩:報告裡每一個數字都掛徽章 —— 🅔 是低精度的實驗場、🅒 是 Merton 信用情境、🅟 是實際出貨的管線。三個配置的數字以前混著講,聽的人會亂;現在每個數字都能對回它的出身,不同基準的成績不互相背書。\n我會一張一張、一步一步把 why 講明白;整條路的地圖,下一張直接給你;三個配置是誰,地圖之後馬上介紹。我們開始。",
+'思路歷程':"開始之前,先給你整條路的地圖。這張圖不是目錄 —— 它是我們真實走過的路:解一個問題,路上會不斷冒出下一個問題;八個站,就是那一連串問題,跟我們一步一步解決的順序。\n第一站,問題:每晚要向監管跟投資人證明風險在限額內,但部位就是策略,不能攤。第二站,選路:審計慢又靠信任、TEE 信晶片、MPC 要全員在線 —— 只有 ZK 的形狀對。第三站,撞牆:合規公式全是 ln、exp、erf 這些超越函數,而電路裡只有加跟乘。第四站,把「拆牆成功」寫成五條可量測的硬條件 R1 到 R5。第五站,藍圖:終點長什麼樣 —— 每晚一張三萬四千位元組的證明、十毫秒驗完。\n後半段就是把藍圖的零件一個個拆開:第六站,四個關鍵的設計選擇 —— 定點、Minimax、per-step、通用 kernel;第七站,怎麼保證 prover 沒亂算 —— 商餘閘鎖死加誤差三源上界;第八站,成果與代價,成績單依三個量測基準分開報。\n每一站下面那行紅字,就是解完這一站、馬上冒出來的下一個問題 —— 這條路不是事後美化的直線,每個因果都是真的。接下來整份報告,就是沿著這條路把每一站重走一遍;左上角的「旅程幾之八」會一直告訴你人在哪。上路之前,先立一個關於數字的規矩 —— 下一張。",
 '要解的問題':"先講一個具體的故事。一家對沖基金,每天晚上要向監管跟投資人證明兩件事:整個投資組合的 Delta 曝險沒有超過門檻、組合的違約機率沒有超過監管上限。麻煩在哪?傳統做法是把部位明細攤開給對方看 —— 但部位就是策略本身,攤開等於把多年的交易策略送人。\n那有哪些路?第一,全揭露,直接洩漏策略。第二,信任審計師:季審等級的速度、靠制度不靠數學,「每晚查一次」根本做不到。第三,TEE,把計算搬進晶片的保險飛地 —— 但信任只是從基金搬給晶片廠,而且旁路攻擊的前科不少。第四,MPC,多方一起算 —— 但每查一次,所有參與方都得在線多輪互動,夜批做不起來。剩下 ZK:證明「我算對了」,但不給你看輸入 —— 一方算、多方隨時驗、不交資料,形狀正好對上。\n先把誠實的話說在前面:ZK 不是什麼都不用信。部位藏住了,但市場資料的真實性還是需要一個現實世界的錨,我們把它收斂到 LP 本來就信任的基金行政管理人,藍圖那張會講清楚。\n那把金融模型搬進 ZK 電路到底有多難?下一張帶你摸那道牆。",
 '兩條死路':"那為什麼不能把超越函數直接放進去?直覺只有兩條路,我帶你看為什麼兩條都死。\n先補兩個詞:pp 是定點精度 —— 小數保留幾個二進位位,像用「分」記帳不用「元」;degree d 是多項式的最高次方,也是求值的步數。\n第一條,查表:把每個可能的輸入預先算好、存成一張表。輸入有 2 的 pp 次方種,表就要那麼多格。低精度還行,pp=16 大概六萬格;但金融要 pp=24、32,表就爆成一千六百多萬、四十三億格,而且每個函數一張 —— 任何電路都裝不下。\n第二條,多項式逼近:用一條低次多項式近似,再用 Horner 求值 —— 就是「乘 x、加下一個係數」一路捲下來。這條可行,但有兩個坑。坑 A:Taylor 在定點量化下崩潰,pp=32、d=10 時 ln 只剩 4.4 個有效位、約一位十進位;換成 Minimax 有 28.6 位。坑 B:中間值不截斷會膨脹 —— 每乘一步數字變長 pp 位,到第 d+1 步就是 S 的 d+1 次方,pp=32、d=10 是 2 的 352 次方,塞不進 BN254 這個 254 位的保險箱;出貨的 pp=48、d=12 更要 2 的 624 次方。\n所以可行的只剩多項式,但要先解掉 Taylor 崩潰跟保險箱裝不下這兩個坑 —— 接下來四個設計決定就是在回答這兩個坑。",
 '四個設計決定':"這張把四個關鍵決定一次攤在取捨表上:選了什麼、別的為什麼不行、換到什麼。\n第一,定點 pp=48、不用浮點 —— 體裡根本沒有浮點,只能「用分記帳」:整數乘 2 的 48 次方把小數變整數;代價是 pp 越大、中間值越容易脹爆,這就逼出後面的截斷。\n第二,Minimax、不用 Taylor —— 不是『比較好』,是『必要條件』:Taylor 在定點下崩潰。這裡先講清楚一個度量:ULP 就是最後一位小數的一格刻度,ULP≤1 表示準到最後一位。13 個函數在最小 degree 全達 ULP≤1 —— 但注意,這是 🅔 實驗場、延遲截斷的成績,不是出貨 kernel 的。\n第三,逐步截斷 per-step、不用延遲 —— 延遲低 pp 精度較好,但它有位元預算:每乘一步長 pp 位,d+1 步超過 254 位保險箱就裝不下。pp=48 只容 d=4,管線要 d=12 —— 延遲直接出局,只剩 per-step;代價是精度,🅔 實測 d* 時 ULP 掉到 2 到 7。\n第四,通用 Horner kernel 加一張 ByteTable —— 換函數只改 fixed 欄那 d 個係數,256 條目的表全函數共用,加新函數零電路重設計。\n這四個決定換到:金融精度 24 到 48 位、單函數 proof 5 到 9.5KB(🅔)、整個投組 34,368 bytes(🅟)、verify 毫秒級、不揭露部位。徽章的規矩第二頁立過了,不同基準的成績不互相背書。接下來就進出貨 kernel 的本體:電路裡到底怎麼把多項式算出來、又怎麼保證 prover 沒亂填。",
@@ -1299,7 +1297,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '我們站在哪':"這張是誠實定位。老師一定會問:ZK 算超越函數早有人做,ezkl、zkLLM、ZKFixedPointChip,你們新在哪?我的原則是寧可少吹,也不要被抓到不誠實。\n先講互補:查表是 ZKML 在大批次、低精度場景的理性選擇,我不否定;我們補它做不到的 —— 多函數共用、高精度、低頻呼叫,金融合規正好是這種需求。\n再講什麼不是我們發明的:Minimax 跟 Remez 是教科書,FHE 2021 年就用過,ZKFixedPointChip 2023 也在 Halo2 用了 Remez;連「Minimax 比 Taylor 好」本身都是教科書事實。\n那新的是什麼?五項:系統化的 Minimax 對 Taylor 量化比較、Horner 鏈內延遲截斷加 bit-budget 分析、形式化誤差預算加窮舉驗證、第一個有誤差分析的 ZK ln 跟 erf 多項式電路、一張 256 表撐全部函數。\n跟兩個最像的工作各一句話:ZKFixedPointChip 把 Remez 放進 Halo2 定點電路,我們補上「誤差三源上界、窮舉驗證、截斷 bit-budget、金融落地」那一層;ezkl 跟 zkLLM 走查表、批次大精度低,我們走多項式、呼叫少精度高 —— 互補的兩個象限,不是對打。",
 '成果與限界':"收尾,成果跟代價一起講,而且依基準分開。\n出貨管線:整個投資組合一張 proof,34,368 bytes、跟部位數量無關,N=8 到 128 都一樣;驗證約 10 毫秒;證明時間從 N=8 的 4.7 秒到 N=128 的 109 秒;精度是 kernel 2.81、端到端 7 個 ULP。\nScenario C:Merton 信用模型,28.6 到 29 個有效位、七個評等全對到小數第八位,proof 15,360 bytes、驗證 33 毫秒。\n實驗場:13 函數延遲截斷全 ULP=1;單函數端到端 proof 5 到 9.5 KB;論文版 Scenario A 在 pp=24 做到 Delta 1 ULP、比查表快 26.3 倍。\n限界同樣掛徽章講清楚:per-step 的精度價,得用 degree 贖;分段的 proof 價,erf 十二段、ln 四段;查表要到 pp=32 以上才真的死,低精度大批次它還是比我們強 —— 我們慢 7.5 倍、proof 大 6.8 倍,這兩個數字我們自己先報。\n一句話收尾:把「能算一個函數」變成「能證一個金融模型」,而且每個數字都能對回它的量測基準。",
 '出處':"最後是出處,也是這份報告的誠實底線。\n所有取捨數字都能對回一手量測檔:實驗場的 exp03、04、07、09、12,Scenario C 的 exp10 跟論文第四章,出貨管線的 kernel 原始碼跟 benchmark 定版紀錄 —— 這份報告改版時逐數核對過一遍,每個數字旁邊的徽章就是它的戶籍。\n證明系統站在 Halo2、PLONK、KZG、SHPLONK、BN254 這些工作上;多項式逼近再強調一次:Minimax 是 Remez 1934、Chebyshev 1853 的教科書工作,FHE 跟 ZKFixedPointChip 都在我們之前用過 —— 我們的新,是把它們組成「能證、有誤差保證、能落地金融」的一整套。謝謝大家。",
-'量測基準':"進正題之前,先把規矩立好:本論文的數字來自三個不同的配置,混著講一定亂。先說一句,卡片裡的延遲截斷、per-step、degree 這些技術詞,後面都會一一講清楚 —— 這頁你只要先認識三個徽章各是誰。\n第一個,E,實驗場:pp=16 跟 24 的低精度單函數小電路。這是做受控實驗的顯微鏡 —— 論文裡所有的對照實驗都在這裡跑;它還有個關鍵好處:輸入總共只有 2 的 16 次方種,可以窮舉驗證,每一個輸入都真的算過一遍。13 函數 ULP=1、proof 幾 KB 這些數字都出自這裡。\n第二個,C,Scenario C —— Merton 信用情境。Merton 是 1974 年的結構式信用模型:用公司資產的價值,去推「這家公司會不會違約」的機率。它是論文的第二個真實金融情境,存在的意義就是證明我們的方法不綁死在 Black-Scholes —— 換一個金融模型、換一個精度檔位,同一套電路照樣能跑。配置是 pp=32;28.6 到 29 個有效位、proof 15,360 bytes 這些數字出自這裡。\n第三個,P,出貨管線:Black-Scholes Delta 投資組合,pp=48,是真的交付的系統;proof 34,368 bytes、verify 十毫秒出自這裡。\n一句話記住:E 是顯微鏡、P 是出貨的機器、C 在中間驗證方法搬得上高精度。拿顯微鏡的精度替出貨機器背書、或拿出貨機器的 proof 去跟顯微鏡比大小,都是張冠李戴 —— 這份報告不做這種事。規矩立好了,下一張給你整條路的地圖。",
+'量測基準':"進正題之前,先把規矩立好:本論文的數字來自三個不同的配置,混著講一定亂。先說一句,卡片裡的延遲截斷、per-step、degree 這些技術詞,後面都會一一講清楚 —— 這頁你只要先認識三個徽章各是誰。\n第一個,E,實驗場:pp=16 跟 24 的低精度單函數小電路。這是做受控實驗的顯微鏡 —— 論文裡所有的對照實驗都在這裡跑;它還有個關鍵好處:輸入總共只有 2 的 16 次方種,可以窮舉驗證,每一個輸入都真的算過一遍。13 函數 ULP=1、proof 幾 KB 這些數字都出自這裡。\n第二個,C,Scenario C —— Merton 信用情境。Merton 是 1974 年的結構式信用模型:用公司資產的價值,去推「這家公司會不會違約」的機率。它是論文的第二個真實金融情境,存在的意義就是證明我們的方法不綁死在 Black-Scholes —— 換一個金融模型、換一個精度檔位,同一套電路照樣能跑。配置是 pp=32;28.6 到 29 個有效位、proof 15,360 bytes 這些數字出自這裡。\n第三個,P,出貨管線:Black-Scholes Delta 投資組合,pp=48,是真的交付的系統;proof 34,368 bytes、verify 十毫秒出自這裡。\n一句話記住:E 是顯微鏡、P 是出貨的機器、C 在中間驗證方法搬得上高精度。拿顯微鏡的精度替出貨機器背書、或拿出貨機器的 proof 去跟顯微鏡比大小,都是張冠李戴 —— 這份報告不做這種事。規矩立好了,正式上路 —— 第一站,要解的問題。",
 '算一步':"這張用玩具尺度 pp=8 把一步完整算給你看,S 是 256;出貨版只是把 S 換成 2 的 48 次方、硬幣從 1 枚變 6 枚,邏輯一模一樣。\n誠實的 prover:acc 是 100、輸入 R 是 181、係數 20,000。乘加起來 38,100。除以 256:商 148、餘 212。閘檢查:148 乘 256 加 212 剛好湊回 38,100,過;餘數 212 是一枚合法硬幣,ByteTable 查得到,過。順帶看到 floor 誤差從哪來:真值 148.828,被剪掉的 0.828 就是「每步不到 1 ULP」的截斷誤差。\n作弊的 prover:想把結果多報 1,填商 149。閘反推餘數必須是負 44 —— 但有限體裡沒有負數,負 44 會繞回去變成接近 2 的 254 次方的巨數,這種巨數絕對拆不成 0 到 255 的硬幣,查表當場失敗。\n重點是這句:作弊不是機率上很難,是數學上湊不出來。算的過程鎖死了,下一張看輸入本身怎麼防。",
 '換道地圖':"兩種截斷的整個故事,濃縮成這一張地圖。橫軸是定點精度 pp,縱軸是次數 d,那條線就是 (d+1) 乘 pp 等於 254 —— 保險箱的邊界。\n線下是紅利區:pp=16、d 四到七,加上備援 kernel 的 pp=24、d=8,延遲截斷都塞得進去 —— 吃紅利、拿 ULP=1。\n線上只剩 per-step:Scenario C 的 pp=32、d=10,延遲的中間值估 320 位,實測直接標 INFEASIBLE;出貨的 pp=48、d=12 更要 624 位。per-step 的中間值永遠約 96 位,degree 怎麼加都安全。\n一定有人問:那高 pp 配低 d、留在紅利區不行嗎?不行,那裡沒有可用的精度 —— pp=48、d=4 的 ln 誤差是 6.9 乘 10 的 7 次方個 ULP,等於沒算。紅利區在高 pp 是空的。\n所以換道是被逼的,代價是精度 —— 下一張把這筆帳一項一項攤開。",
 '逐步的代價':"這張是誠實的帳單:per-step 到底輸延遲多少。exp03b 的完整消融,pp=16、13 個函數、各自用最小可行的 degree。\n結果一翻兩瞪眼:同一組係數、同一個 degree,延遲 13 個全部 ULP=1;per-step 一個都沒有,誤差 2 到 7 倍。所以前面那句「13 函數全 ULP=1」永遠要掛兩個標籤:實驗場、延遲截斷。它不是出貨 kernel 的成績 —— 這一點我們自己先講,不等人來抓。\n那出貨怎麼辦?用 degree 贖。pp=48 把 d 從最小可行的 5 左右拉到 12,實測 exp kernel 最大 2.81 ULP、Delta 端到端 7 ULP。而且高精度下每個 ULP 只有 2 的負 48 次方 —— 7 個 ULP 大約 10 的負 14 次方,對金融門檻綽綽有餘。\ndegree 是用錢買精度 —— 那是不是加越多越好?下一張看實測。",
