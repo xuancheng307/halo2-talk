@@ -11,7 +11,7 @@
 <script defer src="assets/katex/auto-render.min.js"
   onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false})"></script>
 <!-- audio tour: Fish Audio TTS (voice: 台湾女生 e855dc04, model s1), generated 2026-08-12 from NOTES -->
-<script>window.AUDIO_MANIFEST=[{"label":"封面","file":"t01.mp3"},{"label":"思路歷程","file":"t02.mp3"},{"label":"量測基準","file":"t03.mp3"},{"label":"要解的問題","file":"t04.mp3"},{"label":"為什麼難","file":"t05.mp3"},{"label":"條件限制","file":"t06.mp3"},{"label":"藍圖","file":"t07.mp3"},{"label":"分層地圖","file":"t08.mp3"},{"label":"核心工具","file":"t09.mp3"},{"label":"兩條死路","file":"t10.mp3"},{"label":"四個設計決定","file":"t11.mp3"},{"label":"核心 kernel","file":"t12.mp3"},{"label":"算一步","file":"t13.mp3"},{"label":"ExplicitRC","file":"t14.mp3"},{"label":"免費空間","file":"t15.mp3"},{"label":"換道地圖","file":"t16.mp3"},{"label":"逐步的代價","file":"t17.mp3"},{"label":"量化飽和","file":"t18.mp3"},{"label":"誤差預算","file":"t19.mp3"},{"label":"函數與區間","file":"t20.mp3"},{"label":"決策路線圖","file":"t21.mp3"},{"label":"我們站在哪","file":"t22.mp3"},{"label":"成果與限界","file":"t23.mp3"},{"label":"證明多大","file":"t24.mp3"},{"label":"出處","file":"t25.mp3"}];</script>
+<script>window.AUDIO_MANIFEST=[{"label":"封面","file":"t01.mp3"},{"label":"思路歷程","file":"t02.mp3"},{"label":"量測基準","file":"t03.mp3"},{"label":"要解的問題","file":"t04.mp3"},{"label":"拆成兩張證明","file":"t26.mp3"},{"label":"為什麼難","file":"t05.mp3"},{"label":"條件限制","file":"t06.mp3"},{"label":"藍圖","file":"t07.mp3"},{"label":"分層地圖","file":"t08.mp3"},{"label":"核心工具","file":"t09.mp3"},{"label":"兩條死路","file":"t10.mp3"},{"label":"四個設計決定","file":"t11.mp3"},{"label":"核心 kernel","file":"t12.mp3"},{"label":"算一步","file":"t13.mp3"},{"label":"ExplicitRC","file":"t14.mp3"},{"label":"免費空間","file":"t15.mp3"},{"label":"換道地圖","file":"t16.mp3"},{"label":"逐步的代價","file":"t17.mp3"},{"label":"量化飽和","file":"t18.mp3"},{"label":"誤差預算","file":"t19.mp3"},{"label":"函數與區間","file":"t20.mp3"},{"label":"決策路線圖","file":"t21.mp3"},{"label":"我們站在哪","file":"t22.mp3"},{"label":"成果與限界","file":"t23.mp3"},{"label":"證明多大","file":"t24.mp3"},{"label":"出處","file":"t25.mp3"}];</script>
 <style>
 :root{
   --bg:#ffffff; --surface:#f7f8fa; --surface-2:#eef0f4; --border:#d9dce3;
@@ -315,69 +315,76 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="slide-meta"><span class="part-label">旅程地圖</span> · 整條推導，一張看完</div>
   <h2>思路歷程：<span class="accent">解一個問題，會面對一連串的問題 —— 一步一步解決</span></h2>
   <figure style="margin:.5rem 0 0">
-    <svg viewBox="0 0 940 372" role="img" aria-label="八站思路歷程文字卡：問題→為什麼是ZK→撞牆→條件→藍圖→被逼的選擇→保證沒亂算→成果與代價" style="width:100%;max-width:1180px">
+    <svg viewBox="0 0 940 372" role="img" aria-label="九站思路歷程文字卡：問題→為什麼是ZK→拆成兩張證明→撞牆→條件→藍圖→被逼的選擇→保證沒亂算→成果與代價" style="width:100%;max-width:1180px">
       <defs><marker id="jm-arr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L9,5 L0,10 z" fill="#94a3b8"/></marker></defs>
       <!-- connectors -->
       <g stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 5" fill="none">
-        <line x1="220" y1="74" x2="238" y2="74" marker-end="url(#jm-arr)"/>
-        <line x1="452" y1="74" x2="470" y2="74" marker-end="url(#jm-arr)"/>
-        <line x1="684" y1="74" x2="702" y2="74" marker-end="url(#jm-arr)"/>
-        <line x1="811" y1="126" x2="811" y2="246" marker-end="url(#jm-arr)"/>
-        <line x1="702" y1="300" x2="688" y2="300" marker-end="url(#jm-arr)"/>
-        <line x1="470" y1="300" x2="456" y2="300" marker-end="url(#jm-arr)"/>
-        <line x1="238" y1="300" x2="224" y2="300" marker-end="url(#jm-arr)"/>
+        <line x1="189" y1="74" x2="195" y2="74" marker-end="url(#jm-arr)"/>
+        <line x1="375" y1="74" x2="381" y2="74" marker-end="url(#jm-arr)"/>
+        <line x1="561" y1="74" x2="567" y2="74" marker-end="url(#jm-arr)"/>
+        <line x1="747" y1="74" x2="753" y2="74" marker-end="url(#jm-arr)"/>
+        <line x1="843" y1="126" x2="843" y2="246" marker-end="url(#jm-arr)"/>
+        <line x1="753" y1="300" x2="747" y2="300" marker-end="url(#jm-arr)"/>
+        <line x1="567" y1="300" x2="561" y2="300" marker-end="url(#jm-arr)"/>
+        <line x1="381" y1="300" x2="375" y2="300" marker-end="url(#jm-arr)"/>
       </g>
-      <!-- row 1 cards -->
+      <!-- row 1 cards (5) -->
       <g font-family="inherit">
-        <rect x="10" y="26" width="210" height="96" rx="10" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
-        <circle cx="31" cy="48" r="10.5" fill="#4f46e5"/><text x="31" y="52.5" font-size="11.5" text-anchor="middle" fill="#fff" font-weight="800">1</text>
-        <text x="48" y="53" font-size="14.5" fill="#1a1a1f" font-weight="800">問題</text>
-        <text x="24" y="76" font-size="11.4" fill="#55596b">每晚要向監管與 LP 證明</text>
-        <text x="24" y="92" font-size="11.4" fill="#55596b">風險在限內，但部位不能攤</text>
-        <text x="24" y="110" font-size="11.4" fill="#b91c1c" font-weight="700">→ 哪條技術路線做得到？</text>
-        <rect x="242" y="26" width="210" height="96" rx="10" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
-        <circle cx="263" cy="48" r="10.5" fill="#4f46e5"/><text x="263" y="52.5" font-size="11.5" text-anchor="middle" fill="#fff" font-weight="800">2</text>
-        <text x="280" y="53" font-size="14.5" fill="#1a1a1f" font-weight="800">為什麼是 ZK</text>
-        <text x="256" y="76" font-size="11.4" fill="#55596b">審計慢、TEE 信晶片、MPC</text>
-        <text x="256" y="92" font-size="11.4" fill="#55596b">要全員在線 —— 只剩 ZK 對</text>
-        <text x="256" y="110" font-size="11.4" fill="#b91c1c" font-weight="700">→ 金融模型搬得進電路嗎？</text>
-        <rect x="474" y="26" width="210" height="96" rx="10" fill="#fff" stroke="#dc2626" stroke-width="1.8"/>
-        <circle cx="495" cy="48" r="10.5" fill="#dc2626"/><text x="495" y="52.5" font-size="11.5" text-anchor="middle" fill="#fff" font-weight="800">3</text>
-        <text x="512" y="53" font-size="14.5" fill="#1a1a1f" font-weight="800">撞牆</text>
-        <text x="488" y="76" font-size="11.4" fill="#55596b">合規公式全是 ln/exp/erf，</text>
-        <text x="488" y="92" font-size="11.4" fill="#55596b">電路裡卻只有加與乘</text>
-        <text x="488" y="110" font-size="11.4" fill="#b91c1c" font-weight="700">→ 怎樣才算把牆拆成功？</text>
-        <rect x="706" y="26" width="210" height="96" rx="10" fill="#fff" stroke="#d97706" stroke-width="1.8"/>
-        <circle cx="727" cy="48" r="10.5" fill="#d97706"/><text x="727" y="52.5" font-size="11.5" text-anchor="middle" fill="#fff" font-weight="800">4</text>
-        <text x="744" y="53" font-size="14.5" fill="#1a1a1f" font-weight="800">條件 R1–R5</text>
-        <text x="720" y="76" font-size="11.4" fill="#55596b">零揭露·可證誤差·輕驗證·</text>
-        <text x="720" y="92" font-size="11.4" fill="#55596b">可演化·夜批 —— 缺一不可</text>
-        <text x="720" y="110" font-size="11.4" fill="#b91c1c" font-weight="700">→ 湊齊時，終點長什麼樣？</text>
+        <rect x="10" y="26" width="178" height="96" rx="10" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+        <circle cx="30" cy="47" r="10" fill="#4f46e5"/><text x="30" y="51.5" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">1</text>
+        <text x="46" y="52" font-size="14" fill="#1a1a1f" font-weight="800">問題</text>
+        <text x="22" y="76" font-size="10.8" fill="#55596b">每晚要向監管與 LP 證明</text>
+        <text x="22" y="92" font-size="10.8" fill="#55596b">風險在限內，但部位不能攤</text>
+        <text x="22" y="110" font-size="10.8" fill="#b91c1c" font-weight="700">→ 哪條技術路線做得到？</text>
+        <rect x="196" y="26" width="178" height="96" rx="10" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+        <circle cx="216" cy="47" r="10" fill="#4f46e5"/><text x="216" y="51.5" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">2</text>
+        <text x="232" y="52" font-size="14" fill="#1a1a1f" font-weight="800">為什麼是 ZK</text>
+        <text x="208" y="76" font-size="10.8" fill="#55596b">審計慢、TEE 信晶片、MPC</text>
+        <text x="208" y="92" font-size="10.8" fill="#55596b">要全員在線 —— 只剩 ZK 對</text>
+        <text x="208" y="110" font-size="10.8" fill="#b91c1c" font-weight="700">→ 一張證明扛得住嗎？</text>
+        <rect x="382" y="26" width="178" height="96" rx="10" fill="#fff" stroke="#0f766e" stroke-width="1.8"/>
+        <circle cx="402" cy="47" r="10" fill="#0f766e"/><text x="402" y="51.5" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">3</text>
+        <text x="418" y="52" font-size="14" fill="#1a1a1f" font-weight="800">拆成兩張證明</text>
+        <text x="394" y="76" font-size="10.8" fill="#55596b">宣稱＝快照為真 ∧ 算對，</text>
+        <text x="394" y="92" font-size="10.8" fill="#55596b">接口只有一個 state_root</text>
+        <text x="394" y="110" font-size="10.8" fill="#b91c1c" font-weight="700">→ PF1 這半搬得進電路嗎？</text>
+        <rect x="568" y="26" width="178" height="96" rx="10" fill="#fff" stroke="#dc2626" stroke-width="1.8"/>
+        <circle cx="588" cy="47" r="10" fill="#dc2626"/><text x="588" y="51.5" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">4</text>
+        <text x="604" y="52" font-size="14" fill="#1a1a1f" font-weight="800">撞牆</text>
+        <text x="580" y="76" font-size="10.8" fill="#55596b">合規公式全是 ln/exp/erf，</text>
+        <text x="580" y="92" font-size="10.8" fill="#55596b">電路裡卻只有加與乘</text>
+        <text x="580" y="110" font-size="10.8" fill="#b91c1c" font-weight="700">→ 怎樣才算把牆拆成功？</text>
+        <rect x="754" y="26" width="178" height="96" rx="10" fill="#fff" stroke="#d97706" stroke-width="1.8"/>
+        <circle cx="774" cy="47" r="10" fill="#d97706"/><text x="774" y="51.5" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">5</text>
+        <text x="790" y="52" font-size="14" fill="#1a1a1f" font-weight="800">條件 R1–R5</text>
+        <text x="766" y="76" font-size="10.8" fill="#55596b">零揭露·可證誤差·輕驗證·</text>
+        <text x="766" y="92" font-size="10.8" fill="#55596b">可演化·夜批 —— 缺一不可</text>
+        <text x="766" y="110" font-size="10.8" fill="#b91c1c" font-weight="700">→ 湊齊時，終點長什麼樣？</text>
       </g>
-      <!-- row 2 cards (right to left) -->
+      <!-- row 2 cards (4, right to left) -->
       <g font-family="inherit">
-        <rect x="706" y="252" width="210" height="96" rx="10" fill="#fff" stroke="#16a34a" stroke-width="1.8"/>
-        <circle cx="727" cy="274" r="10.5" fill="#16a34a"/><text x="727" y="278.5" font-size="11.5" text-anchor="middle" fill="#fff" font-weight="800">5</text>
-        <text x="744" y="279" font-size="14.5" fill="#1a1a1f" font-weight="800">藍圖</text>
-        <text x="720" y="302" font-size="11.4" fill="#55596b">每晚一張 34,368 B 證明、</text>
-        <text x="720" y="318" font-size="11.4" fill="#55596b">10 ms 驗完</text>
-        <text x="720" y="336" font-size="11.4" fill="#b91c1c" font-weight="700">→ 零件為什麼長這樣？</text>
-        <rect x="474" y="252" width="210" height="96" rx="10" fill="#fff" stroke="#7c3aed" stroke-width="1.8"/>
-        <circle cx="495" cy="274" r="10.5" fill="#7c3aed"/><text x="495" y="278.5" font-size="11.5" text-anchor="middle" fill="#fff" font-weight="800">6</text>
-        <text x="512" y="279" font-size="14.5" fill="#1a1a1f" font-weight="800">被逼的選擇</text>
-        <text x="488" y="302" font-size="11.4" fill="#55596b">定點 48 · Minimax ·</text>
-        <text x="488" y="318" font-size="11.4" fill="#55596b">per-step · 通用 kernel</text>
-        <text x="488" y="336" font-size="11.4" fill="#b91c1c" font-weight="700">→ prover 想作弊怎麼辦？</text>
-        <rect x="242" y="252" width="210" height="96" rx="10" fill="#fff" stroke="#2563eb" stroke-width="1.8"/>
-        <circle cx="263" cy="274" r="10.5" fill="#2563eb"/><text x="263" y="278.5" font-size="11.5" text-anchor="middle" fill="#fff" font-weight="800">7</text>
-        <text x="280" y="279" font-size="14.5" fill="#1a1a1f" font-weight="800">保證沒亂算</text>
-        <text x="256" y="302" font-size="11.4" fill="#55596b">商餘閘鎖死 ＋ 誤差三源上界</text>
-        <text x="256" y="336" font-size="11.4" fill="#b91c1c" font-weight="700">→ 換到什麼、付了什麼？</text>
-        <rect x="10" y="252" width="210" height="96" rx="10" fill="#fff" stroke="#1a1a1f" stroke-width="1.8"/>
-        <circle cx="31" cy="274" r="10.5" fill="#1a1a1f"/><text x="31" y="278.5" font-size="11.5" text-anchor="middle" fill="#fff" font-weight="800">8</text>
-        <text x="48" y="279" font-size="14.5" fill="#1a1a1f" font-weight="800">成果與代價</text>
-        <text x="24" y="302" font-size="11.4" fill="#55596b">成績單依 🅔🅒🅟 分開報</text>
-        <text x="24" y="336" font-size="11.4" fill="#15803d" font-weight="700">→ 誠實收案 ✓</text>
+        <rect x="754" y="252" width="178" height="96" rx="10" fill="#fff" stroke="#16a34a" stroke-width="1.8"/>
+        <circle cx="774" cy="273" r="10" fill="#16a34a"/><text x="774" y="277.5" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">6</text>
+        <text x="790" y="278" font-size="14" fill="#1a1a1f" font-weight="800">藍圖</text>
+        <text x="766" y="302" font-size="10.8" fill="#55596b">每晚一張 34,368 B 證明、</text>
+        <text x="766" y="318" font-size="10.8" fill="#55596b">10 ms 驗完</text>
+        <text x="766" y="336" font-size="10.8" fill="#b91c1c" font-weight="700">→ 零件為什麼長這樣？</text>
+        <rect x="568" y="252" width="178" height="96" rx="10" fill="#fff" stroke="#7c3aed" stroke-width="1.8"/>
+        <circle cx="588" cy="273" r="10" fill="#7c3aed"/><text x="588" y="277.5" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">7</text>
+        <text x="604" y="278" font-size="14" fill="#1a1a1f" font-weight="800">被逼的選擇</text>
+        <text x="580" y="302" font-size="10.8" fill="#55596b">定點 48 · Minimax ·</text>
+        <text x="580" y="318" font-size="10.8" fill="#55596b">per-step · 通用 kernel</text>
+        <text x="580" y="336" font-size="10.8" fill="#b91c1c" font-weight="700">→ prover 想作弊怎麼辦？</text>
+        <rect x="382" y="252" width="178" height="96" rx="10" fill="#fff" stroke="#2563eb" stroke-width="1.8"/>
+        <circle cx="402" cy="273" r="10" fill="#2563eb"/><text x="402" y="277.5" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">8</text>
+        <text x="418" y="278" font-size="14" fill="#1a1a1f" font-weight="800">保證沒亂算</text>
+        <text x="394" y="302" font-size="10.8" fill="#55596b">商餘閘鎖死＋誤差三源上界</text>
+        <text x="394" y="336" font-size="10.8" fill="#b91c1c" font-weight="700">→ 換到什麼、付了什麼？</text>
+        <rect x="196" y="252" width="178" height="96" rx="10" fill="#fff" stroke="#1a1a1f" stroke-width="1.8"/>
+        <circle cx="216" cy="273" r="10" fill="#1a1a1f"/><text x="216" y="277.5" font-size="11" text-anchor="middle" fill="#fff" font-weight="800">9</text>
+        <text x="232" y="278" font-size="14" fill="#1a1a1f" font-weight="800">成果與代價</text>
+        <text x="208" y="302" font-size="10.8" fill="#55596b">成績單依 🅔🅒🅟 分開報</text>
+        <text x="208" y="336" font-size="10.8" fill="#15803d" font-weight="700">→ 誠實收案 ✓</text>
       </g>
       <text x="936" y="368" font-size="8.5" text-anchor="end" fill="#a8afbd">本報告自製</text>
     </svg>
@@ -411,7 +418,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 2 · THE PROBLEM (序章 1/4) ===== -->
 <section class="slide" data-part="" data-label="要解的問題">
-  <div class="slide-meta"><span class="part-label">旅程 1–2/8 · 問題與路線</span> · 這門技術到底在解誰的痛</div>
+  <div class="slide-meta"><span class="part-label">旅程 1–2/9 · 問題與路線</span> · 這門技術到底在解誰的痛</div>
   <h2>要證「風險在限額內」，<span class="accent">卻不洩漏部位</span></h2>
   <div class="whybox"><span class="tag">❓ 具體的故事</span>：一家對沖基金每晚要向監管與投資人（LP）證明兩件事 —— <b>Scenario A</b>：整個投組的 Black–Scholes Delta 曝險沒超門檻（\( |\sum_i w_i\,\mathrm{dd}_i| \le \tau\cdot\mathrm{NAV} \)，dd＝每一部位的美元 Delta）；<b>Scenario C</b>：組合的 Merton 違約機率沒超監管上限。<span class="muted">白話：證「整籃子的風險加總沒爆表」。</span>但傳統做法得把<b>每一筆部位攤開</b>給對方看 —— 部位就是交易策略本身，攤開等於把策略送人。</div>
   <table style="font-size:.92rem">
@@ -423,14 +430,63 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <tr class="hl"><td><b>ZK 證明</b></td><td><b>證明「這個計算做對了」，但不給看輸入</b></td><td style="color:#15803d">形狀正好對症 —— 代價後面誠實攤開</td></tr>
   </table>
   <div class="ideabox"><span class="tag">💡 先把誠實的話說在前面</span>：ZK 不是「什麼都不用信」。部位靠 ZK 藏住了，但<b>市場資料</b>（股價、波動率）的真實性仍需要一個現實世界的錨 —— 協議把它收斂到 LP 本來就信任的<b>基金行政管理人</b>（藍圖那張會講清楚）。ZK 消掉的是「把策略交出去」，不是所有信任。</div>
-  <div class="soulbox"><span class="tag">🎯 所以呢</span>：五條路裡只有 ZK 的形狀對得上「一方算、多方隨時驗、不交資料」。但把金融模型搬進 ZK 電路有多難？下一張帶你摸那道牆。</div>
+  <div class="soulbox"><span class="tag">🎯 所以呢</span>：五條路裡只有 ZK 的形狀對得上「一方算、多方隨時驗、不交資料」。選定 ZK 之後，動工前還有一件事：<b>先把問題本身拆對</b> —— 下一張。</div>
+</section>
+
+<!-- ===== 2.1 · SPLIT INTO TWO PROOFS (序章 1.5/4) ===== -->
+<section class="slide" data-part="" data-label="拆成兩張證明">
+  <div class="slide-meta"><span class="part-label">旅程 3/9 · 拆對問題</span> · 一個宣稱、兩張證明：為什麼可以拆、為什麼拆了更好</div>
+  <h2>先把問題拆對：<span class="accent">一個合規宣稱，拆成兩張證明</span></h2>
+  <div class="whybox"><span class="tag">❓ 為什麼可以拆</span>：「今晚合規」其實是<b>兩個可分離的子宣稱</b> —— ①<b>快照為真</b>：部位樹的每筆更新都有交易所簽章、一路鏈回監管簽的初始狀態；②<b>快照上算對</b>：風險值算得正確、而且在限額內。兩個子宣稱之間<b>只靠一個值交握：state_root</b>。接口這麼窄，就拆得開 —— 各給一張證明。</div>
+  <figure style="margin:.3rem 0 0">
+    <svg viewBox="0 0 940 218" role="img" aria-label="一個合規宣稱拆成兩個子宣稱：快照為真由 PF2 證、快照上算對由 PF1 證，以公開 state_root 綁定，驗證者三件一起驗得到一位元結論" style="width:100%;max-width:1000px">
+      <defs><marker id="sp-arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#55596b"/></marker></defs>
+      <rect x="330" y="10" width="280" height="40" rx="10" fill="var(--surface)" stroke="#1a1a1f" stroke-width="1.8"/>
+      <text x="470" y="28" font-size="12.5" text-anchor="middle" fill="#1a1a1f" font-weight="900">宣稱：今晚這個基金是合規的</text>
+      <text x="470" y="43" font-size="9.5" text-anchor="middle" fill="#55596b">＝ 快照為真 ∧ 快照上算對</text>
+      <line x1="400" y1="50" x2="255" y2="82" stroke="#55596b" stroke-width="1.8" marker-end="url(#sp-arr)"/>
+      <line x1="540" y1="50" x2="685" y2="82" stroke="#55596b" stroke-width="1.8" marker-end="url(#sp-arr)"/>
+      <rect x="80" y="86" width="330" height="72" rx="10" fill="rgba(107,114,128,.06)" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="6 3"/>
+      <text x="245" y="106" font-size="12" text-anchor="middle" fill="#374151" font-weight="800">子宣稱①：快照為真 → PF2 證</text>
+      <text x="245" y="123" font-size="10" text-anchor="middle" fill="#55596b">每筆更新有交易所 EdDSA 簽章、逐筆鏈 root</text>
+      <text x="245" y="138" font-size="10" text-anchor="middle" fill="#55596b">逐筆發生 · 核心是簽章驗證 · 規模＝成交筆數</text>
+      <text x="245" y="153" font-size="9.5" text-anchor="middle" fill="#8b94a3">State Transition · 商業範圍不展開</text>
+      <rect x="530" y="86" width="330" height="72" rx="10" fill="rgba(124,58,237,.07)" stroke="#7c3aed" stroke-width="2"/>
+      <text x="695" y="106" font-size="12" text-anchor="middle" fill="#5b21b6" font-weight="800">子宣稱②：快照上算對 → PF1 證</text>
+      <text x="695" y="123" font-size="10" text-anchor="middle" fill="#55596b">風險值計算正確、在限額內（超越函數都在這）</text>
+      <text x="695" y="138" font-size="10" text-anchor="middle" fill="#55596b">每晚一次 · 核心是數值計算 · 規模＝投組大小</text>
+      <text x="695" y="153" font-size="9.5" text-anchor="middle" fill="#5b21b6" font-weight="800">＝ 本報告與論文的全部內容</text>
+      <line x1="410" y1="122" x2="530" y2="122" stroke="#d97706" stroke-width="2" stroke-dasharray="6 3"/>
+      <text x="470" y="115" font-size="10" text-anchor="middle" fill="#92400e" font-weight="800">state_root</text>
+      <text x="470" y="133" font-size="8.5" text-anchor="middle" fill="#92400e">唯一的交握值（公開）</text>
+      <line x1="245" y1="158" x2="420" y2="196" stroke="#55596b" stroke-width="1.6" marker-end="url(#sp-arr)"/>
+      <line x1="695" y1="158" x2="520" y2="196" stroke="#55596b" stroke-width="1.6" marker-end="url(#sp-arr)"/>
+      <text x="470" y="207" font-size="11" text-anchor="middle" fill="#15803d" font-weight="900">驗證者三件一起驗：{state_root, PF1, PF2} → 合規 ✓（兩個引理合成定理）</text>
+    </svg>
+    <figcaption>本報告自製 · 分工口徑同主報告（四層信任：PF2＝L2 輸入真實性、PF1＝L3 計算完整性）；PF2 scope 見 scenario_a_full/src/proof2/SCOPE.md</figcaption>
+  </figure>
+  <div class="grid-2" style="margin-top:.4rem">
+    <div class="card green"><h3>拆開的好處（有利）</h3>
+      <ul style="font-size:.9rem">
+        <li><b>形狀各自最適</b>：簽章電路歸簽章、數值電路歸數值 —— 不用做一個什麼都會的怪物電路</li>
+        <li><b>頻率各自最適</b>：PF2 逐筆增量做、PF1 每晚一次 —— 合成一張的話，夜批得拖著整段交易歷史</li>
+        <li><b>獨立演化（R4）</b>：換金融模型、改風險指標只動 PF1，PF2 完全不用碰</li>
+        <li><b>PF2 可重用</b>：被保真的部位樹可掛<b>任何</b>後續計算證明；PF2 單獨也是「部位帳完整性」的審計證據</li>
+      </ul>
+    </div>
+    <div class="card"><h3>合成邏輯（無弊）</h3>
+      <p style="font-size:.92rem">PF2 成立 ⇒ state_root 是<b>真實帳</b>的承諾；PF1 成立 ⇒ <b>這本帳上</b>的計算正確且在限額內。兩張證明綁同一個公開 state_root、驗證者<b>三件一起驗</b> —— 中間沒有第三個縫隙。像先證兩個引理、合起來成定理：<b>各保各的對，整體就對</b>。</p>
+      <p style="font-size:.88rem;margin-top:.35rem" class="muted">PF1 單獨看時，「快照為真」就是它的 Assumption 1 —— 這個假設不是懸空的，由 PF2 承擔。</p>
+    </div>
+  </div>
+  <div class="soulbox"><span class="tag">🎯 所以呢</span>：問題拆對了，<b>本報告與論文＝PF1 那一半</b>（超越函數的難題全在這）；「快照為真」由 PF2 承擔（商業範圍，不展開）。從下一張起，我們就站在 PF1 裡面 —— 先看這一半到底有多難。</div>
 </section>
 
 <!-- ===== 2.2 · WHY IT IS HARD (序章 2/4) ===== -->
 <section class="slide" data-part="" data-label="為什麼難">
-  <div class="slide-meta"><span class="part-label">旅程 3/8 · 撞牆</span> · 這道牆到底有多硬</div>
+  <div class="slide-meta"><span class="part-label">旅程 4/9 · 撞牆</span> · 這道牆到底有多硬</div>
   <h2>合規數學是<span class="accent">用超越函數寫成的</span> —— 而電路只有加和乘</h2>
-  <div class="whybox"><span class="tag">❓ 這頁要回答</span>：上一張選了 ZK。但「把金融模型搬進 ZK 電路」不是搬家，是撞牆 —— 牆有三層，一層比一層硬。</div>
+  <div class="whybox"><span class="tag">❓ 這頁要回答</span>：問題拆好了，現在站進 PF1 這一半。但「把金融模型搬進 ZK 電路」不是搬家，是撞牆 —— 牆有三層，一層比一層硬。</div>
   <div class="grid-2">
     <div class="card accent"><h3>牆① 要算的東西，全是超越函數</h3>
       <div class="fbox" style="margin:.3rem 0"><div class="lbl">Black–Scholes Delta（Scenario A 的風險值）</div>
@@ -454,7 +510,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 2.3 · REQUIREMENTS R1-R5 (序章 3/4) ===== -->
 <section class="slide" data-part="" data-label="條件限制">
-  <div class="slide-meta"><span class="part-label">旅程 4/8 · 條件</span> · 「能用」的五個硬條件</div>
+  <div class="slide-meta"><span class="part-label">旅程 5/9 · 條件</span> · 「能用」的五個硬條件</div>
   <h2>五個硬條件 <span class="accent">R1–R5</span> —— 過不了任何一條，就不能上線</h2>
   <div class="whybox"><span class="tag">❓ 走到這裡的問題</span>：牆看清楚了，那「拆牆成功」的標準是什麼？把金融合規的需求寫成<b>五條可量測的硬條件</b> —— 這張表是整份報告的地圖：後面每個「為什麼選 X」，都在回答其中一個編號。</div>
   <table style="font-size:.88rem">
@@ -470,7 +526,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 2.4 · BLUEPRINT (序章 4/4) ===== -->
 <section class="slide" data-part="" data-label="藍圖">
-  <div class="slide-meta"><span class="part-label">旅程 5/8 · 藍圖</span> · 終點長什麼樣：每晚一張證明</div>
+  <div class="slide-meta"><span class="part-label">旅程 6/9 · 藍圖</span> · 終點長什麼樣：每晚一張證明</div>
   <h2>藍圖：<span class="accent">整個投組 → 一張 34,368 B 的證明 → 10 毫秒驗完</span> <span class="rg rg-p">🅟</span></h2>
   <figure style="margin:.2rem 0 0">
     <svg viewBox="0 0 940 235" role="img" aria-label="PF1 夜批流程：私有部位與公開市場資料經 PF1 電路產出固定大小證明，監管與 LP 以 4 個公開輸入毫秒驗證" style="width:100%;max-width:1000px">
@@ -523,7 +579,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     </svg>
     <figcaption>本報告自製 · 數字：scenario_a_full benches/pf1_results.md（2026-07-08b 定版）、HANDOFF.md（公開輸入＝4，portfolio.rs:2206）</figcaption>
   </figure>
-  <div class="ideabox" style="margin-top:.4rem"><span class="tag">🧩 為什麼是兩張證明</span>：合規宣稱拆開其實是<b>兩個性質不同的問題</b> —— ①「照<b>今晚的快照</b>算，風險真的在限額內」：重數值計算（超越函數）、每晚一次、規模跟投組大小走；②「<b>快照本身是真的</b>」：部位樹的每筆更新都有交易所 EdDSA 簽章、一路鏈回監管簽的初始狀態 —— 逐筆發生、核心是簽章不是數學。形狀、頻率、工具都不同 → <b>各給一張證明</b>：<b>PF1 管計算</b>（信任架構的 L3 計算完整性）、<b>PF2 管輸入真實性</b>（L2，State Transition），以公開的 state_root 綁定。<b>本報告與論文＝PF1</b>（超越函數的難題全在這一半）；PF1 假設樹是完整的（Assumption 1）——「輸入正確」由 PF2 承擔，屬商業範圍不展開（口徑同主報告）。</div>
+  <div class="ideabox" style="margin-top:.4rem"><span class="tag">🧩 分工回顧</span>：<b>PF1 管計算、PF2 管輸入真實性</b>（為什麼拆、為什麼拆了更好 —— 第 5 頁「拆成兩張證明」講過）。這頁是 <b>PF1 的終點樣貌</b>；圖上的灰色 PF2 影子提醒：每晚交三件 {state_root, PF1, PF2}。</div>
   <div class="grid-2" style="margin-top:.4rem">
     <div class="card amber"><h3>誠實三註（藍圖不是童話）</h3>
       <ul style="font-size:.88rem">
@@ -538,7 +594,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 2.45 · LAYER MAP (system layers, you-are-here anchor) ===== -->
 <section class="slide" data-part="" data-label="分層地圖">
-  <div class="slide-meta"><span class="part-label">旅程 5/8 · 藍圖</span> · 系統分四層 —— 後面每個取捨都住在其中一層</div>
+  <div class="slide-meta"><span class="part-label">旅程 6/9 · 藍圖</span> · 系統分四層 —— 後面每個取捨都住在其中一層</div>
   <h2>分層地圖：<span class="accent">接下來的每個取捨，都在修其中一層</span></h2>
   <div class="whybox"><span class="tag">❓ 這張是什麼</span>：旅程地圖是<b>時間軸</b>（我們怎麼一路走來），這張是<b>座標系</b>（系統分哪幾層、每個問題住哪層）。從下一張起，<b>螢幕右側會一直亮著「你在哪一層」</b> —— 聽到任何一個取捨時，你都知道我們正在修理系統的哪個部分。</div>
   <figure style="margin:.2rem 0 0">
@@ -594,7 +650,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 2.5 · CORE TOOLS (why Halo2 + KZG) ===== -->
 <section class="slide" data-part="" data-label="核心工具">
-  <div class="slide-meta"><span class="part-label">旅程 6/8 · 被逼的選擇</span> · 取捨 1 底層平台：為什麼不用更快的 Groth16<span class="rref">↩ R4 · R3</span></div>
+  <div class="slide-meta"><span class="part-label">旅程 7/9 · 被逼的選擇</span> · 取捨 1 底層平台：為什麼不用更快的 Groth16<span class="rref">↩ R4 · R3</span></div>
   <h2>為什麼不用<span class="accent">最快最小</span>的 Groth16？</h2>
   <div class="whybox"><span class="tag">❓ 直覺會問</span>：Groth16 proof 最小（3 群元素）、驗證最快 —— 那為什麼不用它？因為<b>「快」不等於「合用」</b>。<b>一句話</b>：我們要證的不是幾條乘法，是 <b>12 次帶截斷的定點乘法</b> —— 每次截斷都要證「48-bit 餘數沒超界」。<b>有原生查表＝6 個 lookup，沒有＝48 條位元約束</b>。快和小，是「<b>算得出來</b>」之後才有意義的指標。<span class="muted">（名詞速記：proof＝算完後交出的一小份「可公開查驗的收據」；verify＝任何人幾毫秒核對這張收據；lookup＝「證明某個值出現在一張公開表裡」的約束。）</span></div>
   <table style="font-size:.86rem">
@@ -612,7 +668,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 3 · TWO DEAD ENDS ===== -->
 <section class="slide" data-part="" data-label="兩條死路">
-  <div class="slide-meta"><span class="part-label">旅程 6/8 · 被逼的選擇</span> · 取捨 2：為什麼不能直接放</div>
+  <div class="slide-meta"><span class="part-label">旅程 7/9 · 被逼的選擇</span> · 取捨 2：為什麼不能直接放</div>
   <h2>兩條直覺的路，<span class="accent">都是死路</span></h2>
   <div class="whybox"><span class="tag">❓ 為什麼不能直接放進去</span>：要在電路裡算 \( \ln,\exp,\mathrm{erf} \)，直覺只有兩條路 —— 查表、或多項式逼近。先看清楚兩條各死在哪，才知道我們的選擇是被逼出來的。</div>
   <figure style="margin:.3rem 0 .2rem">
@@ -672,7 +728,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 4 · FOUR DECISIONS ===== -->
 <section class="slide" data-part="" data-label="四個設計決定">
-  <div class="slide-meta"><span class="part-label">旅程 6/8 · 被逼的選擇</span> · 取捨 3：全部攤在一張表<span class="rref">↩ R1–R5</span></div>
+  <div class="slide-meta"><span class="part-label">旅程 7/9 · 被逼的選擇</span> · 取捨 3：全部攤在一張表<span class="rref">↩ R1–R5</span></div>
   <h2>四個設計決定 —— <span class="accent">選了什麼、別的為什麼不行</span></h2>
   <table style="font-size:.92rem">
     <tr><th style="width:20%">設計決定</th><th>為什麼選這個 · 別的為什麼不行</th><th style="width:24%">換到的效果</th></tr>
@@ -686,7 +742,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== CORE KERNEL (how we evaluate + honest truncation) ===== -->
 <section class="slide" data-part="" data-label="核心 kernel">
-  <div class="slide-meta"><span class="part-label">旅程 7/8 · 保證沒亂算</span> · 核心電路：怎麼算、又怎麼鎖死<span class="rref">↩ R5 · R4</span></div>
+  <div class="slide-meta"><span class="part-label">旅程 8/9 · 保證沒亂算</span> · 核心電路：怎麼算、又怎麼鎖死<span class="rref">↩ R5 · R4</span></div>
   <h2>出貨 kernel <span class="rg rg-p">🅟</span>：<span class="accent">逐步 Horner ＋ 每步誠實截斷</span></h2>
   <div class="whybox"><span class="tag">❓ 核心公式</span>：選了定點 + Minimax 之後，電路裡<b>到底怎麼把多項式算出來</b>、又<b>怎麼保證 prover 沒亂填</b>？這頁講的是<b>實際出貨的 per-step kernel</b>（scenario_a_full/src/kernel.rs）；🅔 的延遲截斷變體放在「免費空間」那張。</div>
   <div class="grid-2">
@@ -766,7 +822,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== WORKED EXAMPLE (one real Horner step at toy scale) ===== -->
 <section class="slide" data-part="" data-label="算一步">
-  <div class="slide-meta"><span class="part-label">旅程 7/8 · 保證沒亂算</span> · 一步算給你看（含作弊示範）</div>
+  <div class="slide-meta"><span class="part-label">旅程 8/9 · 保證沒亂算</span> · 一步算給你看（含作弊示範）</div>
   <h2>算一步給你看：<span class="accent">誠實過關、作弊被抓</span></h2>
   <div class="whybox"><span class="tag">❓ 為什麼要這張</span>：「閘鎖死截斷」聽起來抽象。用玩具尺度 <b>pp=8（S=256）</b>把一個 Horner step 完整算一遍 —— 同樣的邏輯在出貨版只是換成 S=2⁴⁸、rem 拆 6 bytes。</div>
   <div class="grid-2">
@@ -795,7 +851,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== ExplicitRC (input soundness) ===== -->
 <section class="slide" data-part="" data-label="ExplicitRC">
-  <div class="slide-meta"><span class="part-label">旅程 7/8 · 保證沒亂算</span> · 連輸入都騙不了</div>
+  <div class="slide-meta"><span class="part-label">旅程 8/9 · 保證沒亂算</span> · 連輸入都騙不了</div>
   <h2>ExplicitRC：連<span class="accent">輸入</span>都騙不了</h2>
   <div class="whybox"><span class="tag">❓ 為什麼可以信</span>：輸入 \(R\) 是 prover 私下給的。多項式逼近<b>只在選定區間內準</b>；他若餵一個超範圍的 \(R\)，輸出是垃圾、卻仍能過證明。怎麼擋？</div>
   <figure style="margin:.3rem 0 .2rem">
@@ -846,7 +902,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 5 · FREE SPACE (deferred vs per-step) ===== -->
 <section class="slide" data-part="" data-label="免費空間">
-  <div class="slide-meta"><span class="part-label">旅程 6/8 · 被逼的選擇</span> · 拆決定 ③：兩種截斷</div>
+  <div class="slide-meta"><span class="part-label">旅程 7/9 · 被逼的選擇</span> · 拆決定 ③：兩種截斷</div>
   <h2>那塊「免費空間」紅利，<span class="accent">用光就得換路</span></h2>
   <div class="whybox"><span class="tag">❓ 為什麼會有「延遲」和「逐步」兩種截斷</span>：兩者差在「中間值什麼時候除回去」。這頁把<b>兩邊的實測數字</b>都攤開 —— 贏的、輸的一起看，才叫取捨。</div>
   <div class="grid-2">
@@ -877,7 +933,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== REGIME MAP (pp × d plane, real operating points) ===== -->
 <section class="slide" data-part="" data-label="換道地圖">
-  <div class="slide-meta"><span class="part-label">旅程 6/8 · 被逼的選擇</span> · 拆決定 ③：一張圖看懂兩個 regime<span class="rref">↩ R5</span></div>
+  <div class="slide-meta"><span class="part-label">旅程 7/9 · 被逼的選擇</span> · 拆決定 ③：一張圖看懂兩個 regime<span class="rref">↩ R5</span></div>
   <h2>換道地圖：<span class="accent">(d+1)·pp = 254 這條線</span></h2>
   <div class="grid-2">
     <figure style="margin:.1rem 0 0">
@@ -934,7 +990,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== THE PRICE OF PER-STEP (exp03b gold table) ===== -->
 <section class="slide" data-part="" data-label="逐步的代價">
-  <div class="slide-meta"><span class="part-label">旅程 6/8 · 被逼的選擇</span> · 誠實帳單：per-step 的價格</div>
+  <div class="slide-meta"><span class="part-label">旅程 7/9 · 被逼的選擇</span> · 誠實帳單：per-step 的價格</div>
   <h2>誠實的帳單：<span class="accent">per-step 在 13 個函數上輸多少</span> <span class="rg rg-e">🅔</span></h2>
   <div class="whybox"><span class="tag">❓ 為什麼要把輸的一面攤開</span>：前面說延遲精度好 —— 好多少？這是 <b>exp03b 的完整消融</b>（pp=16，13 函數各在最小可行次數 d*）。這張表是「per-step 的價格」，不攤開它，「13 函數全 ULP=1」就會被誤會成 per-step 的成績。<b>它不是</b>：那是延遲截斷的成績。</div>
   <table style="font-size:.85rem">
@@ -952,7 +1008,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 6 · QUANTIZATION SATURATION ===== -->
 <section class="slide" data-part="" data-label="量化飽和">
-  <div class="slide-meta"><span class="part-label">旅程 6/8 · 被逼的選擇</span> · 拆決定 ②：degree 的甜蜜點</div>
+  <div class="slide-meta"><span class="part-label">旅程 7/9 · 被逼的選擇</span> · 拆決定 ②：degree 的甜蜜點</div>
   <h2>degree 越高越準嗎？<span class="accent">反直覺：不是</span></h2>
   <div class="whybox"><span class="tag">❓ 為什麼不能一路把 degree 加大</span>：多項式逼近的直覺是「次數越高越貼合」。在定點 ZK 裡，這個直覺<b>過了甜蜜點就失效</b> —— 這次不畫示意圖，直接放實測。</div>
   <div class="grid-2">
@@ -998,7 +1054,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== ERROR BUDGET (the precision guarantee) ===== -->
 <section class="slide" data-part="" data-label="誤差預算">
-  <div class="slide-meta"><span class="part-label">旅程 7/8 · 保證沒亂算</span> · 誤差保證：為什麼結果可信<span class="rref">↩ R2</span></div>
+  <div class="slide-meta"><span class="part-label">旅程 8/9 · 保證沒亂算</span> · 誤差保證：為什麼結果可信<span class="rref">↩ R2</span></div>
   <h2>誤差預算：精度<span class="accent">可信到一個明確的界</span></h2>
   <div class="whybox"><span class="tag">❓ 為什麼敢說「準」</span>：我們憑什麼說「準到 ULP=1」？不是測幾個點就喊 —— 是把總誤差<b>拆成三源、各給上界</b>，再用窮舉壓在界內。</div>
   <div class="soulbox"><span class="tag">🎯 核心公式</span>：\[ \mathrm{ULP}_{\mathrm{total}} \le \varepsilon_{\mathrm{approx}}+\varepsilon_{\mathrm{quant}}+\varepsilon_{\mathrm{trunc}} \]
@@ -1046,7 +1102,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 7 · FUNCTION & INTERVAL ===== -->
 <section class="slide" data-part="" data-label="函數與區間">
-  <div class="slide-meta"><span class="part-label">旅程 6/8 · 被逼的選擇</span> · 兩個更細的取捨：函數 / 區間</div>
+  <div class="slide-meta"><span class="part-label">旅程 7/9 · 被逼的選擇</span> · 兩個更細的取捨：函數 / 區間</div>
   <h2>還有兩個更細的取捨：<span class="accent">函數本身 · 區間寬窄</span></h2>
   <div class="grid-2">
     <div class="card amber"><h3>① 係數條件數：函數自己決定地板</h3>
@@ -1170,7 +1226,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 8 · WHERE WE STAND (honest positioning) ===== -->
 <section class="slide" data-part="" data-label="我們站在哪">
-  <div class="slide-meta"><span class="part-label">旅程 8/8 · 成果與代價</span> · 誠實定位：我們站在哪</div>
+  <div class="slide-meta"><span class="part-label">旅程 9/9 · 成果與代價</span> · 誠實定位：我們站在哪</div>
   <h2>我們站在哪 —— <span class="accent">誠實講什麼是新的</span></h2>
   <div class="whybox"><span class="tag">❓ 該先回答的質疑</span>：ezkl、zkLLM、ZKFixedPointChip 早就做了，我們新在哪？原則是<b>寧可少講</b>，每一句都要經得起查。</div>
   <div class="grid-2">
@@ -1202,7 +1258,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 9 · RESULTS & LIMITS ===== -->
 <section class="slide" data-part="" data-label="成果與限界">
-  <div class="slide-meta"><span class="part-label">旅程 8/8 · 成果與代價</span> · 換到了什麼 · 代價是什麼</div>
+  <div class="slide-meta"><span class="part-label">旅程 9/9 · 成果與代價</span> · 換到了什麼 · 代價是什麼</div>
   <h2>成果 與 <span class="accent">誠實的限界</span></h2>
   <div class="grid-2">
     <div class="card green"><h3>成果（依基準分開講）</h3>
@@ -1227,7 +1283,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== PROOF-SIZE LADDER ===== -->
 <section class="slide" data-part="" data-label="證明多大">
-  <div class="slide-meta"><span class="part-label">旅程 8/8 · 成果與代價</span> · 一把尺：proof 從 736 B 到 34 KB<span class="rref">↩ R3</span></div>
+  <div class="slide-meta"><span class="part-label">旅程 9/9 · 成果與代價</span> · 一把尺：proof 從 736 B 到 34 KB<span class="rref">↩ R3</span></div>
   <h2>證明到底多大？<span class="accent">一把尺、六個刻度</span></h2>
   <div class="whybox"><span class="tag">❓ 一個自然的問題</span>：「proof 到底是 5KB 還是 34KB？」—— 都對。差別是<b>裡面裝了多少東西</b>。這把尺一次講清楚。</div>
   <div class="grid-2">
@@ -1264,7 +1320,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
 <!-- ===== 10 · SOURCES ===== -->
 <section class="slide" data-part="" data-label="出處">
-  <div class="slide-meta"><span class="part-label">旅程 8/8 · 成果與代價</span> · 出處與先行工作（誠實標註）</div>
+  <div class="slide-meta"><span class="part-label">旅程 9/9 · 成果與代價</span> · 出處與先行工作（誠實標註）</div>
   <h2>出處 —— <span class="accent">取捨數據與先行工作</span></h2>
   <p class="muted" style="margin:0 0 .5rem;font-size:.95rem">本報告所有取捨數字出自我們的碩士論文；凡<b>先行工作</b>（不是我們發明的）一律如實標註。</p>
   <div class="grid-2">
@@ -1329,14 +1385,15 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <script>
 (function(){
   const NOTES = {
-'為什麼難':"上一張選了 ZK,這張講為什麼這件事難 —— 牆有三層。\n第一層:要算的東西全是超越函數。看 Delta 的公式:d1 要先算 ln(S/K)、除以 σ 乘根號 T,再把 d1 丟進常態機率 Φ,而 Φ 的核心是 erf;貼現還要一個 exp。Merton 的違約機率一樣,ln 跟 erf 一個都跑不掉。所以合規數學不是「碰巧用到」超越函數,它就是用超越函數寫成的。\n第二層:電路的世界裡只有一個 254 位質數體的保險箱,裡面只有整數的加法跟乘法。沒有浮點、沒有小數點、沒有 if/else、沒有長度隨資料變的迴圈 —— 連除法跟開根號都不存在。每一個實數運算,都得用整數加乘一磚一瓦重新蓋出來。\n第三層最容易被忽略:算的人正是利害關係人 —— prover 是被監管的基金自己。「大致對」在門檻邊界一文不值:差最後一位的一格,合規跟違規就翻盤 —— 論文裡的例子:投資級違約機率本身只有 10 到 100 個基點,誤差只要 ±0.002、也就是 20 個基點,判定就翻。所以誤差要的是可以證明的上界,不是測幾個點看起來不錯。\n三層牆疊起來:要重建超越函數、只有整數加乘當磚頭、蓋出來還得帶數學保證。下一張把「能用」的五個硬條件寫死。",
+'為什麼難':"問題拆好了,現在正式站進 PF1 這一半。這張講為什麼這件事難 —— 牆有三層。\n第一層:要算的東西全是超越函數。看 Delta 的公式:d1 要先算 ln(S/K)、除以 σ 乘根號 T,再把 d1 丟進常態機率 Φ,而 Φ 的核心是 erf;貼現還要一個 exp。Merton 的違約機率一樣,ln 跟 erf 一個都跑不掉。所以合規數學不是「碰巧用到」超越函數,它就是用超越函數寫成的。\n第二層:電路的世界裡只有一個 254 位質數體的保險箱,裡面只有整數的加法跟乘法。沒有浮點、沒有小數點、沒有 if/else、沒有長度隨資料變的迴圈 —— 連除法跟開根號都不存在。每一個實數運算,都得用整數加乘一磚一瓦重新蓋出來。\n第三層最容易被忽略:算的人正是利害關係人 —— prover 是被監管的基金自己。「大致對」在門檻邊界一文不值:差最後一位的一格,合規跟違規就翻盤 —— 論文裡的例子:投資級違約機率本身只有 10 到 100 個基點,誤差只要 ±0.002、也就是 20 個基點,判定就翻。所以誤差要的是可以證明的上界,不是測幾個點看起來不錯。\n三層牆疊起來:要重建超越函數、只有整數加乘當磚頭、蓋出來還得帶數學保證。下一張把「能用」的五個硬條件寫死。",
 '條件限制':"牆看清楚了,現在把「拆牆成功」的標準寫死 —— 五個硬條件,每條都有量尺,過不了任何一條就不能上線。\nR1,零部位揭露:部位、數量、每筆 Delta 永遠不離開基金;驗證者只看到 Merkle 承諾跟判定。量尺很具體:整個系統的公開輸入只有 4 個。\nR2,誤差要有可證明的上界:不是測起來準,是解析上界加實測雙保證 —— 出貨 kernel 實測 2.81 個 ULP、端到端 7 個,而 1 個 ULP 只有 2 的負 48 次方。\nR3,第三方輕驗證:proof 常數大小、毫秒級驗證。這裡誠實補一句:BN254 剛好是以太坊內建的 precompile 曲線,未來要上鏈可以不換體 —— 但那是紅利、是論文結論的展望,不是本場景的需求;我們的 verifier 是監管跟 LP,驗證在鏈下。\nR4,模型會演化:金融模型的函數跟係數會改版,改版不能重辦可信設定儀式、不能重設計電路 —— 換函數只能是「換係數＋重跑 keygen」這種等級的動作。誠實講,係數放 fixed 欄,VK 還是會變、驗證方要重收一次;所以每天都在變的市場資料走另一條路 —— Merkle root 當公開輸入,VK 完全不動。改版頻率決定走哪條路,這本身就是一個取捨。\nR5,工程可行:夜批要跑得完,prove 分鐘級、verify 毫秒級。\n右邊那欄是預告:每一條後面站著哪個設計決定。這張表是整份報告的地圖 —— 從現在起,每個「為什麼選 X」都是在答 R 幾。條件湊齊時終點長什麼樣?下一張給你藍圖。",
-'藍圖':"條件寫死了,先看終點 —— 這張圖就是每天晚上真實發生的事。\n左邊兩個輸入:基金的部位,私有 witness,N 從 8 到 128 筆,永遠不離開基金,只用 state_root 這個承諾示人;市場資料表,公開的,股價、利率、結算價、波動率,九個欄位一片葉子,壓成 market_data_root。\n中間是 PF1 電路:pp=48、d=12 的通用 Horner kernel,加上 Merkle 驗證、Delta 管線、門檻比較 —— 95 個 advice 欄、91 個 lookup。每晚跑一次,N=128 也就 109 秒。\n出來的是一張 34,368 bytes 的 proof —— 8 筆跟 128 筆部位,proof 一樣大。監管跟 LP 拿它對 4 個公開輸入驗證,10 毫秒驗完;看到的只有「合規,通過」,部位、Delta、任何明細都看不到。\n這裡把 scope 講清楚。完整協議每晚其實交三件:state_root、PF1、PF2。為什麼要兩張證明?因為合規宣稱拆開來,是兩個性質不同的問題。第一個問題:照今晚的部位快照算,風險真的在限額內嗎 —— 這是重數值計算,超越函數都在這裡,每晚跑一次,規模跟投組大小走。第二個問題:這個快照本身是真的嗎 —— 部位樹的每一筆更新,都要有交易所的簽章、一路鏈回監管簽過的初始狀態;它逐筆發生,核心是簽章驗證,不是數學。兩個問題的形狀、頻率、工具都不一樣,硬塞進一張證明只會兩頭吃虧,所以各給一張:PF1 管計算、PF2 管輸入真實性,用公開的 state_root 綁在一起。這份報告跟論文的全部內容是 PF1 —— 超越函數的難題全在這一半;PF1 假設樹是完整的,那個「輸入正確」的假設由 PF2 承擔,它屬商業範圍,今天不展開。\n三句誠實的話。第一,market_data_root 是個雜湊,LP 自己重算不了 —— 實務上的信任錨是基金行政管理人:認證 NAV、提供重算工具,這寫在協議文件裡,不藏。第二,這是單一 prover 的 demo,金鑰管理跟正式 SRS 儀式沒做。第三,法律上 ZK proof 算不算合規證據,在論文範圍外。\n這張藍圖的每一個零件,都是一個被逼出來的選擇 —— 接下來一張一張拆。",
+'藍圖':"條件寫死了,先看終點 —— 這張圖就是每天晚上真實發生的事。\n左邊兩個輸入:基金的部位,私有 witness,N 從 8 到 128 筆,永遠不離開基金,只用 state_root 這個承諾示人;市場資料表,公開的,股價、利率、結算價、波動率,九個欄位一片葉子,壓成 market_data_root。\n中間是 PF1 電路:pp=48、d=12 的通用 Horner kernel,加上 Merkle 驗證、Delta 管線、門檻比較 —— 95 個 advice 欄、91 個 lookup。每晚跑一次,N=128 也就 109 秒。\n出來的是一張 34,368 bytes 的 proof —— 8 筆跟 128 筆部位,proof 一樣大。監管跟 LP 拿它對 4 個公開輸入驗證,10 毫秒驗完;看到的只有「合規,通過」,部位、Delta、任何明細都看不到。\n圖右下那個灰色影子再提醒一次:每晚交的是三件 —— state_root、PF1、PF2。為什麼拆兩張、為什麼拆了更好,第三站講過了;這張圖,就是其中 PF1 這一半的終點樣貌。\n三句誠實的話。第一,market_data_root 是個雜湊,LP 自己重算不了 —— 實務上的信任錨是基金行政管理人:認證 NAV、提供重算工具,這寫在協議文件裡,不藏。第二,這是單一 prover 的 demo,金鑰管理跟正式 SRS 儀式沒做。第三,法律上 ZK proof 算不算合規證據,在論文範圍外。\n這張藍圖的每一個零件,都是一個被逼出來的選擇 —— 接下來一張一張拆。",
 '分層地圖':"進零件之前,先給你一個座標系 —— 剛才的旅程地圖是時間軸,講我們怎麼一路走來;這張是空間圖,講系統分哪幾層。\n由上往下四層:應用層,金融合規 —— 要證什麼、準到哪;數值層 —— 把實數運算變成整數的逼近跟截斷;電路層 —— 用閘跟查表把每一步鎖死,讓 prover 沒有亂填的空間;最底下證明系統層 —— Halo2、KZG、BN254,把整件事變成一張 34KB、10 毫秒可驗的證明。\n兩個方向都要看。需求往下壓:合規要準,逼出數值層的逼近;數值要一步步算,交給電路層鎖死;電路要能驗,靠平台出證明。但限制也往上頂 —— 最重要的就是那條紅色虛線:證明系統層的 254 位保險箱,直接頂進數值層,劃出截斷策略的邊界,就是等下換道地圖那條線。\n從下一張開始,螢幕右邊會一直亮著「你在哪一層」—— 聽到任何取捨,你都知道我們正在修系統的哪個部分。先從最底層修起:為什麼平台選 Halo2。",
 '核心工具':"藍圖攤開了,第一個要拆的零件是最底層的平台 —— 證明系統跟承諾方案。第一個很自然的問題是:Groth16 的 proof 最小、驗證最快,為什麼不用最快的?\n我的答案是:快不等於合用。理由可以整理成四點 —— 這是論文的選型立場,加上工程上的判斷。\n第一,也是最關鍵的一點:表達力。我們的 kernel 需要兩樣東西 —— 自訂閘,逐步 Horner 加截斷;還有原生查表,ByteTable 範圍檢查。這裡我給個具體的價目:pp=48、d=12 的出貨 kernel,一次呼叫是 14 個 row,裡面有 14 次 48-bit 的範圍檢查 —— 每次把餘數拆成 6 個 byte,查同一張 256 表,總共 84 個 lookup。換成 R1CS 呢?沒有 lookup 這個原語,只能做位元分解,14 乘以 48,大約 690 條布林約束 —— 光範圍檢查這一項就貴大約 8 倍,再乘上投資組合的 N 個部位。誠實講,R1CS 不是「做不到」,它是每個原語都要攤平、貴一個級距;而 PLONKish 兩樣都原生給你,出貨電路 🅟 是 91 個 lookup 參數加 degree-6 的閘。所以 Groth16 再快,底層原語不對,整條路就走不順。\n第二,通用設定。Groth16 是每換一個電路就要重辦一次可信設定。這裡要說清楚,不是「金融模型天天改」那麼廉價的理由 —— 而是 R4 那條:我們換一個函數、換一組係數,在 Halo2 底下就只是換 fixed 欄的係數、重跑一次 keygen,幾十秒、沒有儀式;同一件事在 Groth16 底下,是重新找一批互不串通的人辦一場多方儀式。差別是幾十秒對一場儀式。至於每天在變的市場資料,走 Merkle root 當公開輸入,VK 完全不動。\n第三,proof 跟驗證夠用就好:數 KB、數毫秒、不隨投組大小變;STARK 免設定又抗量子,但 proof 偏大,小投組吃虧。\n第四,工程成熟度:halo2_proofs 已穩定,Jolt 這類新工具 API 還在動,金融應用要長期穩。\n綜合下來 Halo2 加 KZG 最匹配,代價是那一次性的可信設定。承諾方案順帶一句:原版 IPA 免設定但驗證是線性時間;PSE 版換 KZG,proof 常數、驗證毫秒 —— 同樣是在答 R3 輕驗證。\n平台選定了,真正的難題才開始 —— 在這個底層上,超越函數到底怎麼算?下一張就看兩條直覺的路怎麼死。",
 '封面':"大家好。\n這份報告只講一件事:我們論文裡的每一個技術決定,背後的取捨是什麼。\n所以它不是教學、不是教你怎麼一步步做;是把每個選擇攤開來說清楚 —— 為什麼選這條、別的路為什麼走不通、換到了什麼、又付出什麼代價。\n這一版還多了一個規矩:報告裡每一個數字都掛徽章 —— 🅔 是低精度的實驗場、🅒 是 Merton 信用情境、🅟 是實際出貨的管線。三個配置的數字以前混著講,聽的人會亂;現在每個數字都能對回它的出身,不同基準的成績不互相背書。\n我會一張一張、一步一步把 why 講明白;整條路的地圖,下一張直接給你;三個配置是誰,地圖之後馬上介紹。我們開始。",
-'思路歷程':"開始之前,先給你整條路的地圖。這張圖不是目錄 —— 它是我們真實走過的路:解一個問題,路上會不斷冒出下一個問題;八個站,就是那一連串問題,跟我們一步一步解決的順序。\n第一站,問題:每晚要向監管跟投資人證明風險在限額內,但部位就是策略,不能攤。第二站,選路:審計慢又靠信任、TEE 信晶片、MPC 要全員在線 —— 只有 ZK 的形狀對。第三站,撞牆:合規公式全是 ln、exp、erf 這些超越函數,而電路裡只有加跟乘。第四站,把「拆牆成功」寫成五條可量測的硬條件 R1 到 R5。第五站,藍圖:終點長什麼樣 —— 每晚一張三萬四千位元組的證明、十毫秒驗完。\n後半段就是把藍圖的零件一個個拆開:第六站,四個關鍵的設計選擇 —— 定點、Minimax、per-step、通用 kernel;第七站,怎麼保證 prover 沒亂算 —— 商餘閘鎖死加誤差三源上界;第八站,成果與代價,成績單依三個量測基準分開報。\n每一站下面那行紅字,就是解完這一站、馬上冒出來的下一個問題 —— 這條路不是事後美化的直線,每個因果都是真的。接下來整份報告,就是沿著這條路把每一站重走一遍;左上角的「旅程幾之八」會一直告訴你人在哪。上路之前,先立一個關於數字的規矩 —— 下一張。",
-'要解的問題':"先講一個具體的故事。一家對沖基金,每天晚上要向監管跟投資人證明兩件事:整個投資組合的 Delta 曝險沒有超過門檻、組合的違約機率沒有超過監管上限。麻煩在哪?傳統做法是把部位明細攤開給對方看 —— 但部位就是策略本身,攤開等於把多年的交易策略送人。\n那有哪些路?第一,全揭露,直接洩漏策略。第二,信任審計師:季審等級的速度、靠制度不靠數學,「每晚查一次」根本做不到。第三,TEE,把計算搬進晶片的保險飛地 —— 但信任只是從基金搬給晶片廠,而且旁路攻擊的前科不少。第四,MPC,多方一起算 —— 但每查一次,所有參與方都得在線多輪互動,夜批做不起來。剩下 ZK:證明「我算對了」,但不給你看輸入 —— 一方算、多方隨時驗、不交資料,形狀正好對上。\n先把誠實的話說在前面:ZK 不是什麼都不用信。部位藏住了,但市場資料的真實性還是需要一個現實世界的錨,我們把它收斂到 LP 本來就信任的基金行政管理人,藍圖那張會講清楚。\n那把金融模型搬進 ZK 電路到底有多難?下一張帶你摸那道牆。",
+'思路歷程':"開始之前,先給你整條路的地圖。這張圖不是目錄 —— 它是我們真實走過的路:解一個問題,路上會不斷冒出下一個問題;九個站,就是那一連串問題,跟我們一步一步解決的順序。\n第一站,問題:每晚要向監管跟投資人證明風險在限額內,但部位就是策略,不能攤。第二站,選路:審計慢又靠信任、TEE 信晶片、MPC 要全員在線 —— 只有 ZK 的形狀對。第三站,先把問題拆對:「合規」其實是「快照為真」跟「快照上算對」兩個子宣稱,接口只有一個 state_root —— 拆成兩張證明,本論文做算的那半,PF1。第四站,撞牆:合規公式全是 ln、exp、erf 這些超越函數,而電路裡只有加跟乘。第五站,把「拆牆成功」寫成五條可量測的硬條件 R1 到 R5。第六站,藍圖:終點長什麼樣 —— 每晚一張三萬四千位元組的證明、十毫秒驗完。\n後半段就是把藍圖的零件一個個拆開:第七站,四個關鍵的設計選擇 —— 定點、Minimax、per-step、通用 kernel;第八站,怎麼保證 prover 沒亂算 —— 商餘閘鎖死加誤差三源上界;第九站,成果與代價,成績單依三個量測基準分開報。\n每一站下面那行紅字,就是解完這一站、馬上冒出來的下一個問題 —— 這條路不是事後美化的直線,每個因果都是真的。接下來整份報告,就是沿著這條路把每一站重走一遍;左上角的「旅程幾之九」會一直告訴你人在哪。上路之前,先立一個關於數字的規矩 —— 下一張。",
+'要解的問題':"先講一個具體的故事。一家對沖基金,每天晚上要向監管跟投資人證明兩件事:整個投資組合的 Delta 曝險沒有超過門檻、組合的違約機率沒有超過監管上限。麻煩在哪?傳統做法是把部位明細攤開給對方看 —— 但部位就是策略本身,攤開等於把多年的交易策略送人。\n那有哪些路?第一,全揭露,直接洩漏策略。第二,信任審計師:季審等級的速度、靠制度不靠數學,「每晚查一次」根本做不到。第三,TEE,把計算搬進晶片的保險飛地 —— 但信任只是從基金搬給晶片廠,而且旁路攻擊的前科不少。第四,MPC,多方一起算 —— 但每查一次,所有參與方都得在線多輪互動,夜批做不起來。剩下 ZK:證明「我算對了」,但不給你看輸入 —— 一方算、多方隨時驗、不交資料,形狀正好對上。\n先把誠實的話說在前面:ZK 不是什麼都不用信。部位藏住了,但市場資料的真實性還是需要一個現實世界的錨,我們把它收斂到 LP 本來就信任的基金行政管理人,藍圖那張會講清楚。\n選定 ZK 之後,動工之前還有一件事:先把問題本身拆對 —— 下一張。",
+'拆成兩張證明':"上一張選定了 ZK。動工之前,先把問題本身拆對。「今晚合規」這個宣稱,其實是兩個性質不同的子宣稱:第一,快照為真 —— 部位樹的每一筆更新都有交易所簽章、一路鏈回監管簽的初始狀態;第二,快照上算對 —— 風險值算得正確、而且在限額內。關鍵在:這兩個子宣稱之間,只靠一個值交握 —— state_root。接口這麼窄,就拆得開:各給一張證明,PF2 保快照為真,PF1 保快照上算對。\n拆開只有好處。形狀上,一個是簽章驗證、一個是重數值計算,各自用最合適的電路,不用做一個什麼都會的怪物;頻率上,一個逐筆增量做、一個每晚一次 —— 合成一張的話,夜批就得拖著整段交易歷史;演化上,換金融模型、改風險指標只動 PF1,PF2 完全不用碰;而且被 PF2 保真的這棵樹是可重用的 —— 之後要加任何新的計算證明,直接掛上去就好,PF2 自己也能單獨當「部位帳完整性」的審計證據。\n邏輯的合成也乾淨:PF2 成立,state_root 就是真實帳的承諾;PF1 成立,這本帳上的計算就是對的;兩張證明綁同一個公開的 state_root,驗證者三件一起驗,中間沒有第三個縫隙 —— 像先證兩個引理,合起來就是定理:各保各的對,整體就對。\n這份報告跟論文,做的是 PF1 這一半 —— 超越函數的難題全在這裡;快照為真由 PF2 承擔,它屬商業範圍,不展開。從下一張起,我們就站在 PF1 裡面 —— 先看這一半到底有多難。",
 '兩條死路':"那為什麼不能把超越函數直接放進去?直覺只有兩條路,我帶你看為什麼兩條都死。\n先補兩個詞:pp 是定點精度 —— 小數保留幾個二進位位,像用「分」記帳不用「元」;degree d 是多項式的最高次方,也是求值的步數。\n第一條,查表:把每個可能的輸入預先算好、存成一張表。輸入有 2 的 pp 次方種,表就要那麼多格。低精度還行,pp=16 大概六萬格;但金融要 pp=24、32,表就爆成一千六百多萬、四十三億格,而且每個函數一張。而且這不只是裝不下:電路的列數要排進 2 的 k 次方階的子群,BN254 連 2 的 28 次方都到頂了 —— 2 的 32 次方對應的單位根根本不存在。這是數學上的牆,不是記憶體的問題。\n第二條,多項式逼近:用一條低次多項式近似,再用 Horner 求值 —— 就是「乘 x、加下一個係數」一路捲下來。這條可行,但有兩個坑。坑 A:Taylor 在定點量化下崩潰,pp=32、d=10 時 ln 只剩 4.4 個有效位、約一位十進位;換成 Minimax 有 28.6 位。坑 B:中間值不截斷會膨脹 —— 每乘一步數字變長 pp 位,到第 d+1 步就是 S 的 d+1 次方,pp=32、d=10 是 2 的 352 次方,塞不進 BN254 這個 254 位的保險箱;出貨的 pp=48、d=12 更要 2 的 624 次方。\n所以可行的只剩多項式,但要先解掉 Taylor 崩潰跟保險箱裝不下這兩個坑 —— 接下來四個設計決定就是在回答這兩個坑。",
 '四個設計決定':"這張把四個關鍵決定一次攤在取捨表上:選了什麼、別的為什麼不行、換到什麼。\n第一,定點 pp=48、不用浮點 —— 體裡根本沒有浮點,只能「用分記帳」:整數乘 2 的 48 次方把小數變整數;代價是 pp 越大、中間值越容易脹爆,這就逼出後面的截斷。\n第二,Minimax、不用 Taylor —— 不是『比較好』,是『必要條件』:Taylor 在定點下崩潰。這裡先講清楚一個度量:ULP 就是最後一位小數的一格刻度,ULP≤1 表示準到最後一位。13 個函數在最小 degree 全達 ULP≤1 —— 但注意,這是 🅔 實驗場、延遲截斷的成績,不是出貨 kernel 的。\n第三,逐步截斷 per-step、不用延遲 —— 延遲低 pp 精度較好,但它有位元預算:每乘一步長 pp 位,d+1 步超過 254 位保險箱就裝不下。pp=48 只容 d=4,管線要 d=12 —— 延遲直接出局,只剩 per-step;代價是精度,🅔 實測 d* 時 ULP 掉到 2 到 7。\n第四,通用 Horner kernel 加一張 ByteTable —— 換函數只改 fixed 欄那 d 個係數,256 條目的表全函數共用,加新函數零電路重設計。誠實講:電路結構不動,但 VK 還是會變,驗證方要重收一次 —— 只是重跑 keygen,幾十秒、沒有儀式。\n這四個決定換到:金融精度 24 到 48 位、單函數 proof 5 到 9.5KB(🅔)、整個投組 34,368 bytes(🅟)、verify 毫秒級、不揭露部位。徽章的規矩第二頁立過了,不同基準的成績不互相背書。接下來就進出貨 kernel 的本體:電路裡到底怎麼把多項式算出來、又怎麼保證 prover 沒亂填。",
 '核心 kernel':"前面選了定點跟 Minimax,這張回答最實在的問題:出貨的電路裡到底怎麼把多項式算出來、又怎麼保證 prover 沒亂填。注意,這頁講的是實際出貨的 per-step kernel;延遲截斷那個變體,等一下「免費空間」那張才登場。\n先講怎麼算。每一步就是乘、加、剪:acc 乘上輸入 R、加上這一步的係數,然後立刻除以 S 取整 —— 把小數點右邊多出來的位數剪掉,回到固定的小數位數,像用「分」記帳的人每一步都把帳面換回固定單位。因為每步都清尺度,中間值永遠只有大約兩個 pp 的長度,pp=48 也才 96 位 —— 254 位的保險箱怎麼裝都裝得下,degree 加到多大都不會爆。\n再講怎麼保證沒亂算。電路本身做不了「除法取整」,所以反過來:讓 prover 自己把商跟餘數填進來,再用一條閘鎖死 —— 商乘 S 加餘數,必須剛好湊回乘加的原金額,像收銀機找零一定要湊回原價;而且餘數只能拆成 0 到 255 的合法硬幣,逐枚去 ByteTable 查。餘數湊得出來,就等於他誠實做了除法。\n帳單也給你:d=12 一次呼叫是 3 種閘、14 列、84 個 byte 查表,全部共用同一張 256 條目的表。空口無憑,下一張直接拿數字算一步給你看。",
@@ -1468,6 +1525,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   const TERMS = {
 '封面':["零知識證明 (ZK)","超越函數","定點 pp=48","Minimax / Remez","逐步截斷 (per-step)","通用 Horner kernel","ByteTable"],
 '要解的問題':["金融法遵 (compliance)","Delta 曝險","Black–Scholes","Merton 模型","零知識證明 (ZK)","審計 (audit)","TEE (可信執行環境)","MPC (多方安全計算)","信任錨 (基金行政管理人)"],
+'拆成兩張證明':["PF1 / PF2 分工","PF1 (投組證明電路)","Merkle 承諾","公開輸入 (public inputs)","零知識證明 (ZK)"],
 '為什麼難':["超越函數","exp / ln / erf","常態 CDF Φ","erf (誤差函數)","d₁ / d₂ (BS 中間量)","Black–Scholes Delta","Merton 模型","有限體 (𝔽ᵣ)","浮點","BN254","ULP"],
 '條件限制':["公開輸入 (public inputs)","Merkle 承諾","零知識證明 (ZK)","ULP","Minimax / Remez","誤差預算 (error budget)","窮舉驗證","KZG 承諾","BN254","可信設定 (trusted setup)","通用 Horner kernel","fixed 欄","ByteTable","逐步截斷 (per-step)","proof (證明 π)","verify (驗證)"],
 '藍圖':["PF1 (投組證明電路)","PF1 / PF2 分工","公開輸入 (public inputs)","Merkle 承諾","信任錨 (基金行政管理人)","proof (證明 π)","verify (驗證)","KZG 承諾","定點 pp=48","通用 Horner kernel","Black–Scholes Delta"],
@@ -1508,8 +1566,12 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
  ["五個條件會不會互相打架？","會，而且整份報告就在講怎麼打：R2 要精度、R5 要中間值不爆 —— per-step 犧牲精度換可行、再用 degree 贖回；R4 要通用、R3 要小 proof —— 分段（erf 12 段）就讓 proof 變大。後面每一張取捨，都是這張表裡兩個條件在拔河。"],
  ["為什麼沒有『抗量子』這種條件？","誠實承認：BN254/KZG 不抗量子，這是 R3（輕驗證）換來的取捨。要分兩層講：證明的「有效性」時效是天級（每晚重發），量子偽造無從得利；但「部位隱私」是長期的 —— 承諾與證明的隱藏性建立在離散對數假設上，若未來量子破了它，歷史資料理論上有回溯揭露風險。要長期後量子隱私，得換 STARK／hash 路線並吞下大 proof 的代價 —— 這是真實限界，不迴避。"]
 ],
+'拆成兩張證明':[
+ ["為什麼拆成 PF1、PF2 兩張證明？一張全包不行嗎？","因為合規宣稱是兩個性質不同的問題：「快照上算對」（重數值、每晚一次、規模＝投組大小）與「快照為真」（每筆更新有交易所簽章、逐筆發生、規模＝成交筆數、核心是簽章驗證）——形狀、頻率、工具都不同，對應信任架構的 L3 計算完整性與 L2 輸入真實性兩層，各給一張證明、以公開 state_root 綁定最乾淨。合成一張的話，夜批還得拖著整段交易歷史重驗。"],
+ ["兩張證明合起來，邏輯真的嚴密嗎？中間有沒有縫？","沒有第三個縫隙：PF2 成立 ⇒ state_root 是真實帳的承諾；PF1 成立 ⇒ 這本帳上的計算正確且在限額內；兩張綁同一個公開 state_root、驗證者三件一起驗。PF1 單獨看時「快照為真」是它的 Assumption 1——這個假設不懸空，由 PF2 承擔。像先證兩個引理、合成定理。"],
+ ["PF2 為什麼不展開？","屬商業範圍（State Transition 與交易所整合的細節）。本報告與論文只引用它的介面（state_root）與它承擔的假設（Assumption 1），口徑與主報告一致。"]
+],
 '藍圖':[
- ["為什麼拆成 PF1、PF2 兩張證明？一張全包不行嗎？","因為合規宣稱是兩個性質不同的問題：「快照上算對」（重數值、每晚一次、規模＝投組大小）與「快照為真」（每筆更新有交易所簽章、逐筆發生、規模＝成交筆數、核心是簽章驗證）——形狀、頻率、工具都不同，對應信任架構的 L3 計算完整性與 L2 輸入真實性兩層，各給一張證明、以公開 state_root 綁定最乾淨。PF1 假設樹完整（Assumption 1），該假設由 PF2 承擔。本報告與論文只展開 PF1；PF2 屬商業範圍，口徑與主報告一致。"],
  ["監管憑什麼信市場資料？","market_data_root 承諾的是公開市場數據，但 root 本身是 Poseidon 雜湊 —— LP 沒辦法自己從公開數據重算。協議把信任收斂到基金行政管理人：認證 NAV（監管據此在電路外算門檻 τ·NAV）、提供 root 重算工具讓 LP 核對。誠實說：這是一個現實世界的信任假設，ZK 沒有消掉它，只是收斂到 LP 本來就信任的既有角色、不引入新的信任方。"],
  ["藍圖離真的上線還差什麼？","誠實列三件：① 這是單一 prover 的 demo 系統 —— 多方金鑰管理、正式 SRS 儀式（目前 per-run fresh、非 ceremony 級）、營運監控都沒做；② 市場資料的信任錨是行政管理人，不是密碼學保證 —— LP 無法獨立驗證市場資料；③ 法律與監管接受度（ZK proof 算不算合規證據）完全在論文範圍外。電路與數字是真的，產品化是另一段路。"],
  ["為什麼 proof 大小跟 N 完全無關？","KZG/SHPLONK 的 proof 由 column 結構決定、不由行數決定；N 變大只是行數變多（k 從 13 到 18），column schema 不動，所以 proof 一格不變 —— N=8 跟 N=128 都是 34,368 bytes、verify 都約 10 ms。這正是 R3『第三方輕驗證』選 KZG 的原因。"]
