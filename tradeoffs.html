@@ -1428,6 +1428,9 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 "Merton 模型":"結構式信用風險模型；用公司資產的對數常態分佈算違約機率，需 ln 與 Φ。",
 "Delta 曝險":"投組對標的價格變動的一階敏感度；風險限額常以 |Σ wΔ|≤τ 形式管控。",
 "d₁ / d₂ (BS 中間量)":"Black–Scholes 公式的標準中間量：把「現價/履約價的相對位置＋利率與波動的時間調整」壓成一個數，再丟進常態機率 Φ；算它要 ln、÷、√ 全上。",
+"BS 符號 S·K·r·q·σ·T":"S＝標的現價；K＝履約價；r＝無風險利率；q＝連續股息率；σ＝波動率；T＝距到期時間（年）。d₁ 把這六個數壓成「現價相對履約價的標準化位置」，丟進 Φ 就得到 Delta。",
+"Merton 符號 V·D·PD":"V＝公司資產總價值；D＝債務面額（違約門檻：到期時 V<D 即違約）；PD＝違約機率＝Φ(−d₂)，d₂ 內含 ln(V/D)＝資產對債務的相對距離。",
+"合規式符號 w·dd·τ·NAV":"w＝每筆部位的數量（股數／口數的股數等效）；dd＝該部位每單位的美元 Delta（Δ×現價）；τ＝監管訂的曝險比例上限；NAV＝基金淨值 —— 門檻＝τ·NAV（美元），電路外由驗證方算好傳入。",
 "金融法遵 (compliance)":"向監管/對手方證明風險在限額內；難點是要證對又不能洩漏部位 → ZK 對症。",
 "審計 (audit)":"第三方看帳、出具意見的傳統合規方式；季度頻率、靠制度信任、無密碼學保證 —— 查得慢，也證不了「每晚都合規」。",
 "TEE (可信執行環境)":"把計算搬進 CPU 的硬體隔離飛地（如 Intel SGX），由晶片簽名背書結果；信任對象變成晶片廠，且歷來有旁路攻擊（cache／電源／投機執行側信道）紀錄。",
@@ -1524,9 +1527,9 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   };
   const TERMS = {
 '封面':["零知識證明 (ZK)","超越函數","定點 pp=48","Minimax / Remez","逐步截斷 (per-step)","通用 Horner kernel","ByteTable"],
-'要解的問題':["金融法遵 (compliance)","Delta 曝險","Black–Scholes","Merton 模型","零知識證明 (ZK)","審計 (audit)","TEE (可信執行環境)","MPC (多方安全計算)","信任錨 (基金行政管理人)"],
+'要解的問題':["金融法遵 (compliance)","Delta 曝險","合規式符號 w·dd·τ·NAV","Black–Scholes","Merton 模型","零知識證明 (ZK)","審計 (audit)","TEE (可信執行環境)","MPC (多方安全計算)","信任錨 (基金行政管理人)"],
 '拆成兩張證明':["PF1 / PF2 分工","PF1 (投組證明電路)","Merkle 承諾","公開輸入 (public inputs)","零知識證明 (ZK)"],
-'為什麼難':["超越函數","exp / ln / erf","常態 CDF Φ","erf (誤差函數)","d₁ / d₂ (BS 中間量)","Black–Scholes Delta","Merton 模型","有限體 (𝔽ᵣ)","浮點","BN254","ULP"],
+'為什麼難':["超越函數","exp / ln / erf","常態 CDF Φ","erf (誤差函數)","d₁ / d₂ (BS 中間量)","BS 符號 S·K·r·q·σ·T","Merton 符號 V·D·PD","Black–Scholes Delta","Merton 模型","有限體 (𝔽ᵣ)","浮點","BN254","ULP"],
 '條件限制':["公開輸入 (public inputs)","Merkle 承諾","零知識證明 (ZK)","ULP","Minimax / Remez","誤差預算 (error budget)","窮舉驗證","KZG 承諾","BN254","可信設定 (trusted setup)","通用 Horner kernel","fixed 欄","ByteTable","逐步截斷 (per-step)","proof (證明 π)","verify (驗證)"],
 '藍圖':["PF1 (投組證明電路)","PF1 / PF2 分工","公開輸入 (public inputs)","Merkle 承諾","信任錨 (基金行政管理人)","proof (證明 π)","verify (驗證)","KZG 承諾","定點 pp=48","通用 Horner kernel","Black–Scholes Delta"],
 '分層地圖':["超越函數","定點 pp=48","Minimax / Remez","逐步截斷 (per-step)","商餘分解 (quotient-remainder)","ByteTable","ExplicitRC","PLONKish","KZG 承諾","BN254","bit-budget"],
