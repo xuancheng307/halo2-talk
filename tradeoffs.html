@@ -836,7 +836,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
         <tr><th></th><th>延遲截斷</th><th>per-step</th></tr>
         <tr><td><b>精度</b><span class="rg rg-e">🅔</span><br><span class="muted" style="font-size:.85em">pp=16、13 函數各在 d*（exp03b）</span></td><td><b style="color:#15803d">13/13 ULP≤1</b></td><td><b style="color:#b91c1c">0/13</b>；ULP 2–7</td></tr>
         <tr><td><b>電路成本</b><span class="rg rg-e">🅔</span><br><span class="muted" style="font-size:.85em">pp=16、d=5 實測（exp04）</span></td><td>6 gates／<b style="color:#b91c1c">12 lookups</b>／9 rows<br>proof 4,992 B</td><td>3 gates／<b style="color:#15803d">2 lookups</b>／7 rows<br>proof 1,472 B</td></tr>
-        <tr><td><b>天花板</b></td><td><b style="color:#b91c1c">\((d{+}1)\cdot pp\ge 254\) 就死</b><br><span class="muted" style="font-size:.85em">pp=32 d=10 → est 320 bit，INFEASIBLE（exp09）</span></td><td><b style="color:#15803d">任何 pp 都行</b>（中間值 ~2·pp bit）<br><span class="muted" style="font-size:.85em">代價：要用 degree 補精度（🅟 d=12）</span></td></tr>
+        <tr><td><b>天花板</b></td><td><b style="color:#b91c1c">\((d{+}1)\cdot pp\ge 254\) 就死</b><br><span class="muted" style="font-size:.85em">pp=32 d=10 → (10+1)×32 = 352 bit，INFEASIBLE（exp09 同判）</span></td><td><b style="color:#15803d">任何 pp 都行</b>（中間值 ~2·pp bit）<br><span class="muted" style="font-size:.85em">代價：要用 degree 補精度（🅟 d=12）</span></td></tr>
         <tr><td><b>出貨角色</b><span class="rg rg-p">🅟</span></td><td>備援（kernel_deferred_backup.rs：pp=24 d=8、rem 拆 24 bytes、27 lookups）</td><td><b>主 kernel</b>（pp=48 d=12、84 lookups）</td></tr>
       </table>
       <p style="margin-top:.4rem;font-size:.9rem"><b>取捨一句：</b>延遲＝<b>多花查表買精度</b>、有硬天花板；per-step＝<b>便宜、無限高</b>，但精度要用 degree 贖回來。這個換路邊界是我們第一個量化的 —— 下一張把它畫成地圖。</p>
@@ -882,7 +882,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <div class="soulbox"><span class="tag">🎯 整個故事就這張圖</span>：<b>線下</b>（🅔 pp=16 d≤7、pp=24 d=8）延遲截斷還塞得進 254 bit —— 吃紅利、拿 ULP=1。<b>線上</b>（🅒 pp=32 d=10、🅟 pp=48 d=12）中間值 \(S^{d+1}\) 爆掉 —— 延遲根本算不出來，per-step 不是偏好、是<b>僅存的路</b>。</div>
       <div class="card amber" style="margin-top:.6rem"><h3>驗算給你看</h3>
         <ul style="font-size:.92rem">
-          <li>🅒 pp=32、d=10：延遲中間值 est <b>320 bit &gt; 253</b> → INFEASIBLE（exp09 實測輸出）；per-step ULP=3。</li>
+          <li>🅒 pp=32、d=10：延遲中間值 (10+1)×32 = <b>352 bit &gt; 254</b> → INFEASIBLE（論文 ch3 口徑，exp09 實測同判）；per-step ULP=3。</li>
           <li>🅟 pp=48、d=12：延遲要 (12+1)×48 = <b>624 bit</b>；per-step 中間值恆 ≈96 bit（exp09「max addend bits」表）。</li>
           <li>pp=48 延遲上限 d≤4（254/48−1≈4.3）—— 但 ln 在 pp=48、d=4 誤差 6.9×10⁷ ULP（exp12）→ 紅利區在高 pp <b>沒有可用的精度</b>。</li>
         </ul>
