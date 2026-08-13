@@ -1002,26 +1002,37 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <div class="card"><h3>\(\varepsilon_{\mathrm{trunc}}\) 截斷</h3><p style="font-size:.9rem">看 kernel：<b>延遲</b><span class="rg rg-e">🅔</span>只截最後一次 → <b>≤1 ULP</b>；<b>per-step</b><span class="rg rg-p">🅟</span>每步 floor 各 &lt;1 ULP、最壞累到 <b>≈d ULP</b>。</p></div>
   </div>
   <figure style="margin:.4rem 0 0">
-    <svg viewBox="0 0 940 118" role="img" aria-label="橫條圖：pp=48 d=12 的最壞解析上界約 12 ULP，實測 exp kernel 2.81 ULP、Delta 端到端 7 ULP，皆落在界內" style="width:100%;max-width:1000px">
+    <svg viewBox="0 0 940 184" role="img" aria-label="兩把尺分開量：單 kernel 鏈（界 12 ULP、實測 2.81）與端到端 Delta 管線（理論保守界 57 ULP、實測 Δ7、d₁ 15）——各自落在各自的界內" style="width:100%;max-width:1000px">
       <g font-size="11" font-weight="700">
-        <!-- scale: 12 ULP = 660px, start x=210 -->
-        <rect x="210" y="8" width="660" height="18" rx="4" fill="none" stroke="#d97706" stroke-width="1.8" stroke-dasharray="6 3"/>
-        <text x="204" y="22" text-anchor="end" fill="#92400e">解析上界（最壞 ≈d）</text>
-        <text x="876" y="22" fill="#92400e">12 ULP</text>
-        <rect x="210" y="38" width="155" height="18" rx="4" fill="#16a34a"/>
+        <!-- band 1: kernel chain, ruler 0..12 = 660px, start x=210 -->
+        <text x="210" y="14" font-size="10.5" fill="#55596b">① 單 kernel 鏈（這把尺：0–12 ULP）</text>
+        <rect x="210" y="20" width="660" height="15" rx="4" fill="none" stroke="#d97706" stroke-width="1.8" stroke-dasharray="6 3"/>
+        <text x="204" y="32" text-anchor="end" fill="#92400e">界（最壞 ≈d）</text>
+        <text x="876" y="32" fill="#92400e">12 ULP</text>
+        <rect x="210" y="40" width="155" height="15" rx="4" fill="#16a34a"/>
         <text x="204" y="52" text-anchor="end" fill="#15803d">實測 · exp kernel</text>
         <text x="371" y="52" fill="#15803d">2.81 ULP</text>
-        <rect x="210" y="68" width="385" height="18" rx="4" fill="#4ade80"/>
-        <text x="204" y="82" text-anchor="end" fill="#15803d">實測 · Delta 端到端</text>
-        <text x="601" y="82" fill="#15803d">7 ULP（含上游 FpMul/FpDiv 鏈）</text>
+        <line x1="210" y1="61" x2="870" y2="61" stroke="#94a3b8" stroke-width="1.1"/>
+        <g font-size="9" fill="#8b94a3" text-anchor="middle" font-weight="400"><text x="210" y="73">0</text><text x="430" y="73">4</text><text x="650" y="73">8</text><text x="870" y="73">12</text></g>
+        <!-- band 2: end-to-end, its own ruler 0..57 = 660px -->
+        <text x="210" y="94" font-size="10.5" fill="#55596b">② 端到端 Delta 管線（另一把尺：0–57 ULP；含上游 FpMul/FpDiv 鏈）</text>
+        <rect x="210" y="100" width="660" height="15" rx="4" fill="none" stroke="#d97706" stroke-width="1.8" stroke-dasharray="6 3"/>
+        <text x="204" y="112" text-anchor="end" fill="#92400e">理論保守界</text>
+        <text x="876" y="112" fill="#92400e">≈57 ULP</text>
+        <rect x="210" y="120" width="81" height="15" rx="4" fill="#4ade80"/>
+        <text x="204" y="132" text-anchor="end" fill="#15803d">實測 · Delta 結果</text>
+        <text x="297" y="132" fill="#15803d">7 ULP</text>
+        <rect x="210" y="140" width="174" height="15" rx="4" fill="#86efac"/>
+        <text x="204" y="152" text-anchor="end" fill="#15803d">實測 · d₁ 中途值</text>
+        <text x="390" y="152" fill="#15803d">15 ULP（&gt;12 —— 所以尺要分開）</text>
+        <line x1="210" y1="161" x2="870" y2="161" stroke="#94a3b8" stroke-width="1.1"/>
+        <g font-size="9" fill="#8b94a3" text-anchor="middle" font-weight="400"><text x="210" y="173">0</text><text x="442" y="173">20</text><text x="673" y="173">40</text><text x="870" y="173">57</text></g>
       </g>
-      <line x1="210" y1="94" x2="870" y2="94" stroke="#94a3b8" stroke-width="1.2"/>
-      <g font-size="9.5" fill="#8b94a3" text-anchor="middle"><text x="210" y="108">0</text><text x="430" y="108">4</text><text x="650" y="108">8</text><text x="870" y="108">12 ULP</text></g>
     </svg>
-    <figcaption>本報告自製 <span class="rg rg-p">🅟</span> pp=48、d=12 · 界＝per-step 每步 floor &lt;1 ULP × d 步的最壞累積；實測出自 benches/pf1_results.md（2026-07-08b 定版）—— 穩落在界內</figcaption>
+    <figcaption>本報告自製 <span class="rg rg-p">🅟</span> pp=48、d=12 · <b>兩把尺分開量</b>：kernel 鏈的界（每步 floor &lt;1 ULP × d 步）管不到端到端 —— d₁ 的 15 就超過 12，但穩落在端到端理論界 ≈57 內（ch4 口徑：實測 ≤13、保守界 ≈57）；實測出自 benches/pf1_results.md（2026-07-08b 定版）</figcaption>
   </figure>
   <div class="card green" style="margin-top:.4rem"><h3>界 vs 實測（兩個都要給）</h3>
-    <p style="font-size:.95rem"><span class="rg rg-p">🅟</span> pp=48、d=12 的界是「最壞 ≈12 ULP／步鏈」；<b>實測</b>：exp kernel（Remez、[0,ln2) 單段）max <b>2.81 ULP</b>，Delta 端到端 <b>7 ULP</b>（d₁ 中途值 15 ULP，含上游 FpMul/FpDiv 鏈）—— 實測穩穩落在界內，1 ULP 只有 2⁻⁴⁸≈3.6×10⁻¹⁵。<span class="muted">（出處：scenario_a_full HANDOFF.md、benches/pf1_results.md）</span></p>
+    <p style="font-size:.95rem"><span class="rg rg-p">🅟</span> pp=48、d=12，<b>兩本帳分開</b>：<b>單 kernel 鏈</b>界「最壞 ≈12 ULP」、實測 exp kernel（Remez、[0,ln2) 單段）max <b>2.81 ULP</b>；<b>端到端</b>理論保守界 ≈57、實測 Delta <b>7 ULP</b>、d₁ 中途值 <b>15 ULP</b>（含上游 FpMul/FpDiv 鏈，超過 12 —— 所以不能拿 kernel 的尺量端到端）。各自穩落在各自的界內，1 ULP 只有 2⁻⁴⁸≈3.6×10⁻¹⁵。<span class="muted">（出處：scenario_a_full HANDOFF.md、benches/pf1_results.md）</span></p>
   </div>
   <div class="ideabox" style="margin-top:.4rem"><span class="tag">💡 順手解釋了量化飽和</span>：\(d\!\uparrow\) 讓 \(\varepsilon_{\mathrm{approx}}\!\downarrow\) 但 \(\varepsilon_{\mathrm{quant}},\varepsilon_{\mathrm{trunc}}\) 的地板不動（per-step 還隨步數微增）；地板一主導，加 degree <b>只剩成本</b> —— 上一張的飽和平台，根就在這條公式。低 pp<span class="rg rg-e">🅔</span>再配窮舉驗證（每個可表示輸入都查過），<b>這才是能拿去做金融合規的底氣</b>。</div>
 </section>
@@ -1765,7 +1776,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   rail.innerHTML='<div class="fr-title">系統分層 · 你在這</div>'+[[1,'應用層 · 要證什麼','超越函數逼出'],[2,'數值層 · 實數→整數','每步交給閘鎖死'],[3,'電路層 · 鎖死誠實','壓成多項式承諾'],[4,'證明系統 · 平台',null]].map(a=>'<div class="fr-stage" data-s="'+a[0]+'"><span class="fr-n">'+a[0]+'</span>'+a[1]+'</div>'+(a[2]?'<div class="fr-arrow">↓ '+a[2]+'</div>':'')).join('');
   document.body.appendChild(rail);
   rail.querySelectorAll('.fr-stage').forEach(n=>n.addEventListener('click',()=>{const s=+n.dataset.s;const t=slides.find(sl=>STAGE[sl.dataset.label]===s);if(t)t.scrollIntoView();}));
-  function updateRail(){const s=STAGE[labels[viewIdx]||''];if(s){rail.classList.add('show');rail.querySelectorAll('.fr-stage').forEach(n=>n.classList.toggle('active',+n.dataset.s===s));}else rail.classList.remove('show');}
+  const railFrom=labels.indexOf('分層地圖'); // rail promised "從下一張起" on the map slide — stay hidden until the map has introduced it
+  function updateRail(){const s=STAGE[labels[viewIdx]||''];if(s&&viewIdx>railFrom){rail.classList.add('show');rail.querySelectorAll('.fr-stage').forEach(n=>n.classList.toggle('active',+n.dataset.s===s));}else rail.classList.remove('show');}
   deck.addEventListener('scroll',()=>{viewIdx=currentIdx();notesP.follow();qaP.follow();updateRail();updatePresenter();},{passive:true});
   updateRail();
 
