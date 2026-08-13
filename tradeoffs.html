@@ -10,8 +10,8 @@
 <script defer src="assets/katex/katex.min.js"></script>
 <script defer src="assets/katex/auto-render.min.js"
   onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false})"></script>
-<!-- no audio for this deck -->
-<script>window.AUDIO_MANIFEST=[];</script>
+<!-- audio tour: Fish Audio TTS (voice: 台湾女生 e855dc04, model s1), generated 2026-08-12 from NOTES -->
+<script>window.AUDIO_MANIFEST=[{"label":"封面","file":"t01.mp3"},{"label":"思路歷程","file":"t02.mp3"},{"label":"要解的問題","file":"t03.mp3"},{"label":"為什麼難","file":"t04.mp3"},{"label":"條件限制","file":"t05.mp3"},{"label":"藍圖","file":"t06.mp3"},{"label":"分層地圖","file":"t07.mp3"},{"label":"核心工具","file":"t08.mp3"},{"label":"兩條死路","file":"t09.mp3"},{"label":"四個設計決定","file":"t10.mp3"},{"label":"量測基準","file":"t11.mp3"},{"label":"核心 kernel","file":"t12.mp3"},{"label":"算一步","file":"t13.mp3"},{"label":"ExplicitRC","file":"t14.mp3"},{"label":"免費空間","file":"t15.mp3"},{"label":"換道地圖","file":"t16.mp3"},{"label":"逐步的代價","file":"t17.mp3"},{"label":"量化飽和","file":"t18.mp3"},{"label":"誤差預算","file":"t19.mp3"},{"label":"函數與區間","file":"t20.mp3"},{"label":"決策路線圖","file":"t21.mp3"},{"label":"我們站在哪","file":"t22.mp3"},{"label":"成果與限界","file":"t23.mp3"},{"label":"證明多大","file":"t24.mp3"},{"label":"出處","file":"t25.mp3"}];</script>
 <style>
 :root{
   --bg:#ffffff; --surface:#f7f8fa; --surface-2:#eef0f4; --border:#d9dce3;
@@ -267,6 +267,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <div class="topbar">
   <div class="brand">論文技術取捨<span class="tag">Why we chose this</span></div>
   <div class="pills" id="pills"></div>
+  <button class="tour-btn" id="tourBtn" title="語音導覽：自動播放講稿並逐頁前進">▶ 語音導覽</button>
   <button class="tour-btn" id="presBtn" title="簡報者模式：另開講稿視窗。投影機投主視窗（乾淨投影片），這個視窗留在你的筆電看講稿（需設「延伸顯示」）。翻頁會自動同步。">🖥 簡報者</button>
   <a class="home-link" href="https://github.com/xuancheng307/halo2-talk" target="_blank" rel="noopener">原始碼 ↗</a>
 </div>
@@ -1739,12 +1740,12 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 
   // ===== audio tour: play per-slide narration + auto-advance (time-synced) =====
   const TOUR={items:(window.AUDIO_MANIFEST||[]),i:0,base:'assets/audio/'}; let AUD=null; let tourRate=1; const RATES=[1,1.25,1.5,1.75,2];
-  // no audio for this deck — AUDIO_MANIFEST is [] and we do not fall back to a manifest file
+  // audio tour manifest is defined inline at the top of this file (t01–t25, one per slide)
   const pb=document.getElementById('playbar');
   function pbIcon(p){document.getElementById('pbPlay').textContent=p?'⏸':'▶';}
   function ensureAud(){if(AUD)return;AUD=new Audio();AUD.onended=()=>{if(TOUR.i<TOUR.items.length-1)tourPlay(TOUR.i+1);else tourStop();};AUD.ontimeupdate=()=>{const f=AUD.duration?AUD.currentTime/AUD.duration:0;document.getElementById('pbProg').style.width=(f*100)+'%';};AUD.onloadedmetadata=()=>{AUD.playbackRate=tourRate;};AUD.onplay=()=>pbIcon(true);AUD.onpause=()=>pbIcon(false);}
   function tourPlay(k){
-    if(!TOUR.items.length){alert('語音檔尚未產生（等「小湯圓」聲音 id 確認後再生成）。');return;}
+    if(!TOUR.items.length){alert('語音檔尚未產生。');return;}
     ensureAud();
     TOUR.i=Math.max(0,Math.min(TOUR.items.length-1,k));
     const it=TOUR.items[TOUR.i];
