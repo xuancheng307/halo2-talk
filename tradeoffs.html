@@ -274,7 +274,8 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 <div class="dots" id="dots"></div>
 <div id="playbar"><button id="pbPrev" title="上一段">⏮</button><button id="pbPlay" title="播放/暫停">⏸</button><button id="pbNext" title="下一段">⏭</button><span class="pb-title" id="pbTitle">—</span><span class="pb-prog"><i id="pbProg"></i></span><span class="pb-idx" id="pbIdx">—</span><button id="pbSpeed" title="播放速度（點擊切換）">1×</button><button id="pbStop" title="結束導覽">✕</button></div>
 
-<button class="note-btn" id="noteBtn" title="講稿（按 n 鍵開關）">📝 講稿</button>
+<!-- 📝 講稿按鈕已移除：講稿改由「🖥 簡報者」視窗閱讀與編輯（單一入口，避免兩處內容不一致）。
+     本 modal 保留為隱藏容器，供 ⤓匯出 / 重設 等既有機制掛載，不再有開啟入口。 -->
 <div class="note-mask" id="noteMask"></div>
 <div class="note-modal" id="noteModal" role="dialog" aria-modal="true" aria-label="講稿">
   <div class="note-head"><h3>講稿 <span class="tag" id="noteTag"></span></h3><button class="note-close" id="noteClose" aria-label="關閉">×</button></div>
@@ -306,7 +307,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <p style="margin-top:1rem;font-size:.92rem;color:var(--text-dim)">本版規矩：<b>每個數字都掛徽章</b>
       <span class="rg rg-e">🅔 實驗場 pp=16/24</span><span class="rg rg-c">🅒 Merton pp=32</span><span class="rg rg-p">🅟 出貨管線 pp=48</span>
       —— 這三個配置是誰，<b>第 3 頁先介紹</b>。</p>
-    <p style="margin-top:1.2rem;font-size:.8rem" class="muted">↓ 向下捲動 · 右側圓點可跳節 · 按 n 看講稿 · 按 q 看名詞·問答</p>
+    <p style="margin-top:1.2rem;font-size:.8rem" class="muted">↓ 向下捲動 · 右側圓點可跳節 · 講稿在「🖥 簡報者」視窗 · 按 q 看名詞·問答</p>
   </div>
 </section>
 
@@ -1690,9 +1691,9 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       idxEl.textContent=(openIdx+1)+' / '+slides.length; bodyEl.scrollTop=keep?st:0;
     }
     const isOpen=()=>modal.classList.contains('open');
-    function open(i){openIdx=Math.max(0,Math.min(slides.length-1,i));render();modal.classList.add('open');btn.style.display='none';}
-    function close(){modal.classList.remove('open');btn.style.display='';}
-    btn.onclick=()=>open(currentIdx());
+    function open(i){openIdx=Math.max(0,Math.min(slides.length-1,i));render();modal.classList.add('open');if(btn)btn.style.display='none';}
+    function close(){modal.classList.remove('open');if(btn)btn.style.display='';}
+    if(btn)btn.onclick=()=>open(currentIdx());
     document.getElementById(o.close).onclick=close;
     document.getElementById(o.prev).onclick=()=>open(openIdx-1);
     document.getElementById(o.next).onclick=()=>open(openIdx+1);
@@ -1758,9 +1759,17 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     for(const s of secs) h+='<div class="nt-sec"><div class="nt-h">'+esc(s.h)+'</div><div class="nt-b">'+fmtLines(s.b)+'</div></div>';
     return h;
   }
+  // single source of truth for a section's speaker note:編輯覆寫 > 原始 NOTES。
+  // 講稿面板與簡報者視窗都必須走這個函式，否則兩處會不一致（2026-08-14 的 bug 就是簡報者直接讀 NOTES）。
+  function noteTextFor(lab){
+    const id='n'+SEP+lab;
+    if(OV.del[id])return '（本節講稿已刪除）';
+    const e=OV.edit[id]||{};
+    return ('text'in e)?e.text:(NOTES[lab]||'（本節暫無講稿）');
+  }
   function noteHTML(lab){
     const id='n'+SEP+lab; if(OV.del[id])return '<div class="qa-empty">（本節講稿已刪除）</div>';
-    const e=OV.edit[id]||{}, txt=('text'in e)?e.text:(NOTES[lab]||'（本節暫無講稿）');
+    const txt=noteTextFor(lab);
     if(editingId===id)return '<div class="note-item editing" data-id="'+id+'">'+editForm(id,[['text','講稿',txt]])+'</div>';
     return '<div class="note-item'+(OV.mark[id]?' marked':'')+'" data-id="'+id+'"><div class="it-bar">'+ctl(id)+'</div><div class="note-text">'+renderNoteText(txt)+'</div></div>';
   }
@@ -1780,24 +1789,79 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     '#pNote .nt-sec{margin-top:.7rem;border-top:1px dashed rgba(124,58,237,.32);padding-top:.5rem;font-size:.95em}'+
     '#pNote .nt-h{font-weight:800;color:#4338ca;font-size:.92em;margin-bottom:.25rem}'+
     '#pNext{position:fixed;left:0;right:0;bottom:0;background:#f3f0ff;border-top:1px solid rgba(124,58,237,.28);padding:11px 22px;color:#4338ca;font-weight:700;font-size:1.02rem}'+
+    '#pBar{display:flex;gap:9px;align-items:center;margin:0 0 11px}'+
+    '#pBar button{font:inherit;font-size:.9rem;font-weight:700;border:1px solid rgba(124,58,237,.42);background:#f3f0ff;color:#4338ca;border-radius:7px;padding:5px 12px;cursor:pointer}'+
+    '#pBar button:hover{background:#e9e2ff}'+
+    '#pSaved{color:#15803d;font-weight:800;font-size:.9rem;opacity:0;transition:opacity .35s}'+
+    '#pEditBox{display:none}'+
+    '#pEditBox textarea{width:100%;box-sizing:border-box;min-height:52vh;font:inherit;font-size:1rem;line-height:1.7;padding:11px 13px;border:1px solid rgba(124,58,237,.42);border-radius:9px;resize:vertical;color:#111;background:#fff}'+
+    '#pEditBox .phint{margin-top:7px;font-size:.82rem;color:#6b7280}'+
     '</style></head><body><div class="ptop"><span id="pPg"></span><span id="pTimer">00:00</span></div>'+
-    '<h2 id="pTitle"></h2><div id="pNote"></div><div id="pNext"></div>'+
+    '<h2 id="pTitle"></h2>'+
+    '<div id="pBar"><button data-pact="edit">✏️ 編輯這頁講稿</button><span id="pSaved">已儲存</span></div>'+
+    '<div id="pNote"></div>'+
+    '<div id="pEditBox"><textarea id="pTa" spellcheck="false"></textarea>'+
+    '<div id="pBar2" style="display:flex;gap:9px;margin-top:9px">'+
+    '<button data-pact="save" style="font:inherit;font-size:.9rem;font-weight:800;border:none;background:#4f46e5;color:#fff;border-radius:7px;padding:6px 15px;cursor:pointer">儲存</button>'+
+    '<button data-pact="cancel" style="font:inherit;font-size:.9rem;font-weight:700;border:1px solid #d1d5db;background:#fff;color:#374151;border-radius:7px;padding:6px 14px;cursor:pointer">取消</button></div>'+
+    '<div class="phint">編輯期間翻頁不會影響這裡；儲存後才會跳回目前頁。【…】開頭的行＝詳解區塊。</div></div>'+
+    '<div id="pNext"></div>'+
     '<scr'+'ipt>var t0=Date.now();setInterval(function(){var s=Math.floor((Date.now()-t0)/1000),m=(""+Math.floor(s/60)).padStart(2,"0"),x=(""+(s%60)).padStart(2,"0"),e=document.getElementById("pTimer");if(e)e.textContent=m+":"+x;},1000);</scr'+'ipt></body></html>';
+  let pEditLab=null;   // 非 null = 簡報者視窗正在編輯該節，暫停自動同步以免蓋掉輸入
   function updatePresenter(){
     if(!presenterWin||presenterWin.closed)return;
-    const i=currentIdx(), lab=labels[i]||'', d=presenterWin.document;
+    const d=presenterWin.document;
     if(!d||!d.getElementById('pPg'))return;
+    if(pEditLab!==null)return;
+    const i=currentIdx(), lab=labels[i]||'';
     d.getElementById('pPg').textContent='p.'+(i+1)+' / '+slides.length+(lab?'　·　'+lab:'');
     d.getElementById('pTitle').textContent=lab;
-    d.getElementById('pNote').innerHTML=renderNoteText(NOTES[lab]||'（本節暫無講稿）');
+    d.getElementById('pNote').innerHTML=renderNoteText(noteTextFor(lab));
     const nx=labels[i+1];
     d.getElementById('pNext').textContent=nx?('下一頁 ▸ '+nx):'（最後一頁）';
+  }
+  function endPresenterEdit(){
+    pEditLab=null;
+    if(!presenterWin||presenterWin.closed)return;
+    const d=presenterWin.document;
+    d.getElementById('pEditBox').style.display='none';
+    d.getElementById('pNote').style.display='';
+    const eb=d.querySelector('#pBar button[data-pact="edit"]'); if(eb)eb.style.display='';
+    updatePresenter();
+  }
+  // 編輯／儲存走與講稿面板同一個覆寫層 OV.edit（localStorage ＋ 本機 authoring server），兩處永遠一致
+  function presenterClick(e){
+    if(!presenterWin||presenterWin.closed)return;
+    const t=e.target; if(!t||!t.closest)return;
+    const b=t.closest('button[data-pact]'); if(!b)return;
+    e.preventDefault();
+    const d=presenterWin.document, act=b.dataset.pact;
+    if(act==='edit'){
+      pEditLab=labels[currentIdx()]||'';
+      d.getElementById('pTa').value=noteTextFor(pEditLab);
+      d.getElementById('pEditBox').style.display='block';
+      d.getElementById('pNote').style.display='none';
+      b.style.display='none';
+      d.getElementById('pTa').focus();
+    }else if(act==='save'){
+      const id='n'+SEP+pEditLab;
+      OV.edit[id]=Object.assign({},OV.edit[id],{text:d.getElementById('pTa').value});
+      delete OV.del[id];
+      saveOV(); notesP.rerender();
+      const s=d.getElementById('pSaved');
+      s.style.opacity='1'; clearTimeout(s._t); s._t=setTimeout(()=>{s.style.opacity='0';},1500);
+      endPresenterEdit();
+    }else if(act==='cancel'){
+      endPresenterEdit();
+    }
   }
   function openPresenter(){
     if(presenterWin&&!presenterWin.closed){presenterWin.focus();updatePresenter();return;}
     presenterWin=window.open('','halo2presenter','width=600,height=820');
     if(!presenterWin){alert('簡報者視窗被瀏覽器擋住了。請允許這個頁面開啟彈出視窗，再按一次「🖥 簡報者」。');return;}
     presenterWin.document.open();presenterWin.document.write(PRESENTER_HTML);presenterWin.document.close();
+    pEditLab=null;
+    presenterWin.document.addEventListener('click',presenterClick);
     setTimeout(updatePresenter,80);
   }
   document.getElementById('presBtn').addEventListener('click',openPresenter);
@@ -1886,8 +1950,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   document.getElementById('pbStop').onclick=tourStop;
 
   window.addEventListener('keydown',e=>{
-    if(e.key==='n'||e.key==='N'){e.preventDefault();notesP.toggle();}
-    else if(e.key==='q'||e.key==='Q'){e.preventDefault();qaP.toggle();}
+    if(e.key==='q'||e.key==='Q'){e.preventDefault();qaP.toggle();}
     else if(e.key==='Escape'){notesP.close();qaP.close();}
     else if((notesP.isOpen()||qaP.isOpen())&&(e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key==='ArrowUp')){e.preventDefault();e.stopPropagation();const d=(e.key==='ArrowRight'||e.key==='ArrowDown')?1:-1;const ni=Math.max(0,Math.min(slides.length-1,viewIdx+d));slides[ni].scrollIntoView();}
   },true);
