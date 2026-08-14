@@ -11,7 +11,7 @@
 <script defer src="assets/katex/auto-render.min.js"
   onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false})"></script>
 <!-- audio tour: Fish Audio TTS (voice: 台湾女生 e855dc04, model s1), generated 2026-08-12 from NOTES -->
-<script>window.AUDIO_MANIFEST=[{"label":"封面","file":"t01.mp3"},{"label":"思路歷程","file":"t02.mp3"},{"label":"量測基準","file":"t03.mp3"},{"label":"要解的問題","file":"t04.mp3"},{"label":"拆成兩張證明","file":"t26.mp3"},{"label":"為什麼難","file":"t05.mp3"},{"label":"條件限制","file":"t06.mp3"},{"label":"藍圖","file":"t07.mp3"},{"label":"分層地圖","file":"t08.mp3"},{"label":"核心工具","file":"t09.mp3"},{"label":"兩條死路","file":"t10.mp3"},{"label":"四個設計決定","file":"t11.mp3"},{"label":"核心 kernel","file":"t12.mp3"},{"label":"算一步","file":"t13.mp3"},{"label":"ExplicitRC","file":"t14.mp3"},{"label":"免費空間","file":"t15.mp3"},{"label":"換道地圖","file":"t16.mp3"},{"label":"逐步的代價","file":"t17.mp3"},{"label":"量化飽和","file":"t18.mp3"},{"label":"誤差預算","file":"t19.mp3"},{"label":"函數與區間","file":"t20.mp3"},{"label":"決策路線圖","file":"t21.mp3"},{"label":"我們站在哪","file":"t22.mp3"},{"label":"成果與限界","file":"t23.mp3"},{"label":"證明多大","file":"t24.mp3"},{"label":"出處","file":"t25.mp3"}];</script>
+<script>window.AUDIO_MANIFEST=[{"label":"封面","file":"t01.mp3"},{"label":"思路歷程","file":"t02.mp3"},{"label":"量測基準","file":"t03.mp3"},{"label":"要解的問題","file":"t04.mp3"},{"label":"拆成兩張證明","file":"t26.mp3"},{"label":"為什麼難","file":"t05.mp3"},{"label":"條件限制","file":"t06.mp3"},{"label":"藍圖","file":"t07.mp3"},{"label":"分層地圖","file":"t08.mp3"},{"label":"核心工具","file":"t09.mp3"},{"label":"兩條死路","file":"t10.mp3"},{"label":"四個設計決定","file":"t11.mp3"},{"label":"免費空間","file":"t15.mp3"},{"label":"換道地圖","file":"t16.mp3"},{"label":"逐步的代價","file":"t17.mp3"},{"label":"量化飽和","file":"t18.mp3"},{"label":"核心 kernel","file":"t12.mp3"},{"label":"算一步","file":"t13.mp3"},{"label":"ExplicitRC","file":"t14.mp3"},{"label":"誤差預算","file":"t19.mp3"},{"label":"函數與區間","file":"t20.mp3"},{"label":"決策路線圖","file":"t21.mp3"},{"label":"我們站在哪","file":"t22.mp3"},{"label":"成果與限界","file":"t23.mp3"},{"label":"證明多大","file":"t24.mp3"},{"label":"出處","file":"t25.mp3"}];</script>
 <style>
 :root{
   --bg:#ffffff; --surface:#f7f8fa; --surface-2:#eef0f4; --border:#d9dce3;
@@ -737,14 +737,169 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
     <tr class="hl"><td><b>③ 逐步截斷</b><br><span class="muted">per-step，不用延遲</span></td><td>延遲在低 pp 精度較好，但受 \( (d{+}1)\cdot pp<254 \) 限制（每乘一步長 pp 位、超過保險箱 254 位就裝不下）：pp=48 只容 \( d\le4 \)，管線要 \( d{=}12 \) → per-step 是<b>唯一可行</b>、不是「比較好」。代價：精度（<span class="rg rg-e">🅔</span> d* 時 ULP 2–7）。</td><td>中間值恆 ~2·pp bit，任何 pp 都不溢位</td></tr>
     <tr><td><b>④ 通用 Horner<br>+ ByteTable</b></td><td>換函數只改 \( d \) 個係數放進 fixed 欄＋重跑 keygen（秒～數十秒、無儀式）；一張 256 表<b>全函數共用</b>。</td><td>加新函數<b>零電路重設計</b><br><span class="muted" style="font-size:.85em">（電路結構不變；VK 仍會變、驗證方要重收一次）</span></td></tr>
   </table>
-  <div class="soulbox"><span class="tag">🎯 目標效果（這四個決定一起換到的）</span>：金融精度 <b>24–48 bit</b>、proof 單函數 <b>5.0–9.5 KB</b><span class="rg rg-e">🅔</span>／全組合 <b>34,368 B</b><span class="rg rg-p">🅟</span>、verify <b>毫秒級</b>、<b>不揭露部位</b>。數字掛的徽章第 3 頁立過規矩 —— 不同基準的成績不互相背書。下一張進出貨 kernel 的本體。</div>
+  <div class="soulbox"><span class="tag">🎯 目標效果（這四個決定一起換到的）</span>：金融精度 <b>24–48 bit</b>、proof 單函數 <b>5.0–9.5 KB</b><span class="rg rg-e">🅔</span>／全組合 <b>34,368 B</b><span class="rg rg-p">🅟</span>、verify <b>毫秒級</b>、<b>不揭露部位</b>。數字掛的徽章第 3 頁立過規矩 —— 不同基準的成績不互相背書。下一張先攤開四個決定裡最大的一筆帳：什麼時候截斷。</div>
+</section>
+
+<!-- ===== 5 · FREE SPACE (deferred vs per-step) ===== -->
+<section class="slide" data-part="" data-label="免費空間">
+  <div class="slide-meta"><span class="part-label">旅程 7/9 · 關鍵的選擇</span> · 拆決定 ③：兩種截斷</div>
+  <h2>那塊「免費空間」紅利，<span class="accent">用光就得換路</span></h2>
+  <div class="whybox"><span class="tag">❓ 為什麼會有「延遲」和「逐步」兩種截斷</span>：兩者差在「中間值什麼時候除回去」。這頁把<b>兩邊的實測數字</b>都攤開 —— 贏的、輸的一起看，才叫取捨。</div>
+  <div class="card" style="margin-top:.4rem"><h3>先 20 秒認識 Horner 求值（後面全部圍著它）</h3>
+    <p style="font-size:.93rem">算多項式不用算次方，「乘 x、加下一個係數」一路捲：\(3x^2{+}2x{+}5\) 在 \(x{=}2\)：<b>acc=3</b> <span style="color:#4f46e5;font-weight:800">→ ×2＋2 →</span> <b>8</b> <span style="color:#4f46e5;font-weight:800">→ ×2＋5 →</span> <b>21</b> —— \(d\) 次多項式＝\(d\) 步。<span class="muted">定點下每「乘」一步，小數位數就加一份 pp —— <b>什麼時候把多出來的小數位剪回去</b>，就是本頁的取捨。</span></p>
+  </div>
+  <div class="grid-2">
+    <div>
+      <div class="ideabox"><span class="tag">💡 核心比喻</span>：ZK 的 254-bit 體，是<b>傳統 CPU 上不存在的免費資源 —— 暫存空間</b>。延遲截斷吃這塊紅利：把 \( d \) 次截斷併到<b>最後一次</b>（CPU 的 64-bit register 被迫一直截斷，做不到）。</div>
+      <div class="fbox" style="margin:.4rem 0"><div class="lbl">延遲版的玩法（🅔 低 pp 專用）</div>
+        <div class="cmt">係數整條<b>預縮放</b> \( D_i=\lfloor c_i S^{\,d+1-i}\rceil \)，Horner 遞推 \( H_k=D_k+R\,H_{k+1} \) 中間<b>完全不截斷</b>，最後除一次 \( S^{d} \)。</div>
+        <div class="cmt muted" style="font-size:.86rem">白話：先把每個係數墊到剛好的高度，讓中間<b>一路只乘加、不用剪小數</b>，帳留到最後一次結清 —— 只截一次，誤差最小。</div>
+      </div>
+      <div class="fbox"><div class="lbl">但有 bit-budget</div>
+        \[ (d+1)\cdot pp < 254 \]
+        <div class="cmt muted" style="font-size:.86rem">白話：每乘一步數字變長 pp 位，乘到第 d+1 步、長度超過保險箱的 254 位就裝不下。</div>
+        <div class="cmt">pp=48 只容 \( d\le 4 \)；管線要 \( d{=}12 \)（中間值會到 \( 2^{624} \)）→ per-step 是<b>唯一可行</b>。</div>
+      </div>
+    </div>
+    <div>
+      <table style="font-size:.88rem">
+        <tr><th></th><th>延遲截斷</th><th>per-step</th></tr>
+        <tr><td><b>精度</b><span class="rg rg-e">🅔</span><br><span class="muted" style="font-size:.85em">pp=16、13 函數各在 d*（exp03b）</span></td><td><b style="color:#15803d">13/13 ULP≤1</b></td><td><b style="color:#b91c1c">0/13</b>；ULP 2–7</td></tr>
+        <tr><td><b>電路成本</b><span class="rg rg-e">🅔</span><br><span class="muted" style="font-size:.85em">pp=16、d=5 實測（exp04）</span></td><td>6 gates／<b style="color:#b91c1c">12 lookups</b>／9 rows<br>proof 4,992 B</td><td>3 gates／<b style="color:#15803d">2 lookups</b>／7 rows<br>proof 1,472 B</td></tr>
+        <tr><td><b>天花板</b></td><td><b style="color:#b91c1c">\((d{+}1)\cdot pp\ge 254\) 就死</b><br><span class="muted" style="font-size:.85em">pp=32 d=10 → (10+1)×32 = 352 bit，INFEASIBLE（exp09 同判）</span></td><td><b style="color:#15803d">任何 pp 都行</b>（中間值 ~2·pp bit）<br><span class="muted" style="font-size:.85em">代價：要用 degree 補精度（🅟 d=12）</span></td></tr>
+        <tr><td><b>出貨角色</b><span class="rg rg-p">🅟</span></td><td>備援（kernel_deferred_backup.rs：pp=24 d=8、rem 拆 24 bytes、27 lookups）</td><td><b>主 kernel</b>（pp=48 d=12、84 lookups）<br><span class="muted" style="font-size:.85em">此列兩欄 pp/d 配置不同，lookup 數不可直接相比</span></td></tr>
+      </table>
+      <p style="margin-top:.4rem;font-size:.9rem"><b>取捨一句：</b>延遲＝<b>多花查表買精度</b>、有硬天花板；per-step＝<b>便宜、無限高</b>，但精度要用 degree 贖回來。這個換路邊界是我們第一個量化的 —— 下一張把它畫成地圖。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== REGIME MAP (pp × d plane, real operating points) ===== -->
+<section class="slide" data-part="" data-label="換道地圖">
+  <div class="slide-meta"><span class="part-label">旅程 7/9 · 關鍵的選擇</span> · 拆決定 ③：一張圖看懂兩個 regime<span class="rref">↩ R5</span></div>
+  <h2>換道地圖：<span class="accent">(d+1)·pp = 254 這條線</span></h2>
+  <div class="grid-2">
+    <figure style="margin:.1rem 0 0">
+      <svg viewBox="0 0 460 280" role="img" aria-label="pp × degree 平面分三區：紅利區、假可行區（d 太低沒精度）、延遲不可行區；出貨點是三個約束的唯一交集" style="width:100%;max-width:520px">
+        <!-- quality zones (behind everything) -->
+        <polygon points="93,30 93,58 131,101 169,129 207,149 245,164 283,176 321,185 359,193 397,199 435,203 435,30" fill="rgba(124,58,237,.07)"/>
+        <polygon points="93,58 131,101 169,129 207,149 245,164 245,230 93,230" fill="rgba(37,99,235,.06)"/>
+        <polygon points="245,164 283,176 321,185 359,193 397,199 435,203 435,230 245,230" fill="rgba(220,38,38,.07)"/>
+        <line x1="55" y1="230" x2="435" y2="230" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="55" y1="230" x2="55" y2="30" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="245" y="262" font-size="12" text-anchor="middle" fill="#55596b">定點精度 pp →　<tspan fill="#92400e" font-weight="700">金融要準：往右走</tspan></text>
+        <text x="17" y="130" font-size="12" text-anchor="middle" fill="#55596b" transform="rotate(-90 17 130)">多項式次數 d →　<tspan fill="#92400e" font-weight="700">逼近要夠：往上走</tspan></text>
+        <g font-size="10" fill="#8b94a3" text-anchor="middle"><text x="93" y="244">16</text><text x="169" y="244">24</text><text x="245" y="244">32</text><text x="321" y="244">40</text><text x="397" y="244">48</text></g>
+        <g font-size="10" fill="#8b94a3" text-anchor="end"><text x="48" y="207">4</text><text x="48" y="153">8</text><text x="48" y="100">12</text><text x="48" y="47">16</text></g>
+        <!-- boundary curve d = 254/pp - 1 -->
+        <path d="M93,58 L131,101 L169,129 L207,149 L245,164 L283,176 L321,185 L359,193 L397,199" fill="none" stroke="#dc2626" stroke-width="2.4" stroke-dasharray="6 3"/>
+        <text x="150" y="90" font-size="11" fill="#dc2626" font-weight="700">(d+1)·pp = 254</text>
+        <text x="100" y="215" font-size="9.5" fill="#1d4ed8" font-weight="700">紅利區：塞得下、也夠準</text>
+        <text x="100" y="227" font-size="9.5" fill="#1d4ed8">（🅔 研究用 —— 金融要更高 pp）</text>
+        <text x="252" y="215" font-size="9.5" fill="#b91c1c" font-weight="700">假可行：塞得下但 d 太低</text>
+        <text x="252" y="227" font-size="9.5" fill="#b91c1c">ln 誤差 6.9×10⁷ ULP ＝ 沒算</text>
+        <text x="290" y="48" font-size="10.5" fill="#7c3aed" font-weight="700">延遲不可行 → 只剩 per-step</text>
+        <!-- 🅔 pp16 d4..7 -->
+        <g fill="#2563eb"><circle cx="93" cy="203" r="4"/><circle cx="93" cy="190" r="4"/><circle cx="93" cy="177" r="4"/><circle cx="93" cy="163" r="4"/></g>
+        <text x="104" y="185" font-size="10.5" fill="#1d4ed8" font-weight="700">🅔 pp=16 · d*=4–7（延遲）</text>
+        <!-- 🅔 pp24 d8 -->
+        <circle cx="169" cy="150" r="5" fill="#2563eb"/>
+        <text x="180" y="146" font-size="10.5" fill="#1d4ed8" font-weight="700">🅔 pp=24 · d=8（備援 kernel）</text>
+        <!-- 🅒 pp32 d10 -->
+        <circle cx="245" cy="123" r="6" fill="#d97706"/>
+        <text x="234" y="119" font-size="10.5" text-anchor="end" fill="#92400e" font-weight="700">🅒 pp=32 · d=10（per-step）</text>
+        <!-- 🅟 pp48 d12 -->
+        <circle cx="397" cy="96" r="7" fill="#16a34a"/>
+        <circle cx="397" cy="96" r="11" fill="none" stroke="#16a34a" stroke-width="1.4" stroke-dasharray="2 2"/>
+        <text x="392" y="82" font-size="11" text-anchor="end" fill="#15803d" font-weight="800">🅟 pp=48 · d=12（出貨）</text>
+        <text x="430" y="118" font-size="9.5" text-anchor="end" fill="#15803d" font-weight="700">↑ 三個約束的唯一交集：</text>
+        <text x="430" y="130" font-size="9.5" text-anchor="end" fill="#15803d">夠準 · 逼近夠 · 算得動（per-step）</text>
+      </svg>
+      <figcaption>本報告自製 · 三塊底色＝好壞自己顯形：藍＝紅利區（研究）、紅＝假可行（沒精度）、紫＝延遲不可行（只剩 per-step）；邊界 (d+1)·pp=254（BN254 ≈253.6 bit）；點位出自 exp03b／kernel_deferred_backup.rs／exp10／scenario_a_full</figcaption>
+    </figure>
+    <div>
+      <div class="soulbox"><span class="tag">🎯 整個故事就這張圖</span>：<b>線下</b>（🅔 pp=16 d≤7、pp=24 d=8）延遲截斷還塞得進 254 bit —— 吃紅利、拿 ULP=1。<b>線上</b>（🅒 pp=32 d=10、🅟 pp=48 d=12）中間值 \(S^{d+1}\) 爆掉 —— 延遲根本算不出來，per-step 不是偏好、是<b>僅存的路</b>。</div>
+      <div class="card amber" style="margin-top:.6rem"><h3>驗算給你看</h3>
+        <ul style="font-size:.92rem">
+          <li>🅒 pp=32、d=10：延遲中間值 (10+1)×32 = <b>352 bit &gt; 254</b> → INFEASIBLE（論文 ch3 口徑，exp09 實測同判）；per-step ULP=3。</li>
+          <li>🅟 pp=48、d=12：延遲要 (12+1)×48 = <b>624 bit</b>；per-step 中間值恆 ≈96 bit（exp09「max addend bits」表）。</li>
+          <li>pp=48 延遲上限 d≤4（254/48−1≈4.3）—— 但 ln 在 pp=48、d=4 誤差 6.9×10⁷ ULP（exp12）→ 紅利區在高 pp <b>沒有可用的精度</b>。</li>
+        </ul>
+        <p style="margin-top:.35rem;font-size:.9rem"><b>所以呢</b>：換到 per-step 這條道，代價是精度 —— 下一張把這筆帳一項項攤開。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== THE PRICE OF PER-STEP (exp03b gold table) ===== -->
+<section class="slide" data-part="" data-label="逐步的代價">
+  <div class="slide-meta"><span class="part-label">旅程 7/9 · 關鍵的選擇</span> · 誠實帳單：per-step 的價格</div>
+  <h2>誠實的帳單：<span class="accent">per-step 在 13 個函數上輸多少</span> <span class="rg rg-e">🅔</span></h2>
+  <div class="whybox"><span class="tag">❓ 為什麼要把輸的一面攤開</span>：前面說延遲精度好 —— 好多少？這是 <b>exp03b 的完整消融</b>（pp=16，13 函數各在最小可行次數 d*）。這張表是「per-step 的價格」，不攤開它，「13 函數全 ULP=1」就會被誤會成 per-step 的成績。<b>它不是</b>：那是延遲截斷的成績。</div>
+  <table style="font-size:.85rem">
+    <tr><th>函數</th><th>exp</th><th>ln</th><th>sin</th><th>1−cos</th><th>arcsin</th><th>arctan</th><th>tan</th><th>sinh</th><th>erf</th><th>sigmoid</th><th>GELU</th><th>1−e⁻ˣ</th><th>1−e^(−x²)</th></tr>
+    <tr><td><b>d*</b></td><td>4</td><td>5</td><td>4</td><td>4</td><td>5</td><td>4</td><td>7</td><td>4</td><td>6</td><td>4</td><td>5</td><td>5</td><td>7</td></tr>
+    <tr style="background:rgba(37,99,235,.06)"><td><b>延遲 ULP</b></td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+    <tr style="background:rgba(220,38,38,.05)"><td><b>per-step ULP</b></td><td><b>2</b></td><td><b>3</b></td><td><b>3</b></td><td><b>3</b></td><td><b>2</b></td><td><b>2</b></td><td><b>4</b></td><td><b>2</b></td><td><b>4</b></td><td><b>4</b></td><td><b>4</b></td><td><b>4</b></td><td><b>7</b></td></tr>
+  </table>
+  <div class="grid-2" style="margin-top:.5rem">
+    <div class="soulbox"><span class="tag">🎯 讀法</span>：同一組係數、同一個 d*，<b>延遲 13/13 達 ULP≤1，per-step 0/13</b>（差 2–7×）。所以「13 函數全 ULP=1」永遠要掛 <span class="rg rg-e">🅔</span>＋「延遲截斷」兩個標籤。</div>
+    <div class="ideabox"><span class="tag">💡 那出貨怎麼辦</span>：🅟 在 pp=48 用 <b>degree 贖精度</b>：d 從 d*≈5 拉到 <b>12</b>，exp kernel 實測 <b>2.81 ULP</b>、Delta 端到端 <b>7 ULP</b>（pf1_results.md）—— 高 pp 下每個 ULP 只有 2⁻⁴⁸，7 ULP ≈ 2.5×10⁻¹⁴，遠小於金融門檻。</div>
+  </div>
+  <p class="muted" style="margin-top:.35rem;font-size:.85rem">資料：exp03_deferred_truncation/results/full13_summary.md（2026-03-14，pp=16）。<b style="color:var(--text)">所以呢</b>：per-step 的價要用 degree 贖 —— 那 degree 是不是加越多越好？下一張看實測。</p>
+</section>
+
+<!-- ===== 6 · QUANTIZATION SATURATION ===== -->
+<section class="slide" data-part="" data-label="量化飽和">
+  <div class="slide-meta"><span class="part-label">旅程 7/9 · 關鍵的選擇</span> · 拆決定 ②：degree 的甜蜜點</div>
+  <h2>degree 越高越準嗎？<span class="accent">反直覺：不是</span></h2>
+  <div class="whybox"><span class="tag">❓ 為什麼不能一路把 degree 加大</span>：多項式逼近的直覺是「次數越高越貼合」。在定點 ZK 裡，這個直覺<b>過了甜蜜點就失效</b> —— 這次不畫示意圖，直接放實測。</div>
+  <div class="grid-2">
+    <div>
+      <div class="soulbox"><span class="tag">🎯 量化飽和（quantization saturation）</span>：過了最佳 degree \( d^\* \)，逼近誤差已壓到底，總誤差被<b>量化／截斷的「地板」接管</b> —— 加 degree <b>買不到精度</b>，只多付 rows 和 lookups；極高 d 還出現輕微反轉（1.24→1.25）。</div>
+      <div class="card accent" style="margin-top:.55rem"><h3>實測數字（右圖的點）</h3>
+        <ul style="font-size:.93rem">
+          <li>延遲<span class="rg rg-e">🅔</span>（ln、pp=32、4 段）：d=4 誤差 <b>1058.67</b> → d=6 <b>3.44</b> → d=8 起<b>釘死在 1.24</b>（量化地板），d≥12 微升 1.25。</li>
+          <li>per-step（ln、pp=32、單段）：d=7 <b>105</b> → d=9 <b>4</b> → d≥10 <b>釘死在 3</b>（截斷地板）—— 地板比延遲高，正是上一張的價差。</li>
+          <li>pp=16<span class="rg rg-e">🅔</span>：\( d^\*\le7 \) 已讓 13 函數全 ULP≤1（延遲）—— 再加 degree 不會更好。</li>
+        </ul>
+      </div>
+      <div class="ideabox" style="margin-top:.5rem"><span class="tag">💡 為什麼有地板</span>：係數量化（每個 \(c_i\) 取整）與截斷（每步 floor）的誤差<b>不隨 degree 下降</b>；逼近誤差一旦壓過它們，總誤差就貼著地板走。</div>
+    </div>
+    <figure>
+      <svg viewBox="0 0 460 260" role="img" aria-label="真實 degree 掃描：延遲截斷降到 1.24 後平台；per-step 降到 3 後平台" style="width:100%;max-width:480px">
+        <line x1="55" y1="210" x2="435" y2="210" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="55" y1="210" x2="55" y2="30" stroke="#94a3b8" stroke-width="1.5"/>
+        <g stroke="#e5e7eb" stroke-width="1"><line x1="55" y1="200" x2="435" y2="200"/><line x1="55" y1="150" x2="435" y2="150"/><line x1="55" y1="100" x2="435" y2="100"/><line x1="55" y1="50" x2="435" y2="50"/></g>
+        <g font-size="9.5" fill="#8b94a3" text-anchor="end"><text x="50" y="203">1</text><text x="50" y="153">10</text><text x="50" y="103">100</text><text x="50" y="53">1000</text></g>
+        <g font-size="10" fill="#8b94a3" text-anchor="middle"><text x="55" y="224">4</text><text x="118" y="224">6</text><text x="182" y="224">8</text><text x="245" y="224">10</text><text x="308" y="224">12</text><text x="372" y="224">14</text><text x="435" y="224">16</text></g>
+        <text x="245" y="244" font-size="11.5" text-anchor="middle" fill="#55596b">degree d →</text>
+        <text x="16" y="120" font-size="11.5" text-anchor="middle" fill="#55596b" transform="rotate(-90 16 120)">max ULP（log 刻度）</text>
+        <!-- deferred (exp12 pp32, 4-seg): 1058.67, 3.44, 1.24, 1.24, 1.25, 1.25, 1.25 -->
+        <polyline points="55,49 118,173 182,195 245,195 308,195 372,195 435,195" fill="none" stroke="#2563eb" stroke-width="2.4"/>
+        <g fill="#2563eb"><circle cx="55" cy="49" r="4"/><circle cx="118" cy="173" r="4"/><circle cx="182" cy="195" r="4"/><circle cx="245" cy="195" r="4"/><circle cx="308" cy="195" r="4"/><circle cx="372" cy="195" r="4"/><circle cx="435" cy="195" r="4"/></g>
+        <g font-size="9.5" fill="#1d4ed8" font-weight="700"><text x="63" y="46">1058.67</text><text x="126" y="170">3.44</text><text x="182" y="188" text-anchor="middle">1.24</text><text x="308" y="188" text-anchor="middle">1.25</text></g>
+        <text x="99" y="120" font-size="10.5" fill="#1d4ed8" font-weight="700">延遲 🅔（4 段）</text>
+        <!-- per-step (exp09 pp32, single seg): 105, 15, 4, 3, 3 -->
+        <polyline points="150,99 182,141 213,170 245,176 308,176" fill="none" stroke="#16a34a" stroke-width="2.4" stroke-dasharray="7 3"/>
+        <g fill="#16a34a"><circle cx="150" cy="99" r="4"/><circle cx="182" cy="141" r="4"/><circle cx="213" cy="170" r="4"/><circle cx="245" cy="176" r="4"/><circle cx="308" cy="176" r="4"/></g>
+        <g font-size="9.5" fill="#15803d" font-weight="700"><text x="158" y="96">105</text><text x="190" y="138">15</text><text x="221" y="167">4</text><text x="251" y="173">3</text><text x="314" y="173">3</text></g>
+        <text x="255" y="155" font-size="10.5" fill="#15803d" font-weight="700">per-step（單段）</text>
+        <!-- floors -->
+        <text x="433" y="191" font-size="9" text-anchor="end" fill="#1d4ed8">量化地板 1.24</text>
+        <text x="360" y="172" font-size="9" fill="#15803d">截斷地板 3</text>
+      </svg>
+      <figcaption>真實量測（非示意）· ln(1+x)、pp=32：藍＝exp12/ln_degree_sweep.json（4 段、延遲／模擬）；綠＝exp09/ln_sweep_output.txt（單段、per-step）。分段設定不同 → 比形狀與地板高度，不比兩線的絕對差。</figcaption>
+    </figure>
+  </div>
+  <p style="margin-top:.4rem"><b>取捨：</b>degree <b>不是免費</b> —— 甜蜜點之後每加一次 d 都是白付的 rows/lookups；「更差」的反轉在這組量測裡很輕微（exp12：1.24→1.25），主現象是<b>飽和</b>。<span class="muted">（DSP／硬體早有相關討論〔de Dinechin 2015〕；我們是首次在 ZK 定點下量測它 —— 是測量，不是發明。）</span><b>所以呢</b>：地板從哪來，誤差預算那張會用公式拆開。取捨的帳攤完了 —— 下一張進機械室：那台每步都截斷的 kernel，長什麼樣、憑什麼沒亂算。</p>
 </section>
 
 <!-- ===== CORE KERNEL (how we evaluate + honest truncation) ===== -->
 <section class="slide" data-part="" data-label="核心 kernel">
   <div class="slide-meta"><span class="part-label">旅程 8/9 · 保證沒亂算</span> · 核心電路：怎麼算、又怎麼鎖死<span class="rref">↩ R5 · R4</span></div>
   <h2>出貨 kernel <span class="rg rg-p">🅟</span>：<span class="accent">逐步 Horner ＋ 每步誠實截斷</span></h2>
-  <div class="whybox"><span class="tag">❓ 核心公式</span>：選了定點 + Minimax 之後，電路裡<b>到底怎麼把多項式算出來</b>、又<b>怎麼保證 prover 沒亂填</b>？這頁講的是<b>實際出貨的 per-step kernel</b>（scenario_a_full/src/kernel.rs）；🅔 的延遲截斷變體放在「免費空間」那張。</div>
+  <div class="whybox"><span class="tag">❓ 核心公式</span>：選了定點 + Minimax 之後，電路裡<b>到底怎麼把多項式算出來</b>、又<b>怎麼保證 prover 沒亂填</b>？這頁講的是<b>實際出貨的 per-step kernel</b>（scenario_a_full/src/kernel.rs）；🅔 的延遲截斷變體在「免費空間」那張講過了。</div>
   <div class="grid-2">
     <div class="card"><h3>① 怎麼算：per-step Horner，每步除回去</h3>
       <p>每一步乘完 \(R\)、加上係數，<b>立刻</b>除以 \(S{=}2^{pp}\) 取整：</p>
@@ -897,159 +1052,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
       <p style="margin-top:.4rem">合法的 \(R\in[0,R_{\max}]\)：gap <b>唯一</b>拆成兩個 byte。</p>
     </div>
   </div>
-  <div class="soulbox" style="margin-top:.45rem"><span class="tag">🎯 一句</span>：超範圍的輸入<b>在數學上湊不出</b>合法的 gap 分解 —— 不是「機率上難」，是「<b>根本不可能</b>」。<span class="muted">（也試過用單調性省檢查的 ORV，但 13 個函數有 7 個有 security gap → 改用 ExplicitRC。）</span><b>所以呢</b>：過程與輸入都鎖死了；接下來回到「什麼時候截斷」這個最大的取捨。</div>
-</section>
-
-<!-- ===== 5 · FREE SPACE (deferred vs per-step) ===== -->
-<section class="slide" data-part="" data-label="免費空間">
-  <div class="slide-meta"><span class="part-label">旅程 7/9 · 關鍵的選擇</span> · 拆決定 ③：兩種截斷</div>
-  <h2>那塊「免費空間」紅利，<span class="accent">用光就得換路</span></h2>
-  <div class="whybox"><span class="tag">❓ 為什麼會有「延遲」和「逐步」兩種截斷</span>：兩者差在「中間值什麼時候除回去」。這頁把<b>兩邊的實測數字</b>都攤開 —— 贏的、輸的一起看，才叫取捨。</div>
-  <div class="grid-2">
-    <div>
-      <div class="ideabox"><span class="tag">💡 核心比喻</span>：ZK 的 254-bit 體，是<b>傳統 CPU 上不存在的免費資源 —— 暫存空間</b>。延遲截斷吃這塊紅利：把 \( d \) 次截斷併到<b>最後一次</b>（CPU 的 64-bit register 被迫一直截斷，做不到）。</div>
-      <div class="fbox" style="margin:.4rem 0"><div class="lbl">延遲版的玩法（🅔 低 pp 專用）</div>
-        <div class="cmt">係數整條<b>預縮放</b> \( D_i=\lfloor c_i S^{\,d+1-i}\rceil \)，Horner 遞推 \( H_k=D_k+R\,H_{k+1} \) 中間<b>完全不截斷</b>，最後除一次 \( S^{d} \)。</div>
-        <div class="cmt muted" style="font-size:.86rem">白話：先把每個係數墊到剛好的高度，讓中間<b>一路只乘加、不用剪小數</b>，帳留到最後一次結清 —— 只截一次，誤差最小。</div>
-      </div>
-      <div class="fbox"><div class="lbl">但有 bit-budget</div>
-        \[ (d+1)\cdot pp < 254 \]
-        <div class="cmt muted" style="font-size:.86rem">白話：每乘一步數字變長 pp 位，乘到第 d+1 步、長度超過保險箱的 254 位就裝不下。</div>
-        <div class="cmt">pp=48 只容 \( d\le 4 \)；管線要 \( d{=}12 \)（中間值會到 \( 2^{624} \)）→ per-step 是<b>唯一可行</b>。</div>
-      </div>
-    </div>
-    <div>
-      <table style="font-size:.88rem">
-        <tr><th></th><th>延遲截斷</th><th>per-step</th></tr>
-        <tr><td><b>精度</b><span class="rg rg-e">🅔</span><br><span class="muted" style="font-size:.85em">pp=16、13 函數各在 d*（exp03b）</span></td><td><b style="color:#15803d">13/13 ULP≤1</b></td><td><b style="color:#b91c1c">0/13</b>；ULP 2–7</td></tr>
-        <tr><td><b>電路成本</b><span class="rg rg-e">🅔</span><br><span class="muted" style="font-size:.85em">pp=16、d=5 實測（exp04）</span></td><td>6 gates／<b style="color:#b91c1c">12 lookups</b>／9 rows<br>proof 4,992 B</td><td>3 gates／<b style="color:#15803d">2 lookups</b>／7 rows<br>proof 1,472 B</td></tr>
-        <tr><td><b>天花板</b></td><td><b style="color:#b91c1c">\((d{+}1)\cdot pp\ge 254\) 就死</b><br><span class="muted" style="font-size:.85em">pp=32 d=10 → (10+1)×32 = 352 bit，INFEASIBLE（exp09 同判）</span></td><td><b style="color:#15803d">任何 pp 都行</b>（中間值 ~2·pp bit）<br><span class="muted" style="font-size:.85em">代價：要用 degree 補精度（🅟 d=12）</span></td></tr>
-        <tr><td><b>出貨角色</b><span class="rg rg-p">🅟</span></td><td>備援（kernel_deferred_backup.rs：pp=24 d=8、rem 拆 24 bytes、27 lookups）</td><td><b>主 kernel</b>（pp=48 d=12、84 lookups）<br><span class="muted" style="font-size:.85em">此列兩欄 pp/d 配置不同，lookup 數不可直接相比</span></td></tr>
-      </table>
-      <p style="margin-top:.4rem;font-size:.9rem"><b>取捨一句：</b>延遲＝<b>多花查表買精度</b>、有硬天花板；per-step＝<b>便宜、無限高</b>，但精度要用 degree 贖回來。這個換路邊界是我們第一個量化的 —— 下一張把它畫成地圖。</p>
-    </div>
-  </div>
-</section>
-
-<!-- ===== REGIME MAP (pp × d plane, real operating points) ===== -->
-<section class="slide" data-part="" data-label="換道地圖">
-  <div class="slide-meta"><span class="part-label">旅程 7/9 · 關鍵的選擇</span> · 拆決定 ③：一張圖看懂兩個 regime<span class="rref">↩ R5</span></div>
-  <h2>換道地圖：<span class="accent">(d+1)·pp = 254 這條線</span></h2>
-  <div class="grid-2">
-    <figure style="margin:.1rem 0 0">
-      <svg viewBox="0 0 460 280" role="img" aria-label="pp × degree 平面分三區：紅利區、假可行區（d 太低沒精度）、延遲不可行區；出貨點是三個約束的唯一交集" style="width:100%;max-width:520px">
-        <!-- quality zones (behind everything) -->
-        <polygon points="93,30 93,58 131,101 169,129 207,149 245,164 283,176 321,185 359,193 397,199 435,203 435,30" fill="rgba(124,58,237,.07)"/>
-        <polygon points="93,58 131,101 169,129 207,149 245,164 245,230 93,230" fill="rgba(37,99,235,.06)"/>
-        <polygon points="245,164 283,176 321,185 359,193 397,199 435,203 435,230 245,230" fill="rgba(220,38,38,.07)"/>
-        <line x1="55" y1="230" x2="435" y2="230" stroke="#94a3b8" stroke-width="1.5"/>
-        <line x1="55" y1="230" x2="55" y2="30" stroke="#94a3b8" stroke-width="1.5"/>
-        <text x="245" y="262" font-size="12" text-anchor="middle" fill="#55596b">定點精度 pp →　<tspan fill="#92400e" font-weight="700">金融要準：往右走</tspan></text>
-        <text x="17" y="130" font-size="12" text-anchor="middle" fill="#55596b" transform="rotate(-90 17 130)">多項式次數 d →　<tspan fill="#92400e" font-weight="700">逼近要夠：往上走</tspan></text>
-        <g font-size="10" fill="#8b94a3" text-anchor="middle"><text x="93" y="244">16</text><text x="169" y="244">24</text><text x="245" y="244">32</text><text x="321" y="244">40</text><text x="397" y="244">48</text></g>
-        <g font-size="10" fill="#8b94a3" text-anchor="end"><text x="48" y="207">4</text><text x="48" y="153">8</text><text x="48" y="100">12</text><text x="48" y="47">16</text></g>
-        <!-- boundary curve d = 254/pp - 1 -->
-        <path d="M93,58 L131,101 L169,129 L207,149 L245,164 L283,176 L321,185 L359,193 L397,199" fill="none" stroke="#dc2626" stroke-width="2.4" stroke-dasharray="6 3"/>
-        <text x="150" y="90" font-size="11" fill="#dc2626" font-weight="700">(d+1)·pp = 254</text>
-        <text x="100" y="215" font-size="9.5" fill="#1d4ed8" font-weight="700">紅利區：塞得下、也夠準</text>
-        <text x="100" y="227" font-size="9.5" fill="#1d4ed8">（🅔 研究用 —— 金融要更高 pp）</text>
-        <text x="252" y="215" font-size="9.5" fill="#b91c1c" font-weight="700">假可行：塞得下但 d 太低</text>
-        <text x="252" y="227" font-size="9.5" fill="#b91c1c">ln 誤差 6.9×10⁷ ULP ＝ 沒算</text>
-        <text x="290" y="48" font-size="10.5" fill="#7c3aed" font-weight="700">延遲不可行 → 只剩 per-step</text>
-        <!-- 🅔 pp16 d4..7 -->
-        <g fill="#2563eb"><circle cx="93" cy="203" r="4"/><circle cx="93" cy="190" r="4"/><circle cx="93" cy="177" r="4"/><circle cx="93" cy="163" r="4"/></g>
-        <text x="104" y="185" font-size="10.5" fill="#1d4ed8" font-weight="700">🅔 pp=16 · d*=4–7（延遲）</text>
-        <!-- 🅔 pp24 d8 -->
-        <circle cx="169" cy="150" r="5" fill="#2563eb"/>
-        <text x="180" y="146" font-size="10.5" fill="#1d4ed8" font-weight="700">🅔 pp=24 · d=8（備援 kernel）</text>
-        <!-- 🅒 pp32 d10 -->
-        <circle cx="245" cy="123" r="6" fill="#d97706"/>
-        <text x="234" y="119" font-size="10.5" text-anchor="end" fill="#92400e" font-weight="700">🅒 pp=32 · d=10（per-step）</text>
-        <!-- 🅟 pp48 d12 -->
-        <circle cx="397" cy="96" r="7" fill="#16a34a"/>
-        <circle cx="397" cy="96" r="11" fill="none" stroke="#16a34a" stroke-width="1.4" stroke-dasharray="2 2"/>
-        <text x="392" y="82" font-size="11" text-anchor="end" fill="#15803d" font-weight="800">🅟 pp=48 · d=12（出貨）</text>
-        <text x="430" y="118" font-size="9.5" text-anchor="end" fill="#15803d" font-weight="700">↑ 三個約束的唯一交集：</text>
-        <text x="430" y="130" font-size="9.5" text-anchor="end" fill="#15803d">夠準 · 逼近夠 · 算得動（per-step）</text>
-      </svg>
-      <figcaption>本報告自製 · 三塊底色＝好壞自己顯形：藍＝紅利區（研究）、紅＝假可行（沒精度）、紫＝延遲不可行（只剩 per-step）；邊界 (d+1)·pp=254（BN254 ≈253.6 bit）；點位出自 exp03b／kernel_deferred_backup.rs／exp10／scenario_a_full</figcaption>
-    </figure>
-    <div>
-      <div class="soulbox"><span class="tag">🎯 整個故事就這張圖</span>：<b>線下</b>（🅔 pp=16 d≤7、pp=24 d=8）延遲截斷還塞得進 254 bit —— 吃紅利、拿 ULP=1。<b>線上</b>（🅒 pp=32 d=10、🅟 pp=48 d=12）中間值 \(S^{d+1}\) 爆掉 —— 延遲根本算不出來，per-step 不是偏好、是<b>僅存的路</b>。</div>
-      <div class="card amber" style="margin-top:.6rem"><h3>驗算給你看</h3>
-        <ul style="font-size:.92rem">
-          <li>🅒 pp=32、d=10：延遲中間值 (10+1)×32 = <b>352 bit &gt; 254</b> → INFEASIBLE（論文 ch3 口徑，exp09 實測同判）；per-step ULP=3。</li>
-          <li>🅟 pp=48、d=12：延遲要 (12+1)×48 = <b>624 bit</b>；per-step 中間值恆 ≈96 bit（exp09「max addend bits」表）。</li>
-          <li>pp=48 延遲上限 d≤4（254/48−1≈4.3）—— 但 ln 在 pp=48、d=4 誤差 6.9×10⁷ ULP（exp12）→ 紅利區在高 pp <b>沒有可用的精度</b>。</li>
-        </ul>
-        <p style="margin-top:.35rem;font-size:.9rem"><b>所以呢</b>：換到 per-step 這條道，代價是精度 —— 下一張把這筆帳一項項攤開。</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== THE PRICE OF PER-STEP (exp03b gold table) ===== -->
-<section class="slide" data-part="" data-label="逐步的代價">
-  <div class="slide-meta"><span class="part-label">旅程 7/9 · 關鍵的選擇</span> · 誠實帳單：per-step 的價格</div>
-  <h2>誠實的帳單：<span class="accent">per-step 在 13 個函數上輸多少</span> <span class="rg rg-e">🅔</span></h2>
-  <div class="whybox"><span class="tag">❓ 為什麼要把輸的一面攤開</span>：前面說延遲精度好 —— 好多少？這是 <b>exp03b 的完整消融</b>（pp=16，13 函數各在最小可行次數 d*）。這張表是「per-step 的價格」，不攤開它，「13 函數全 ULP=1」就會被誤會成 per-step 的成績。<b>它不是</b>：那是延遲截斷的成績。</div>
-  <table style="font-size:.85rem">
-    <tr><th>函數</th><th>exp</th><th>ln</th><th>sin</th><th>1−cos</th><th>arcsin</th><th>arctan</th><th>tan</th><th>sinh</th><th>erf</th><th>sigmoid</th><th>GELU</th><th>1−e⁻ˣ</th><th>1−e^(−x²)</th></tr>
-    <tr><td><b>d*</b></td><td>4</td><td>5</td><td>4</td><td>4</td><td>5</td><td>4</td><td>7</td><td>4</td><td>6</td><td>4</td><td>5</td><td>5</td><td>7</td></tr>
-    <tr style="background:rgba(37,99,235,.06)"><td><b>延遲 ULP</b></td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
-    <tr style="background:rgba(220,38,38,.05)"><td><b>per-step ULP</b></td><td><b>2</b></td><td><b>3</b></td><td><b>3</b></td><td><b>3</b></td><td><b>2</b></td><td><b>2</b></td><td><b>4</b></td><td><b>2</b></td><td><b>4</b></td><td><b>4</b></td><td><b>4</b></td><td><b>4</b></td><td><b>7</b></td></tr>
-  </table>
-  <div class="grid-2" style="margin-top:.5rem">
-    <div class="soulbox"><span class="tag">🎯 讀法</span>：同一組係數、同一個 d*，<b>延遲 13/13 達 ULP≤1，per-step 0/13</b>（差 2–7×）。所以「13 函數全 ULP=1」永遠要掛 <span class="rg rg-e">🅔</span>＋「延遲截斷」兩個標籤。</div>
-    <div class="ideabox"><span class="tag">💡 那出貨怎麼辦</span>：🅟 在 pp=48 用 <b>degree 贖精度</b>：d 從 d*≈5 拉到 <b>12</b>，exp kernel 實測 <b>2.81 ULP</b>、Delta 端到端 <b>7 ULP</b>（pf1_results.md）—— 高 pp 下每個 ULP 只有 2⁻⁴⁸，7 ULP ≈ 2.5×10⁻¹⁴，遠小於金融門檻。</div>
-  </div>
-  <p class="muted" style="margin-top:.35rem;font-size:.85rem">資料：exp03_deferred_truncation/results/full13_summary.md（2026-03-14，pp=16）。<b style="color:var(--text)">所以呢</b>：per-step 的價要用 degree 贖 —— 那 degree 是不是加越多越好？下一張看實測。</p>
-</section>
-
-<!-- ===== 6 · QUANTIZATION SATURATION ===== -->
-<section class="slide" data-part="" data-label="量化飽和">
-  <div class="slide-meta"><span class="part-label">旅程 7/9 · 關鍵的選擇</span> · 拆決定 ②：degree 的甜蜜點</div>
-  <h2>degree 越高越準嗎？<span class="accent">反直覺：不是</span></h2>
-  <div class="whybox"><span class="tag">❓ 為什麼不能一路把 degree 加大</span>：多項式逼近的直覺是「次數越高越貼合」。在定點 ZK 裡，這個直覺<b>過了甜蜜點就失效</b> —— 這次不畫示意圖，直接放實測。</div>
-  <div class="grid-2">
-    <div>
-      <div class="soulbox"><span class="tag">🎯 量化飽和（quantization saturation）</span>：過了最佳 degree \( d^\* \)，逼近誤差已壓到底，總誤差被<b>量化／截斷的「地板」接管</b> —— 加 degree <b>買不到精度</b>，只多付 rows 和 lookups；極高 d 還出現輕微反轉（1.24→1.25）。</div>
-      <div class="card accent" style="margin-top:.55rem"><h3>實測數字（右圖的點）</h3>
-        <ul style="font-size:.93rem">
-          <li>延遲<span class="rg rg-e">🅔</span>（ln、pp=32、4 段）：d=4 誤差 <b>1058.67</b> → d=6 <b>3.44</b> → d=8 起<b>釘死在 1.24</b>（量化地板），d≥12 微升 1.25。</li>
-          <li>per-step（ln、pp=32、單段）：d=7 <b>105</b> → d=9 <b>4</b> → d≥10 <b>釘死在 3</b>（截斷地板）—— 地板比延遲高，正是上一張的價差。</li>
-          <li>pp=16<span class="rg rg-e">🅔</span>：\( d^\*\le7 \) 已讓 13 函數全 ULP≤1（延遲）—— 再加 degree 不會更好。</li>
-        </ul>
-      </div>
-      <div class="ideabox" style="margin-top:.5rem"><span class="tag">💡 為什麼有地板</span>：係數量化（每個 \(c_i\) 取整）與截斷（每步 floor）的誤差<b>不隨 degree 下降</b>；逼近誤差一旦壓過它們，總誤差就貼著地板走。</div>
-    </div>
-    <figure>
-      <svg viewBox="0 0 460 260" role="img" aria-label="真實 degree 掃描：延遲截斷降到 1.24 後平台；per-step 降到 3 後平台" style="width:100%;max-width:480px">
-        <line x1="55" y1="210" x2="435" y2="210" stroke="#94a3b8" stroke-width="1.5"/>
-        <line x1="55" y1="210" x2="55" y2="30" stroke="#94a3b8" stroke-width="1.5"/>
-        <g stroke="#e5e7eb" stroke-width="1"><line x1="55" y1="200" x2="435" y2="200"/><line x1="55" y1="150" x2="435" y2="150"/><line x1="55" y1="100" x2="435" y2="100"/><line x1="55" y1="50" x2="435" y2="50"/></g>
-        <g font-size="9.5" fill="#8b94a3" text-anchor="end"><text x="50" y="203">1</text><text x="50" y="153">10</text><text x="50" y="103">100</text><text x="50" y="53">1000</text></g>
-        <g font-size="10" fill="#8b94a3" text-anchor="middle"><text x="55" y="224">4</text><text x="118" y="224">6</text><text x="182" y="224">8</text><text x="245" y="224">10</text><text x="308" y="224">12</text><text x="372" y="224">14</text><text x="435" y="224">16</text></g>
-        <text x="245" y="244" font-size="11.5" text-anchor="middle" fill="#55596b">degree d →</text>
-        <text x="16" y="120" font-size="11.5" text-anchor="middle" fill="#55596b" transform="rotate(-90 16 120)">max ULP（log 刻度）</text>
-        <!-- deferred (exp12 pp32, 4-seg): 1058.67, 3.44, 1.24, 1.24, 1.25, 1.25, 1.25 -->
-        <polyline points="55,49 118,173 182,195 245,195 308,195 372,195 435,195" fill="none" stroke="#2563eb" stroke-width="2.4"/>
-        <g fill="#2563eb"><circle cx="55" cy="49" r="4"/><circle cx="118" cy="173" r="4"/><circle cx="182" cy="195" r="4"/><circle cx="245" cy="195" r="4"/><circle cx="308" cy="195" r="4"/><circle cx="372" cy="195" r="4"/><circle cx="435" cy="195" r="4"/></g>
-        <g font-size="9.5" fill="#1d4ed8" font-weight="700"><text x="63" y="46">1058.67</text><text x="126" y="170">3.44</text><text x="182" y="188" text-anchor="middle">1.24</text><text x="308" y="188" text-anchor="middle">1.25</text></g>
-        <text x="99" y="120" font-size="10.5" fill="#1d4ed8" font-weight="700">延遲 🅔（4 段）</text>
-        <!-- per-step (exp09 pp32, single seg): 105, 15, 4, 3, 3 -->
-        <polyline points="150,99 182,141 213,170 245,176 308,176" fill="none" stroke="#16a34a" stroke-width="2.4" stroke-dasharray="7 3"/>
-        <g fill="#16a34a"><circle cx="150" cy="99" r="4"/><circle cx="182" cy="141" r="4"/><circle cx="213" cy="170" r="4"/><circle cx="245" cy="176" r="4"/><circle cx="308" cy="176" r="4"/></g>
-        <g font-size="9.5" fill="#15803d" font-weight="700"><text x="158" y="96">105</text><text x="190" y="138">15</text><text x="221" y="167">4</text><text x="251" y="173">3</text><text x="314" y="173">3</text></g>
-        <text x="255" y="155" font-size="10.5" fill="#15803d" font-weight="700">per-step（單段）</text>
-        <!-- floors -->
-        <text x="433" y="191" font-size="9" text-anchor="end" fill="#1d4ed8">量化地板 1.24</text>
-        <text x="360" y="172" font-size="9" fill="#15803d">截斷地板 3</text>
-      </svg>
-      <figcaption>真實量測（非示意）· ln(1+x)、pp=32：藍＝exp12/ln_degree_sweep.json（4 段、延遲／模擬）；綠＝exp09/ln_sweep_output.txt（單段、per-step）。分段設定不同 → 比形狀與地板高度，不比兩線的絕對差。</figcaption>
-    </figure>
-  </div>
-  <p style="margin-top:.4rem"><b>取捨：</b>degree <b>不是免費</b> —— 甜蜜點之後每加一次 d 都是白付的 rows/lookups；「更差」的反轉在這組量測裡很輕微（exp12：1.24→1.25），主現象是<b>飽和</b>。<span class="muted">（DSP／硬體早有相關討論〔de Dinechin 2015〕；我們是首次在 ZK 定點下量測它 —— 是測量，不是發明。）</span><b>所以呢</b>：地板是什麼、從哪來？下一張用一條公式拆給你看。</p>
+  <div class="soulbox" style="margin-top:.45rem"><span class="tag">🎯 一句</span>：超範圍的輸入<b>在數學上湊不出</b>合法的 gap 分解 —— 不是「機率上難」，是「<b>根本不可能</b>」。<span class="muted">（也試過用單調性省檢查的 ORV，但 13 個函數有 7 個有 security gap → 改用 ExplicitRC。）</span><b>所以呢</b>：過程與輸入都鎖死了 —— 最後憑什麼說結果可信？下一張把誤差的帳算給你看。</div>
 </section>
 
 <!-- ===== ERROR BUDGET (the precision guarantee) ===== -->
@@ -1097,7 +1100,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
   <div class="card green" style="margin-top:.4rem"><h3>界 vs 實測（兩個都要給）</h3>
     <p style="font-size:.95rem"><span class="rg rg-p">🅟</span> pp=48、d=12，<b>兩本帳分開</b>：<b>單 kernel 鏈</b>界「最壞 ≈12 ULP」、實測 exp kernel（Remez、[0,ln2) 單段）max <b>2.81 ULP</b>；<b>端到端</b>理論保守界 ≈57、實測 Delta <b>7 ULP</b>、d₁ 中途值 <b>15 ULP</b>（含上游 FpMul/FpDiv 鏈，超過 12 —— 所以不能拿 kernel 的尺量端到端）。各自穩落在各自的界內，1 ULP 只有 2⁻⁴⁸≈3.6×10⁻¹⁵。<span class="muted">（出處：scenario_a_full HANDOFF.md、benches/pf1_results.md）</span></p>
   </div>
-  <div class="ideabox" style="margin-top:.4rem"><span class="tag">💡 順手解釋了量化飽和</span>：\(d\!\uparrow\) 讓 \(\varepsilon_{\mathrm{approx}}\!\downarrow\) 但 \(\varepsilon_{\mathrm{quant}},\varepsilon_{\mathrm{trunc}}\) 的地板不動（per-step 還隨步數微增）；地板一主導，加 degree <b>只剩成本</b> —— 上一張的飽和平台，根就在這條公式。低 pp<span class="rg rg-e">🅔</span>再配窮舉驗證（每個可表示輸入都查過），<b>這才是能拿去做金融合規的底氣</b>。</div>
+  <div class="ideabox" style="margin-top:.4rem"><span class="tag">💡 順手解釋了量化飽和</span>：\(d\!\uparrow\) 讓 \(\varepsilon_{\mathrm{approx}}\!\downarrow\) 但 \(\varepsilon_{\mathrm{quant}},\varepsilon_{\mathrm{trunc}}\) 的地板不動（per-step 還隨步數微增）；地板一主導，加 degree <b>只剩成本</b> —— 前面量化飽和那張的平台，根就在這條公式。低 pp<span class="rg rg-e">🅔</span>再配窮舉驗證（每個可表示輸入都查過），<b>這才是能拿去做金融合規的底氣</b>。</div>
 </section>
 
 <!-- ===== 7 · FUNCTION & INTERVAL ===== -->
@@ -1395,12 +1398,12 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '要解的問題':"先講一個具體的故事。一家對沖基金,每天晚上要向監管跟投資人證明兩件事:整個投資組合的 Delta 曝險沒有超過門檻、組合的違約機率沒有超過監管上限。麻煩在哪?傳統做法是把部位明細攤開給對方看 —— 但部位就是策略本身,攤開等於把多年的交易策略送人。\n那有哪些路?第一,全揭露,直接洩漏策略。第二,信任審計師:季審等級的速度、靠制度不靠數學,「每晚查一次」根本做不到。第三,TEE,把計算搬進晶片的保險飛地 —— 但信任只是從基金搬給晶片廠,而且旁路攻擊的前科不少。第四,MPC,多方一起算 —— 但每查一次,所有參與方都得在線多輪互動,夜批做不起來。剩下 ZK:證明「我算對了」,但不給你看輸入 —— 一方算、多方隨時驗、不交資料,形狀正好對上。\n先把誠實的話說在前面:ZK 不是什麼都不用信。部位藏住了,但市場資料的真實性還是需要一個現實世界的錨,我們把它收斂到 LP 本來就信任的基金行政管理人,藍圖那張會講清楚。\n選定 ZK 之後,動工之前還有一件事:先把問題本身拆對 —— 下一張。",
 '拆成兩張證明':"上一張選定了 ZK。動工之前,先把問題本身拆對。「今晚合規」這個宣稱,其實是兩個性質不同的子宣稱:第一,快照為真 —— 部位樹的每一筆更新都有交易所簽章、一路鏈回監管簽的初始狀態;第二,快照上算對 —— 風險值算得正確、而且在限額內。關鍵在:這兩個子宣稱之間,只靠一個值交握 —— state_root。接口這麼窄,就拆得開:各給一張證明,PF2 保快照為真,PF1 保快照上算對。\n拆開只有好處。形狀上,一個是簽章驗證、一個是重數值計算,各自用最合適的電路,不用做一個什麼都會的怪物;頻率上,一個逐筆增量做、一個每晚一次 —— 合成一張的話,夜批就得拖著整段交易歷史;演化上,換金融模型、改風險指標只動 PF1,PF2 完全不用碰;而且被 PF2 保真的這棵樹是可重用的 —— 之後要加任何新的計算證明,直接掛上去就好,PF2 自己也能單獨當「部位帳完整性」的審計證據。\n邏輯的合成也乾淨:PF2 成立,state_root 就是真實帳的承諾;PF1 成立,這本帳上的計算就是對的;兩張證明綁同一個公開的 state_root,驗證者三件一起驗,中間沒有第三個縫隙 —— 像先證兩個引理,合起來就是定理:各保各的對,整體就對。\n這份報告跟論文,做的是 PF1 這一半 —— 超越函數的難題全在這裡;快照為真由 PF2 承擔,它屬商業範圍,不展開。從下一張起,我們就站在 PF1 裡面 —— 先看這一半到底有多難。",
 '兩條死路':"那為什麼不能把超越函數直接放進去?直覺只有兩條路,我帶你看為什麼兩條都死。\n先補兩個詞:pp 是定點精度 —— 小數保留幾個二進位位,像用「分」記帳不用「元」;degree d 是多項式的最高次方,也是求值的步數。\n第一條,查表:把每個可能的輸入預先算好、存成一張表。輸入有 2 的 pp 次方種,表就要那麼多格。低精度還行,pp=16 大概六萬格;但金融要 pp=24、32,表就爆成一千六百多萬、四十三億格,而且每個函數一張。而且這不只是裝不下:電路的列數要排進 2 的 k 次方階的子群,BN254 連 2 的 28 次方都到頂了 —— 2 的 32 次方對應的單位根根本不存在。這是數學上的牆,不是記憶體的問題。\n第二條,多項式逼近:用一條低次多項式近似,再用 Horner 求值 —— 就是「乘 x、加下一個係數」一路捲下來。這條可行,但有兩個坑。坑 A:Taylor 在定點量化下崩潰,pp=32、d=10 時 ln 只剩 4.4 個有效位、約一位十進位;換成 Minimax 有 28.6 位。坑 B:中間值不截斷會膨脹 —— 每乘一步數字變長 pp 位,到第 d+1 步就是 S 的 d+1 次方,pp=32、d=10 是 2 的 352 次方,塞不進 BN254 這個 254 位的保險箱;出貨的 pp=48、d=12 更要 2 的 624 次方。\n所以可行的只剩多項式,但要先解掉 Taylor 崩潰跟保險箱裝不下這兩個坑 —— 接下來四個設計決定就是在回答這兩個坑。",
-'四個設計決定':"這張把四個關鍵決定一次攤在取捨表上:選了什麼、別的為什麼不行、換到什麼。\n第一,定點 pp=48、不用浮點 —— 體裡根本沒有浮點,只能「用分記帳」:整數乘 2 的 48 次方把小數變整數;代價是 pp 越大、中間值越容易脹爆,這就帶出後面的截斷。\n第二,Minimax、不用 Taylor —— 不是『比較好』,是『必要條件』:Taylor 在定點下崩潰。這裡先講清楚一個度量:ULP 就是最後一位小數的一格刻度,ULP≤1 表示準到最後一位。13 個函數在最小 degree 全達 ULP≤1 —— 但注意,這是 🅔 實驗場、延遲截斷的成績,不是出貨 kernel 的。\n第三,逐步截斷 per-step、不用延遲 —— 延遲低 pp 精度較好,但它有位元預算:每乘一步長 pp 位,d+1 步超過 254 位保險箱就裝不下。pp=48 只容 d=4,管線要 d=12 —— 延遲直接出局,只剩 per-step;代價是精度,🅔 實測 d* 時 ULP 掉到 2 到 7。\n第四,通用 Horner kernel 加一張 ByteTable —— 換函數只改 fixed 欄那 d 個係數,256 條目的表全函數共用,加新函數零電路重設計。誠實講:電路結構不動,但 VK 還是會變,驗證方要重收一次 —— 只是重跑 keygen,幾十秒、沒有儀式。\n這四個決定換到:金融精度 24 到 48 位、單函數 proof 5 到 9.5KB(🅔)、整個投組 34,368 bytes(🅟)、verify 毫秒級、不揭露部位。徽章的規矩第三頁立過了,不同基準的成績不互相背書。接下來就進出貨 kernel 的本體:電路裡到底怎麼把多項式算出來、又怎麼保證 prover 沒亂填。",
-'核心 kernel':"前面選了定點跟 Minimax,這張回答最實在的問題:出貨的電路裡到底怎麼把多項式算出來、又怎麼保證 prover 沒亂填。注意,這頁講的是實際出貨的 per-step kernel;延遲截斷那個變體,等一下「免費空間」那張才登場。\n先講怎麼算。每一步就是乘、加、剪:acc 乘上輸入 R、加上這一步的係數,然後立刻除以 S 取整 —— 把小數點右邊多出來的位數剪掉,回到固定的小數位數,像用「分」記帳的人每一步都把帳面換回固定單位。因為每步都清尺度,中間值永遠只有大約兩個 pp 的長度,pp=48 也才 96 位 —— 254 位的保險箱怎麼裝都裝得下,degree 加到多大都不會爆。\n再講怎麼保證沒亂算。電路本身做不了「除法取整」,所以反過來:讓 prover 自己把商跟餘數填進來,再用一條閘鎖死 —— 商乘 S 加餘數,必須剛好湊回乘加的原金額,像收銀機找零一定要湊回原價;而且餘數只能拆成 0 到 255 的合法硬幣,逐枚去 ByteTable 查。餘數湊得出來,就等於他誠實做了除法。\n帳單也給你:d=12 一次呼叫是 3 種閘、14 列、84 個 byte 查表,全部共用同一張 256 條目的表。空口無憑,下一張直接拿數字算一步給你看。",
-'ExplicitRC':"剛剛保證了「算的過程」沒亂來,但還有一個洞:輸入本身。\n輸入 R 是 prover 私下給的 witness。我們的多項式只在選定的區間裡準,區間外是垃圾。要是他故意餵一個超出範圍的 R,輸出根本沒意義,卻還是能產生一個通得過的證明。所以一定要在電路裡擋住超範圍的輸入。\n我們的做法叫 ExplicitRC,核心就一條約束:gap_lo 加 gap_hi 乘 256,再加 R,要等於 R_max;而 gap_lo、gap_hi 兩個都用共用的那張 ByteTable 查 byte,不需要新表。\n為什麼這樣就確定性擋住?如果他餵的 R 超過 R_max,那 gap 等於 R_max 減 R 是負數,在有限體裡會 wrap 成一個超大的數,根本拆不成兩個 byte,byte 檢查就確定性地失敗。反過來,合法的 R 落在 0 到 R_max,gap 唯一拆成兩個 byte。成本只多一個閘。\n關鍵是:這不是「機率上難偽造」,是「數學上根本湊不出來」。我們也試過用單調性省掉這個檢查的 ORV 方案,但 13 個函數裡有 7 個有安全漏洞,所以改用 ExplicitRC。下一張回到截斷:什麼時候截斷,有兩種策略的取捨。",
-'誤差預算':"前面到處在講 ULP,這張回答最關鍵的問題:我們憑什麼說結果可信?不是測幾個點看起來對,是把總誤差拆成三個來源、每個各給上界。\n第一項逼近誤差:Remez 多項式跟真函數的距離,degree 決定、不可再降。第二項量化誤差:係數塞進定點時的捨入。第三項截斷誤差要看 kernel:延遲只截最後一次,頂多 1 ULP;per-step 每步 floor 各不到 1 ULP,最壞累到大約 d 個 ULP。\n所以出貨配置 pp=48、d=12,單一 kernel 鏈的界是「最壞約 12 ULP」,實測 exp kernel 最大只有 2.81。端到端是另一本帳:理論上界保守抓約 57 個 ULP,實測 Delta 是 7、中間量 d1 因為多了上游的乘除鏈,是 15 —— 各自都穩穩落在自己的界內,而且 1 個 ULP 只有 10 的負 15 次方量級。界跟實測兩個都給、kernel 跟端到端分開講,才叫誤差保證。\n這條公式還順手解釋了上一張的飽和:degree 只壓得動第一項,後兩項是地板;地板一主導,加 degree 只剩成本。低 pp 的實驗場我們再加窮舉驗證 —— 每一個可表示的輸入都真的算過一遍。這才是敢拿去做金融合規的底氣。",
-'免費空間':"這張講兩種截斷策略的取捨,差別就一句話:中間值什麼時候除回去。\n先講延遲截斷的玩法。ZK 的 254 位體像一個超寬的保險箱,是傳統 CPU 沒有的免費空間。延遲截斷吃這塊紅利:把係數預先墊高,讓中間一路只乘加、完全不剪小數,帳留到最後一次結清。只截一次,誤差當然最小 —— 13 個函數在最小 degree 全部 ULP=1,就是它的成績。\n但它有一條硬預算:每乘一步,數字就變長 pp 位;乘到第 d+1 步超過 254 位,保險箱就裝不下。pp=48 只容得下 d=4,我們管線要 d=12 —— 中間值會脹到 2 的 624 次方,根本算不出來。所以高精度只剩 per-step 一條路;這不是偏好,是僅存的路。\n兩邊的實測帳單都在表上:延遲是 6 個閘、12 個查表、proof 4,992 bytes,換到 ULP=1;per-step 是 3 個閘、2 個查表、proof 1,472 bytes —— 便宜、天花板無限高,但精度要用 degree 贖回來。延遲版在出貨系統裡只當備援。下一張把這個換道邊界畫成一張地圖。",
-'量化飽和':"這張回答「degree 是不是加越多越好」—— 不是,而且這次不畫示意圖,直接放實測。\n藍線是延遲截斷,ln、pp=32、四段:d=4 誤差一千多,d=6 掉到 3.44,d=8 以後釘死在 1.24,再加 degree 一格都不動,d 很大時甚至微微翹到 1.25。綠線是 per-step、單段:從 105 一路降到 3,之後也釘死。\n兩條線說同一件事:degree 買得到的只有逼近誤差;量化跟截斷的地板不隨 degree 下降。逼近誤差一旦壓到地板以下,再加 degree 就只是白付 rows 跟 lookups。注意綠線的地板 3 比藍線的 1.24 高 —— 上一張說的 per-step 價差,在圖上直接看得到。\n誠實講:文獻說「過了甜蜜點會更差」,在我們這組量測裡反轉非常輕微,主現象是飽和。這現象 DSP 硬體圈早有討論,我們是第一次在 ZK 定點下把它量出來 —— 是測量,不是發明。地板是什麼、從哪來?下一張用一條公式拆開。",
+'四個設計決定':"這張把四個關鍵決定一次攤在取捨表上:選了什麼、別的為什麼不行、換到什麼。\n第一,定點 pp=48、不用浮點 —— 體裡根本沒有浮點,只能「用分記帳」:整數乘 2 的 48 次方把小數變整數;代價是 pp 越大、中間值越容易脹爆,這就帶出後面的截斷。\n第二,Minimax、不用 Taylor —— 不是『比較好』,是『必要條件』:Taylor 在定點下崩潰。這裡先講清楚一個度量:ULP 就是最後一位小數的一格刻度,ULP≤1 表示準到最後一位。13 個函數在最小 degree 全達 ULP≤1 —— 但注意,這是 🅔 實驗場、延遲截斷的成績,不是出貨 kernel 的。\n第三,逐步截斷 per-step、不用延遲 —— 延遲低 pp 精度較好,但它有位元預算:每乘一步長 pp 位,d+1 步超過 254 位保險箱就裝不下。pp=48 只容 d=4,管線要 d=12 —— 延遲直接出局,只剩 per-step;代價是精度,🅔 實測 d* 時 ULP 掉到 2 到 7。\n第四,通用 Horner kernel 加一張 ByteTable —— 換函數只改 fixed 欄那 d 個係數,256 條目的表全函數共用,加新函數零電路重設計。誠實講:電路結構不動,但 VK 還是會變,驗證方要重收一次 —— 只是重跑 keygen,幾十秒、沒有儀式。\n這四個決定換到:金融精度 24 到 48 位、單函數 proof 5 到 9.5KB(🅔)、整個投組 34,368 bytes(🅟)、verify 毫秒級、不揭露部位。徽章的規矩第三頁立過了,不同基準的成績不互相背書。接下來先攤開四個決定裡最大的一筆帳 —— 截斷:延遲還是逐步,差在哪、為什麼最後只剩一條路。",
+'核心 kernel':"前面選了定點跟 Minimax,這張回答最實在的問題:出貨的電路裡到底怎麼把多項式算出來、又怎麼保證 prover 沒亂填。注意,這頁講的是實際出貨的 per-step kernel;延遲截斷的變體,免費空間那張講過了。\n先講怎麼算。每一步就是乘、加、剪:acc 乘上輸入 R、加上這一步的係數,然後立刻除以 S 取整 —— 把小數點右邊多出來的位數剪掉,回到固定的小數位數,像用「分」記帳的人每一步都把帳面換回固定單位。因為每步都清尺度,中間值永遠只有大約兩個 pp 的長度,pp=48 也才 96 位 —— 254 位的保險箱怎麼裝都裝得下,degree 加到多大都不會爆。\n再講怎麼保證沒亂算。電路本身做不了「除法取整」,所以反過來:讓 prover 自己把商跟餘數填進來,再用一條閘鎖死 —— 商乘 S 加餘數,必須剛好湊回乘加的原金額,像收銀機找零一定要湊回原價;而且餘數只能拆成 0 到 255 的合法硬幣,逐枚去 ByteTable 查。餘數湊得出來,就等於他誠實做了除法。\n帳單也給你:d=12 一次呼叫是 3 種閘、14 列、84 個 byte 查表,全部共用同一張 256 條目的表。空口無憑,下一張直接拿數字算一步給你看。",
+'ExplicitRC':"剛剛保證了「算的過程」沒亂來,但還有一個洞:輸入本身。\n輸入 R 是 prover 私下給的 witness。我們的多項式只在選定的區間裡準,區間外是垃圾。要是他故意餵一個超出範圍的 R,輸出根本沒意義,卻還是能產生一個通得過的證明。所以一定要在電路裡擋住超範圍的輸入。\n我們的做法叫 ExplicitRC,核心就一條約束:gap_lo 加 gap_hi 乘 256,再加 R,要等於 R_max;而 gap_lo、gap_hi 兩個都用共用的那張 ByteTable 查 byte,不需要新表。\n為什麼這樣就確定性擋住?如果他餵的 R 超過 R_max,那 gap 等於 R_max 減 R 是負數,在有限體裡會 wrap 成一個超大的數,根本拆不成兩個 byte,byte 檢查就確定性地失敗。反過來,合法的 R 落在 0 到 R_max,gap 唯一拆成兩個 byte。成本只多一個閘。\n關鍵是:這不是「機率上難偽造」,是「數學上根本湊不出來」。我們也試過用單調性省掉這個檢查的 ORV 方案,但 13 個函數裡有 7 個有安全漏洞,所以改用 ExplicitRC。過程跟輸入都鎖死了 —— 最後一個問題:憑什麼說結果可信?下一張把誤差的帳攤開。",
+'誤差預算':"前面到處在講 ULP,這張回答最關鍵的問題:我們憑什麼說結果可信?不是測幾個點看起來對,是把總誤差拆成三個來源、每個各給上界。\n第一項逼近誤差:Remez 多項式跟真函數的距離,degree 決定、不可再降。第二項量化誤差:係數塞進定點時的捨入。第三項截斷誤差要看 kernel:延遲只截最後一次,頂多 1 ULP;per-step 每步 floor 各不到 1 ULP,最壞累到大約 d 個 ULP。\n所以出貨配置 pp=48、d=12,單一 kernel 鏈的界是「最壞約 12 ULP」,實測 exp kernel 最大只有 2.81。端到端是另一本帳:理論上界保守抓約 57 個 ULP,實測 Delta 是 7、中間量 d1 因為多了上游的乘除鏈,是 15 —— 各自都穩穩落在自己的界內,而且 1 個 ULP 只有 10 的負 15 次方量級。界跟實測兩個都給、kernel 跟端到端分開講,才叫誤差保證。\n這條公式還順手解釋了前面量化飽和那張的平台:degree 只壓得動第一項,後兩項是地板;地板一主導,加 degree 只剩成本。低 pp 的實驗場我們再加窮舉驗證 —— 每一個可表示的輸入都真的算過一遍。這才是敢拿去做金融合規的底氣。",
+'免費空間':"先花二十秒認識 Horner 求值,後面全部圍著它。算多項式不用算次方,「乘 x、加下一個係數」一路捲:三 x 平方加二 x 加五,代 x 等於二 —— 起手是三,乘二加二得八,再乘二加五得二十一,兩步算完;d 次多項式就是 d 步。定點下每乘一步,小數位數就多一份 pp。這張講的就是兩種截斷策略的取捨,差別一句話:中間值什麼時候除回去。\n先講延遲截斷的玩法。ZK 的 254 位體像一個超寬的保險箱,是傳統 CPU 沒有的免費空間。延遲截斷吃這塊紅利:把係數預先墊高,讓中間一路只乘加、完全不剪小數,帳留到最後一次結清。只截一次,誤差當然最小 —— 13 個函數在最小 degree 全部 ULP=1,就是它的成績。\n但它有一條硬預算:每乘一步,數字就變長 pp 位;乘到第 d+1 步超過 254 位,保險箱就裝不下。pp=48 只容得下 d=4,我們管線要 d=12 —— 中間值會脹到 2 的 624 次方,根本算不出來。所以高精度只剩 per-step 一條路;這不是偏好,是僅存的路。\n兩邊的實測帳單都在表上:延遲是 6 個閘、12 個查表、proof 4,992 bytes,換到 ULP=1;per-step 是 3 個閘、2 個查表、proof 1,472 bytes —— 便宜、天花板無限高,但精度要用 degree 贖回來。延遲版在出貨系統裡只當備援。下一張把這個換道邊界畫成一張地圖。",
+'量化飽和':"這張回答「degree 是不是加越多越好」—— 不是,而且這次不畫示意圖,直接放實測。\n藍線是延遲截斷,ln、pp=32、四段:d=4 誤差一千多,d=6 掉到 3.44,d=8 以後釘死在 1.24,再加 degree 一格都不動,d 很大時甚至微微翹到 1.25。綠線是 per-step、單段:從 105 一路降到 3,之後也釘死。\n兩條線說同一件事:degree 買得到的只有逼近誤差;量化跟截斷的地板不隨 degree 下降。逼近誤差一旦壓到地板以下,再加 degree 就只是白付 rows 跟 lookups。注意綠線的地板 3 比藍線的 1.24 高 —— 上一張說的 per-step 價差,在圖上直接看得到。\n誠實講:文獻說「過了甜蜜點會更差」,在我們這組量測裡反轉非常輕微,主現象是飽和。這現象 DSP 硬體圈早有討論,我們是第一次在 ZK 定點下把它量出來 —— 是測量,不是發明。地板從哪來,誤差預算那張會用公式拆開;先進機械室 —— 看那台每步都截斷的機器,到底長什麼樣、憑什麼沒亂算。",
 '函數與區間':"還有兩個更細的取捨。第一個:函數本身。同一個 kernel、同 pp=48、同 d=14,ln 是 142 個 ULP,erf 只有 15,差快十倍。原因在係數結構:erf 是奇函數,偶次係數幾乎是零,14 步裡只有約 7 步真的帶著截斷誤差;ln 的係數正負交錯、每一步都在累積。這叫係數條件數 —— 它跟 per-step 截斷一起決定精度地板:「哪幾步帶截斷誤差」正是逐步截斷才有的帳。有些函數天生就難。\n第二個:區間寬窄。窄區間準、寬區間糊:ln 在 0 到 ln2 是 1 ULP,放寬到 e−1 變 9;erf 在 0 到 1 是 3,放寬到 2.5 變 122。想又準又廣,就得 range reduction —— 先把輸入摺回小區間、算完再還原 —— 或者切段,每段配自己的一條多項式。出貨版 erf 切 12 段、ln 切 4 段。\n代價也要講:切段會放大 proof,Scenario C 的 erf 五段就讓 proof 乘 2.2。精度、覆蓋、大小三個角互相拉 —— 這是設計出來的平衡,不是免費午餐。",
 '我們站在哪':"這張是誠實定位,先正面回答一個該問的問題:ZK 算超越函數早有人做,ezkl、zkLLM、ZKFixedPointChip,那這個工作新在哪?我的原則是寧可少講,每一句都要經得起查。\n先講互補:查表是 ZKML 在大批次、低精度場景的理性選擇,我不否定;我們補它做不到的 —— 多函數共用、高精度、低頻呼叫,金融合規正好是這種需求。\n再講什麼不是我們發明的:Minimax 跟 Remez 是教科書,FHE 2021 年就用過,ZKFixedPointChip 2023 也在 Halo2 用了 Remez;連「Minimax 比 Taylor 好」本身都是教科書事實。\n那新的是什麼?五項:系統化的 Minimax 對 Taylor 量化比較、Horner 鏈內延遲截斷加 bit-budget 分析、形式化誤差預算加窮舉驗證、第一個有誤差分析的 ZK ln 跟 erf 多項式電路、一張 256 表撐全部函數。\n跟兩個最像的工作各一句話:ZKFixedPointChip 把 Remez 放進 Halo2 定點電路,我們補上「誤差三源上界、窮舉驗證、截斷 bit-budget、金融落地」那一層;ezkl 跟 zkLLM 走查表、批次大精度低,我們走多項式、呼叫少精度高 —— 互補的兩個象限,不是對打。",
 '成果與限界':"收尾,成果跟代價一起講,而且依基準分開。\n出貨管線,也就是 PF1:整個投資組合一張 proof,34,368 bytes、跟部位數量無關,N=8 到 128 都一樣;驗證約 10 毫秒;證明時間從 N=8 的 4.7 秒到 N=128 的 109 秒;精度是 kernel 2.81、端到端 7 個 ULP。\nScenario C:Merton 信用模型,28.6 到 29 個有效位、七個評等全對到小數第八位,proof 15,360 bytes、驗證 33 毫秒。\n實驗場:13 函數延遲截斷全 ULP=1;單函數端到端 proof 5 到 9.5 KB;論文版 Scenario A 在 pp=24 做到 Delta 1 ULP、比查表快 26.3 倍。\n限界同樣掛徽章講清楚:per-step 的精度價,得用 degree 贖;分段的 proof 價,erf 十二段、ln 四段;查表要到 pp=32 以上才真的死,低精度大批次它還是比我們強 —— 我們慢 7.5 倍、proof 大 6.8 倍,這兩個數字我們自己先報。\n一句話收尾:把「能算一個函數」變成「能證一個金融模型」,而且每個數字都能對回它的量測基準。",
@@ -1449,7 +1452,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 "Minimax / Remez":"求『整個區間最大誤差最小』(L∞) 的逼近多項式；Remez 是求其係數的演算法。對本論文是必要條件、非『較好』。",
 "ULP":"Unit in the Last Place；以末位為單位衡量誤差，ULP=1 表示準到定點能表示的最後一位。",
 "有效位 (有效數字)":"結果可信的十進位位數；pp=32,d=10 時 Taylor 的 ln 只剩 4.4 位、Minimax 有 28.6 位。",
-"Horner 法":"逐步求多項式值：acc←acc·x+係數，一層層算；中間值會隨步數膨脹。",
+"Horner 法":"逐步求多項式值：acc←acc·x+係數，一層層捲。例：3x²+2x+5 在 x=2 → 3 →(×2+2)→ 8 →(×2+5)→ 21，兩步算完；d 次＝d 步。定點下每乘一步小數位多一份 pp → 中間值隨步數膨脹，截斷時機因此成為取捨。",
 "中間值膨脹":"Horner 逐步乘加時，未截斷的中間值脹成 S^(d+1)；pp=32,d=10 約 2^352，溢位 BN254。",
 "溢位 (overflow)":"中間值超過體可表示範圍（BN254 約 253 bit）；一旦溢位，模約化會毀掉數值意義。",
 "BN254":"配對友善橢圓曲線（約 128-bit 安全）；純量場約 254-bit，是中間值的硬天花板。",
@@ -1539,7 +1542,7 @@ svg{max-width:100%;height:auto;display:block;margin:0 auto}
 '核心 kernel':["通用 Horner kernel","預縮放係數 (pre-scaled)","商餘分解 (quotient-remainder)","ByteTable","Horner 法","尺度 S=2^pp","延遲截斷 (deferred)","逐步截斷 (per-step)","fixed 欄"],
 'ExplicitRC':["ExplicitRC","ORV (輸出範圍驗證)","ByteTable","有限體 (𝔽ᵣ)","溢位 (overflow)","區間 (interval)","range reduction"],
 '誤差預算':["誤差預算公式","誤差預算 (error budget)","窮舉驗證","ULP","Minimax / Remez","量化誤差","逼近誤差","量化飽和","延遲截斷 (deferred)","degree (多項式次數 d)"],
-'免費空間':["延遲截斷 (deferred)","逐步截斷 (per-step)","bit-budget","暫存空間 (紅利)","BN254","pp (定點精度)","degree (多項式次數 d)","中間值膨脹","溢位 (overflow)"],
+'免費空間':["Horner 法","延遲截斷 (deferred)","逐步截斷 (per-step)","bit-budget","暫存空間 (紅利)","BN254","pp (定點精度)","degree (多項式次數 d)","中間值膨脹","溢位 (overflow)"],
 '量化飽和':["量化飽和","d* (最佳 degree)","harmful degree","degree (多項式次數 d)","量化誤差","逼近誤差","ULP","pp (定點精度)"],
 '函數與區間':["係數條件數","精度地板","區間 (interval)","range reduction","piecewise (分段)","ULP","erf (誤差函數)","exp / ln / erf","degree (多項式次數 d)"],
 '決策路線圖':["硬條件 R1–R5","PLONKish","KZG 承諾","BN254","BLS12-381","Groth16 / R1CS","FRI / STARK","Goldilocks / BabyBear (小體)","IPA (內積論證)","可信設定 (trusted setup)","定點 pp=48","浮點","查表 (lookup)","Minimax / Remez","Taylor 展開","有效位 (有效數字)","逐步截斷 (per-step)","延遲截斷 (deferred)","bit-budget","通用 Horner kernel","ByteTable","ExplicitRC","ORV (輸出範圍驗證)","Merkle 承諾","fixed 欄","VK / keygen"],
